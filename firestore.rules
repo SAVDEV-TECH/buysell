@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User Profiles
+    match /users/{userId} {
+      // Allow users to read and write their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Public access to manufacturer profiles
+      allow read: if resource.data.role == 'MANUFACTURER' && resource.data.isPublic == true;
+      
+      // Admin access to all users
+      allow read, write: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+
+    // Products
+    match /products/{productId} {
+      // Products are publicly readable
+      allow read: if true;
+      
+      // Only manufacturers and admins can create/edit products
+      allow write: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'MANUFACTURER' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
+      );
+    }
+
+    // Chats & Messages
+    match /chats/{chatId} {
+      // Allow participants to read and update the chat document
+      allow read, update: if request.auth != null && 
+        request.auth.uid in resource.data.participants;
+      
+      // Allow creation of a chat if the creator is one of the participants
+      allow create: if request.auth != null && 
+        request.auth.uid in request.resource.data.participants;
+    }
+
+    match /messages/{messageId} {
+      // Allow reading messages if the user is a participant in the associated chat
+      allow read: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.participants;
+      
+      // Allow creating a message if the user is a participant in the associated chat
+      allow create: if request.auth != null && 
+        request.auth.uid in get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.participants;
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.buyerId || 
+        request.auth.uid == resource.data.sellerId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
+      );
+      allow create: if request.auth != null;
+    }
+
+    // Payout Requests
+    match /payoutRequests/{requestId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN'
+      );
+      allow create: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'MANUFACTURER';
+      allow update: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+
+    // RFQs
+    match /rfqs/{rfqId} {
+      // Wholesalers can create RFQs, manufacturers and wholesalers can read their own
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.wholesalerId || request.auth.uid == resource.data.manufacturerId);
+      
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.wholesalerId;
+      
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.wholesalerId || request.auth.uid == resource.data.manufacturerId);
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow write: if request.auth != null; // In a real app, restrict who can send notifications
+    }
+  }
+}
