@@ -21,7 +21,10 @@ const MobileBottomNav = () => {
   if (!user) return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 px-6 py-3 pb-6 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+    <div 
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 px-6 py-3 flex justify-between items-center shadow-[0_-5px_20px_rgba(0,0,0,0.05)]"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}
+    >
       {navItems.map((item) => (
         <Link 
           key={item.href} 

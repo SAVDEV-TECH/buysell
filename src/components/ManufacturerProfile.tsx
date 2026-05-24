@@ -143,7 +143,7 @@ export default function ManufacturerProfile({ id }: { id: string }) {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 border-t border-border pt-6 flex-wrap">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:flex md:flex-row gap-3 border-t border-border pt-6 flex-wrap">
               <button 
                 onClick={() => setIsChatOpen(true)} 
                 className="flex-1 sm:flex-none bg-[#0f172a] text-white h-12 px-8 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-[#0f172a]/90 transition-all shadow-sm"

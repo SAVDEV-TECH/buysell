@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MessageSquare } from "lucide-react";
+import { Search, MessageSquare, Menu, X } from "lucide-react";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
 
 const Navbar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200">
@@ -64,9 +66,39 @@ const Navbar = () => {
                 </Link>
               </div>
             )}
+            
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-slate-600 hover:text-[#0f172a] bg-slate-50 rounded-md ml-1"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1 shadow-lg absolute w-full z-40">
+          <Link href="/manufacturers" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50 border-b border-slate-50">
+            Browse Manufacturers
+          </Link>
+          <Link href="/dashboard/messages" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50">
+            Messages 
+            {unreadCount > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{unreadCount}</span>}
+          </Link>
+          {!user && (
+            <div className="pt-4 mt-2 flex flex-col gap-3">
+              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 text-center rounded-md text-base font-semibold text-[#0f172a] hover:bg-slate-50 border border-slate-200">
+                Log in
+              </Link>
+              <Link href="/register" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 text-center rounded-md text-base font-semibold text-white bg-[#0f172a] hover:bg-[#0f172a]/90">
+                Sign up
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };

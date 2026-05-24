@@ -38,7 +38,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6 border border-primary/20">
             <Zap size={14} className="fill-primary" /> The B2B Commerce Standard
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 tracking-tight leading-[1.1] sm:leading-[0.9]">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.1] sm:leading-[0.9]">
             Source Smarter. <br className="hidden sm:block" />
             <span className="gradient-text">Trade Better.</span>
           </h1>

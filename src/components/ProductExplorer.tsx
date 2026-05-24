@@ -251,7 +251,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
            </button>
         </div>
       ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-4 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
+          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
           {displayedProducts.map((product, i) => (
             <motion.div 
               key={product.id}
@@ -289,11 +289,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
               <div className="p-2 sm:p-3 flex-1 flex flex-col min-w-0">
                 <div className="flex justify-between items-start mb-1 sm:mb-2">
-                  <span className="text-[6px] sm:text-[8px] text-muted-foreground font-black uppercase tracking-widest italic truncate">{product.category}</span>
+                  <span className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest italic truncate">{product.category}</span>
                    <div className="flex items-center gap-0.5 sm:gap-1 px-1 py-0.5 bg-orange-500/10 text-orange-500 rounded-lg border border-orange-500/10 shrink-0">
-                    <Star size={6} fill="currentColor" className="sm:hidden" />
-                    <Star size={10} fill="currentColor" className="hidden sm:block" />
-                    <span className="text-[6px] sm:text-[8px] font-black">{product.rating}</span>
+                    <Star size={8} fill="currentColor" className="sm:hidden" />
+                    <Star size={12} fill="currentColor" className="hidden sm:block" />
+                    <span className="text-[10px] sm:text-xs font-black">{product.rating}</span>
                   </div>
                 </div>
                 
@@ -301,10 +301,10 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                   href={`/manufacturers/${product.sellerId}`}
                   className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-2 group/seller hover:text-primary transition-colors min-w-0"
                 >
-                  <div className="w-3 h-3 sm:w-5 sm:h-5 rounded-sm sm:rounded-md bg-muted flex items-center justify-center text-[5px] sm:text-[8px] font-black uppercase text-primary border border-primary/10 group-hover/seller:scale-110 transition-all shrink-0">
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-sm sm:rounded-md bg-muted flex items-center justify-center text-[8px] sm:text-[10px] font-black uppercase text-primary border border-primary/10 group-hover/seller:scale-110 transition-all shrink-0">
                     {product.sellerName ? product.sellerName.charAt(0) : 'S'}
                   </div>
-                  <span className="text-[6px] sm:text-[8px] font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
                     {product.sellerName || "Partner"}
                   </span>
                   <VerifiedBadge />
@@ -329,8 +329,8 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                 
                 <div className="mt-auto flex flex-col gap-1 sm:gap-2 pt-1 sm:pt-2">
                   <div className="flex flex-row sm:flex-col justify-between items-center sm:items-start min-w-0">
-                     <p className="text-[6px] sm:text-[8px] text-muted-foreground font-black uppercase tracking-widest italic sm:mb-0.5">Price</p>
-                     <p className="text-[10px] sm:text-base font-black text-slate-800 dark:text-white tracking-tighter truncate">₦{product.price.toLocaleString()}</p>
+                     <p className="text-[10px] sm:text-[11px] text-muted-foreground font-black uppercase tracking-widest italic sm:mb-0.5">Price</p>
+                     <p className="text-sm sm:text-base font-black text-slate-800 dark:text-white tracking-tighter truncate">₦{product.price.toLocaleString()}</p>
                   </div>
                   <div className="flex gap-1">
                     <button 

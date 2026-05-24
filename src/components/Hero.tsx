@@ -19,7 +19,7 @@ const Hero = () => {
             <ShieldCheck className="mr-1.5 h-3.5 w-3.5 text-orange-500" /> Verified B2B sourcing directory
           </div>
           
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl text-[#0f172a] mb-6 leading-[1.1]">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-[#0f172a] mb-6 leading-[1.1] sm:leading-[1.1]">
             Connect wholesalers with verified manufacturers.
           </h1>
           
