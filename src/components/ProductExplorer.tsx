@@ -251,7 +251,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
            </button>
         </div>
       ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
           {displayedProducts.map((product, i) => (
             <motion.div 
               key={product.id}
@@ -287,50 +287,50 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                   </div>
               </div>
 
-              <div className="p-2 sm:p-3 flex-1 flex flex-col min-w-0">
-                <div className="flex justify-between items-start mb-1 sm:mb-2">
-                  <span className="text-[10px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest italic truncate">{product.category}</span>
-                   <div className="flex items-center gap-0.5 sm:gap-1 px-1 py-0.5 bg-orange-500/10 text-orange-500 rounded-lg border border-orange-500/10 shrink-0">
-                    <Star size={8} fill="currentColor" className="sm:hidden" />
+              <div className="p-3 sm:p-4 flex-1 flex flex-col min-w-0">
+                <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+                  <span className="text-[11px] sm:text-xs text-muted-foreground font-black uppercase tracking-wider italic truncate">{product.category}</span>
+                   <div className="flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.5 bg-orange-500/10 text-orange-500 rounded-lg border border-orange-500/10 shrink-0">
+                    <Star size={10} fill="currentColor" className="sm:hidden" />
                     <Star size={12} fill="currentColor" className="hidden sm:block" />
-                    <span className="text-[10px] sm:text-xs font-black">{product.rating}</span>
+                    <span className="text-[11px] sm:text-xs font-black">{product.rating}</span>
                   </div>
                 </div>
                 
                 <Link 
                   href={`/manufacturers/${product.sellerId}`}
-                  className="flex items-center gap-1 sm:gap-1.5 mb-1 sm:mb-2 group/seller hover:text-primary transition-colors min-w-0"
+                  className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2 group/seller hover:text-primary transition-colors min-w-0"
                 >
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-sm sm:rounded-md bg-muted flex items-center justify-center text-[8px] sm:text-[10px] font-black uppercase text-primary border border-primary/10 group-hover/seller:scale-110 transition-all shrink-0">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-muted flex items-center justify-center text-[10px] sm:text-xs font-black uppercase text-primary border border-primary/10 group-hover/seller:scale-110 transition-all shrink-0">
                     {product.sellerName ? product.sellerName.charAt(0) : 'S'}
                   </div>
-                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
+                  <span className="text-[11px] sm:text-xs font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
                     {product.sellerName || "Partner"}
                   </span>
                   <VerifiedBadge />
                 </Link>
 
                 <Link href={`/marketplace/${product.id}`} className="group/title block min-w-0">
-                  <h3 className="text-xs sm:text-sm font-black mb-0.5 sm:mb-1 group-hover/title:text-primary transition-colors flex items-center justify-between tracking-tight leading-tight line-clamp-2">
+                  <h3 className="text-sm sm:text-base font-black mb-1 sm:mb-1.5 group-hover/title:text-primary transition-colors tracking-tight leading-snug line-clamp-2">
                     {product.name}
                   </h3>
                 </Link>
 
-                <div className="flex flex-col gap-1 my-2 text-[10px] text-muted-foreground border-y border-border py-2">
-                  <div className="flex justify-between">
-                    <span>MOQ:</span>
-                    <span className="font-medium text-foreground">{product.moq ? `${product.moq} units` : "Contact Supplier"}</span>
+                <div className="flex flex-col gap-1.5 my-2 text-[11px] sm:text-xs text-muted-foreground border-y border-border py-2">
+                  <div className="flex justify-between gap-2">
+                    <span className="shrink-0">MOQ:</span>
+                    <span className="font-medium text-foreground truncate text-right">{product.moq ? `${product.moq} units` : "Ask Supplier"}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Lead Time:</span>
-                    <span className="font-medium text-foreground">{product.leadTime || "Contact Supplier"}</span>
+                  <div className="flex justify-between gap-2">
+                    <span className="shrink-0">Lead:</span>
+                    <span className="font-medium text-foreground truncate text-right">{product.leadTime || "Ask Supplier"}</span>
                   </div>
                 </div>
                 
                 <div className="mt-auto flex flex-col gap-1 sm:gap-2 pt-1 sm:pt-2">
                   <div className="flex flex-row sm:flex-col justify-between items-center sm:items-start min-w-0">
-                     <p className="text-[10px] sm:text-[11px] text-muted-foreground font-black uppercase tracking-widest italic sm:mb-0.5">Price</p>
-                     <p className="text-sm sm:text-base font-black text-slate-800 dark:text-white tracking-tighter truncate">₦{product.price.toLocaleString()}</p>
+                     <p className="text-[11px] sm:text-xs text-muted-foreground font-black uppercase tracking-widest italic sm:mb-0.5">Price</p>
+                     <p className="text-base sm:text-lg font-black text-slate-800 dark:text-white tracking-tighter truncate">₦{product.price.toLocaleString()}</p>
                   </div>
                   <div className="flex gap-1">
                     <button 
@@ -342,13 +342,13 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                         imageUrl: product.imageUrl,
                         desc: product.desc
                       })}
-                      className="p-1 sm:p-2 bg-muted/50 dark:bg-slate-800 text-primary rounded sm:rounded-lg hover:bg-accent transition-all flex items-center justify-center shrink-0 border border-border"
+                      className="p-2 bg-muted/50 dark:bg-slate-800 text-primary rounded-lg hover:bg-accent transition-all flex items-center justify-center shrink-0 border border-border"
                       title="Add to PO"
                     >
-                      <Plus size={10} className="sm:hidden" />
+                      <Plus size={14} className="sm:hidden" />
                       <Plus size={16} className="hidden sm:block" />
                     </button>
-                    <div className="flex-1 min-w-0 relative group/pay shadow-xl shadow-primary/10 rounded sm:rounded-lg overflow-hidden [&_button]:text-[9px] sm:[&_button]:text-sm [&_button]:py-1.5 sm:[&_button]:py-2 [&_button]:px-1 sm:[&_button]:px-2 [&_button_svg]:w-3 [&_button_svg]:h-3 sm:[&_button_svg]:w-4 sm:[&_button_svg]:h-4">
+                    <div className="flex-1 min-w-0 relative group/pay shadow-xl shadow-primary/10 rounded-lg overflow-hidden [&_button]:text-[11px] sm:[&_button]:text-sm [&_button]:py-2 sm:[&_button]:py-2.5 [&_button]:px-2 sm:[&_button]:px-3 [&_button_svg]:w-3.5 [&_button_svg]:h-3.5 sm:[&_button_svg]:w-4 sm:[&_button_svg]:h-4">
                        <PayWithPaystack product={product} user={user} />
                     </div>
                   </div>
