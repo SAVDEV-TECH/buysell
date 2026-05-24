@@ -251,7 +251,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
            </button>
         </div>
       ) : (
-          <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 text-slate-800 dark:text-neutral-200 w-full overflow-hidden">
           {displayedProducts.map((product, i) => (
             <motion.div 
               key={product.id}
