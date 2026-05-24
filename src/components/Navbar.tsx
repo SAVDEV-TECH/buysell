@@ -57,7 +57,7 @@ const Navbar = () => {
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-4">
                 <Link href="/login" className="text-sm font-semibold text-[#0f172a] hover:text-[#0f172a]/80">
                   Log in
                 </Link>

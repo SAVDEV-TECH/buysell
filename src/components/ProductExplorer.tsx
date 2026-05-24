@@ -311,7 +311,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                 </Link>
 
                 <Link href={`/marketplace/${product.id}`} className="group/title block min-w-0">
-                  <h3 className="text-[10px] sm:text-sm font-black mb-0.5 sm:mb-1 group-hover/title:text-primary transition-colors flex items-center justify-between tracking-tight leading-tight line-clamp-1">
+                  <h3 className="text-xs sm:text-sm font-black mb-0.5 sm:mb-1 group-hover/title:text-primary transition-colors flex items-center justify-between tracking-tight leading-tight line-clamp-2">
                     {product.name}
                   </h3>
                 </Link>
@@ -348,7 +348,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                       <Plus size={10} className="sm:hidden" />
                       <Plus size={16} className="hidden sm:block" />
                     </button>
-                    <div className="flex-1 min-w-0 relative group/pay shadow-xl shadow-primary/10 rounded sm:rounded-lg overflow-hidden [&_button]:text-[7px] sm:[&_button]:text-sm [&_button]:py-1 sm:[&_button]:py-2 [&_button]:px-0 sm:[&_button]:px-2 [&_button_svg]:w-3 [&_button_svg]:h-3 sm:[&_button_svg]:w-4 sm:[&_button_svg]:h-4">
+                    <div className="flex-1 min-w-0 relative group/pay shadow-xl shadow-primary/10 rounded sm:rounded-lg overflow-hidden [&_button]:text-[9px] sm:[&_button]:text-sm [&_button]:py-1.5 sm:[&_button]:py-2 [&_button]:px-1 sm:[&_button]:px-2 [&_button_svg]:w-3 [&_button_svg]:h-3 sm:[&_button_svg]:w-4 sm:[&_button_svg]:h-4">
                        <PayWithPaystack product={product} user={user} />
                     </div>
                   </div>

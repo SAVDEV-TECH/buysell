@@ -26,7 +26,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden">
+    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden w-full">
       {/* Hero Section - Search Centric */}
       <section className="relative pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10">
@@ -123,17 +123,17 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] sm:rounded-[4rem] p-8 sm:p-16 text-center text-white overflow-hidden relative group">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-10 md:p-16 text-center text-white overflow-hidden relative group">
           <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-primary/20 rounded-full blur-[80px] sm:blur-[100px] -mr-10 sm:-mr-20 -mt-10 sm:-mt-20 group-hover:bg-primary/30 transition-colors" />
           <h2 className="text-3xl sm:text-4xl md:text-6xl font-black mb-6 sm:mb-8 relative z-10 tracking-tighter">Ready to scale?</h2>
           <p className="text-slate-400 max-w-xl mx-auto mb-8 sm:mb-12 text-sm sm:text-lg font-medium relative z-10 leading-relaxed">
             Join the ecosystem of elite manufacturers and fast-growing wholesalers today.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 relative z-10">
-            <button className="px-8 sm:px-12 py-4 sm:py-5 bg-white text-slate-900 rounded-2xl sm:rounded-[2rem] font-black text-lg sm:text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3">
-              Open Account <ArrowRight size={20} className="sm:hidden" /> <ArrowRight size={24} className="hidden sm:block" />
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 relative z-10">
+            <button className="px-8 sm:px-12 py-3.5 sm:py-5 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[2rem] font-black text-base sm:text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto">
+              Open Account <ArrowRight size={20} />
             </button>
-            <button className="px-8 sm:px-12 py-4 sm:py-5 border-2 border-white/10 hover:border-white/30 rounded-2xl sm:rounded-[2rem] font-black text-lg sm:text-xl transition-all backdrop-blur-sm">
+            <button className="px-8 sm:px-12 py-3.5 sm:py-5 border-2 border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl md:rounded-[2rem] font-black text-base sm:text-xl transition-all backdrop-blur-sm w-full sm:w-auto">
               Contact Sales
             </button>
           </div>
