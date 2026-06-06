@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -41,20 +42,22 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full flex flex-col min-h-screen relative`}>
-        <AuthProvider>
-          <NotificationProvider>
-            <CartProvider>
-              <Navbar />
-              <CartDrawer />
-              <main className="flex-1 pt-16 pb-24 md:pb-0">
-                {children}
-              </main>
-              <Footer />
-              <MobileBottomNav />
-              <PwaRegister />
-            </CartProvider>
-          </NotificationProvider>
-        </AuthProvider>
+        <CurrencyProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <CartProvider>
+                <Navbar />
+                <CartDrawer />
+                <main className="flex-1 pt-16 pb-24 md:pb-0">
+                  {children}
+                </main>
+                <Footer />
+                <MobileBottomNav />
+                <PwaRegister />
+              </CartProvider>
+            </NotificationProvider>
+          </AuthProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

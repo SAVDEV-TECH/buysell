@@ -5,6 +5,7 @@ import { Search, MessageSquare, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
+import CurrencySelector from "./CurrencySelector";
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -45,6 +46,7 @@ const Navbar = () => {
           
           {/* Desktop Actions */}
           <div className="flex items-center gap-4">
+            <CurrencySelector />
             {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
