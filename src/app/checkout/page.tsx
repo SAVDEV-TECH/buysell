@@ -23,8 +23,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
+const FlutterwaveButton = dynamic(() => import('@/components/FlutterwaveButton'), { ssr: false });
+const MobileMoneyButton = dynamic(() => import('@/components/MobileMoneyButton'), { ssr: false });
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -33,6 +36,7 @@ export default function CheckoutPage() {
   
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "flutterwave" | "mobile-money">("paystack");
   const [formData, setFormData] = useState({
     fullName: user?.displayName || "",
     email: user?.email || "",
@@ -245,25 +249,42 @@ export default function CheckoutPage() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="glass p-12 rounded-[3.5rem] border border-primary/20 bg-primary/5 text-center flex flex-col items-center"
+                  className="glass p-12 rounded-[3.5rem] border border-primary/20 bg-primary/5 space-y-8"
                 >
-                   <div className="w-24 h-24 bg-primary/10 rounded-[2rem] flex items-center justify-center mb-8">
-                      <CreditCard size={48} className="text-primary" />
+                   <div className="text-center">
+                      <div className="w-24 h-24 bg-primary/10 rounded-[2rem] flex items-center justify-center mb-8 mx-auto">
+                         <CreditCard size={48} className="text-primary" />
+                      </div>
+                      <h2 className="text-3xl font-black mb-4">Secure Payment</h2>
+                      <p className="text-muted-foreground mb-4">
+                         Your order for ₦{finalTotal.toLocaleString()} {discount > 0 && `(with ₦${discount.toLocaleString()} discount)`}
+                      </p>
                    </div>
-                   <h2 className="text-3xl font-black mb-4">Secure Payment</h2>
-                   <p className="text-muted-foreground mb-12 max-w-md mx-auto">
-                      Your business order for ₦{finalTotal.toLocaleString()} {discount > 0 && `(with ₦${discount.toLocaleString()} discount)`} will be processed instantly via Paystack. Click the button below to complete.
-                   </p>
-                   
-                   <div className="w-full max-w-sm [&>button]:w-full [&>button]:py-5 [&>button]:font-black [&>button]:text-2xl [&>button]:flex [&>button]:justify-center [&>button]:items-center [&>button]:gap-3 [&>button]:bg-primary [&>button]:text-white [&>button]:rounded-2xl transition-all shadow-2xl shadow-primary/20">
-                      <PaystackButton product={mockProductForPaystack} user={user} />
+
+                   {/* Payment Method Selector */}
+                   <PaymentMethodSelector 
+                     onMethodChange={setPaymentMethod}
+                     selectedMethod={paymentMethod}
+                   />
+
+                   {/* Payment Buttons */}
+                   <div className="flex gap-4 justify-center flex-wrap [&>button]:py-5 [&>button]:font-bold [&>button]:text-lg [&>button]:w-16 [&>button]:h-16">
+                      {paymentMethod === "paystack" && (
+                        <PaystackButton product={mockProductForPaystack} user={user} />
+                      )}
+                      {paymentMethod === "flutterwave" && (
+                        <FlutterwaveButton product={mockProductForPaystack} user={user} currency="NGN" />
+                      )}
+                      {paymentMethod === "mobile-money" && (
+                        <MobileMoneyButton product={mockProductForPaystack} user={user} currency="NGN" />
+                      )}
                    </div>
 
                    <button 
                      onClick={prevStep}
-                     className="mt-8 text-primary font-bold hover:underline"
+                     className="w-full py-3 border border-borderline rounded-2xl hover:bg-muted transition-all font-medium"
                    >
-                      Modify Shipping Details
+                      ← Modify Shipping Details
                    </button>
                 </motion.div>
               )}

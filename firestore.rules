@@ -222,5 +222,21 @@ service cloud.firestore {
       
       allow delete: if false;
     }
+
+    // Transactions (payment records)
+    match /transactions/{transactionId} {
+      // Users can read their own transactions
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      
+      // Server-side actions create transactions
+      allow create: if request.auth != null;
+      
+      // Only admin can update
+      allow update: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+      
+      allow delete: if false;
+    }
   }
 }
