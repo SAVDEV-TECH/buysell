@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { LogIn, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth } from "firebase/auth";
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,6 +25,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const functions = getFunctions();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +33,36 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      // Check rate limit before attempting login
+      const checkRateLimit = httpsCallable(functions, "checkLoginRateLimit");
+      await checkRateLimit({ email });
+
+      // Attempt login
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // Record successful login
+      const recordSuccess = httpsCallable(functions, "recordLoginSuccess");
+      await recordSuccess({
+        email,
+        uid: userCredential.user.uid,
+      });
+
+      // Clear previous failed attempts
+      const clearAttempts = httpsCallable(functions, "clearLoginAttempts");
+      await clearAttempts({ email });
+
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError((err as { message?: string }).message || "Failed to log in. Please check your credentials.");
+      const errorMessage = (err as { message?: string }).message || "Failed to log in. Please check your credentials.";
+      setError(errorMessage);
+
+      // Record failed login attempt for rate limiting
+      try {
+        const recordFailure = httpsCallable(functions, "recordLoginFailure");
+        await recordFailure({ email });
+      } catch (rateLimitErr) {
+        console.error("Failed to record login attempt:", rateLimitErr);
+      }
     } finally {
       setLoading(false);
     }

@@ -110,6 +110,7 @@ export default function AdminDashboard() {
     setSubmitting(true);
     try {
       const result = await processPaystackPayout(
+        user?.uid || "",
         request.id, 
         request.userId, 
         request.amount, 

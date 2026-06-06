@@ -1,0 +1,6 @@
+functions/lib
+node_modules
+.next
+dist
+out
+build

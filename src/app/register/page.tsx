@@ -19,6 +19,19 @@ const GoogleIcon = () => (
   );
 import { UserRole } from "@/context/AuthContext";
 
+// Password validation function
+const validatePassword = (password: string): string[] => {
+  const errors = [];
+  if (password.length < 12) errors.push("At least 12 characters");
+  if (!/[A-Z]/.test(password)) errors.push("One uppercase letter");
+  if (!/[a-z]/.test(password)) errors.push("One lowercase letter");
+  if (!/[0-9]/.test(password)) errors.push("One number");
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    errors.push("One special character (!@#$%^&*)");
+  }
+  return errors;
+};
+
 export default function RegisterPage() {
   const [role, setRole] = useState<UserRole>("WHOLESALER");
 
@@ -35,10 +48,37 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      // Validate password
+      const passwordErrors = validatePassword(password);
+      if (passwordErrors.length > 0) {
+        setError(`Password requirements: ${passwordErrors.join(", ")}`);
+        setLoading(false);
+        return;
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError("Please enter a valid email address");
+        setLoading(false);
+        return;
+      }
+
+      // Validate name
+      if (name.trim().length < 2) {
+        setError("Name must be at least 2 characters");
+        setLoading(false);
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: name });
+
+      // Send email verification
+      const { sendEmailVerification } = await import("firebase/auth");
+      await sendEmailVerification(user);
 
       // Save role in Firestore
       await setDoc(doc(db, "users", user.uid), {
@@ -47,10 +87,12 @@ export default function RegisterPage() {
         email: email,
         role: role,
         isVerified: false,
+        emailVerified: false,
         createdAt: new Date(),
       });
 
-      router.push("/dashboard");
+      // Redirect to email verification page
+      router.push("/verify-email");
     } catch (err: unknown) {
       setError((err as { message?: string }).message || "Failed to create account. Please try again.");
     } finally {

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { fetchPaystackBanks, resolveBankAccount } from "@/app/actions/paystack";
 
 export default function PayoutsPage() {
   const { user, role } = useAuth();
@@ -41,10 +42,7 @@ export default function PayoutsPage() {
   useEffect(() => {
     const fetchBanks = async () => {
       try {
-        const res = await fetch("https://api.paystack.co/bank", {
-          headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY}` }
-        });
-        const data = await res.json();
+        const data = await fetchPaystackBanks();
         if (data.status) setBanks(data.data);
       } catch (err) {
         console.error("Failed to fetch banks", err);
@@ -59,10 +57,7 @@ export default function PayoutsPage() {
       if (bankForm.accountNumber.length === 10 && bankForm.bankCode) {
         setVerifying(true);
         try {
-          const res = await fetch(`https://api.paystack.co/bank/resolve?account_number=${bankForm.accountNumber}&bank_code=${bankForm.bankCode}`, {
-            headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY}` }
-          });
-          const data = await res.json();
+          const data = await resolveBankAccount(bankForm.accountNumber, bankForm.bankCode);
           if (data.status) {
             setBankForm(prev => ({ ...prev, accountName: data.data.account_name }));
           } else {
