@@ -49,9 +49,11 @@ export default function PaystackButton({ product, user }: { product: Product, us
         }
         initializePayment({ onSuccess, onClose });
       }}
-      className="p-4 bg-slate-900 dark:bg-primary text-white rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-primary/20"
+      className="w-full p-2 sm:p-2.5 lg:p-3 bg-slate-900 dark:bg-primary text-white rounded-lg sm:rounded-xl hover:scale-100 sm:hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-1.5 text-xs sm:text-sm font-semibold"
     >
-      <ShoppingCart size={20} />
+      <ShoppingCart size={14} className="sm:block hidden" />
+      <span className="hidden sm:inline">Buy Now</span>
+      <span className="sm:hidden">Buy</span>
     </button>
   );
 }

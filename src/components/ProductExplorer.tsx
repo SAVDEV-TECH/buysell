@@ -97,9 +97,9 @@ function MobileProductCard({
   user: any;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full">
+    <div className="flex flex-col overflow-hidden rounded-lg sm:rounded-xl border border-border bg-card w-full h-full">
       {/* Image */}
-      <Link href={`/marketplace/${product.id}`} className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden">
+      <Link href={`/marketplace/${product.id}`} className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -108,41 +108,41 @@ function MobileProductCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Package size={24} className="text-muted-foreground opacity-20" />
+            <Package size={20} className="text-muted-foreground opacity-20" />
           </div>
         )}
         {/* Rating pill over image */}
-        <div className="absolute top-1.5 left-1.5 flex items-center gap-0.5 bg-black/60 text-white rounded px-1 py-0.5">
-          <Star size={8} fill="currentColor" className="text-orange-400" />
-          <span className="text-[9px] font-bold leading-none">{product.rating}</span>
+        <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 flex items-center gap-0.5 bg-black/60 text-white rounded px-0.5 sm:px-1 py-0.5">
+          <Star size={7} fill="currentColor" className="text-orange-400" />
+          <span className="text-[7px] sm:text-[9px] font-bold leading-none">{product.rating}</span>
         </div>
         {/* Wishlist */}
-        <button className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-full z-10">
-          <Heart size={11} className="text-slate-600 dark:text-slate-300" />
+        <button className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-5 sm:w-6 h-5 sm:h-6 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-full z-10">
+          <Heart size={9} className="text-slate-600 dark:text-slate-300" />
         </button>
       </Link>
 
       {/* Body */}
-      <div className="p-2 flex flex-col gap-1.5">
+      <div className="p-1 sm:p-1.5 flex flex-col gap-0.5 sm:gap-1">
         {/* Category */}
-        <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground truncate">
+        <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-muted-foreground truncate">
           {product.category}
         </span>
 
         {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
-          <p className="text-[11px] font-bold leading-tight line-clamp-2 text-foreground">
+          <p className="text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-2 text-foreground">
             {product.name}
           </p>
         </Link>
 
         {/* Price */}
-        <p className="text-xs font-black text-foreground tracking-tight">
+        <p className="text-[9px] sm:text-[10px] font-black text-foreground tracking-tight">
           ₦{product.price.toLocaleString()}
         </p>
 
         {/* CTA — full width, no Plus button at this size */}
-        <div className="w-full overflow-hidden rounded-lg">
+        <div className="w-full overflow-hidden rounded-lg mt-0.5 sm:mt-1">
           <PayWithPaystack product={product} user={user} />
         </div>
       </div>
@@ -334,10 +334,10 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-x-hidden">
       {/* Search + Sort */}
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 mb-8 lg:mb-12">
-        <div className="flex-1 relative group">
+      <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0">
+        <div className="flex-1 relative group min-w-0">
           <Search
             size={18}
             className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
@@ -347,25 +347,26 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             placeholder="Search products, categories or wholesalers..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm"
+            className="w-full pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm"
           />
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 lg:flex-none h-12 px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-sm transition-all ${showFilters
+            className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${showFilters
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background border-input hover:bg-accent text-muted-foreground"
               }`}
           >
-            <Filter size={16} />
-            Filters
+            <Filter size={14} className="sm:hidden" />
+            <Filter size={16} className="hidden sm:block" />
+            <span className="hidden sm:inline">Filters</span>
           </button>
-          <div className="flex-1 lg:flex-none relative">
+          <div className="flex-1 sm:flex-none lg:flex-none relative flex-shrink-0 min-w-0">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-12 pl-4 pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-sm appearance-none"
+              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-xs sm:text-sm appearance-none whitespace-nowrap"
             >
               <option value="Newest">Newest</option>
               <option value="Price: Low to High">Price ↑</option>
@@ -374,7 +375,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             </select>
             <ArrowUpRight
               size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 rotate-45"
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 rotate-45"
             />
           </div>
         </div>
@@ -389,7 +390,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="bg-card p-5 sm:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-6 items-end shadow-sm">
+            <div className="bg-card p-3 sm:p-5 md:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
                   Price Range (₦)
@@ -426,13 +427,13 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
       </AnimatePresence>
 
       {/* Categories */}
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 sm:mb-10 scrollbar-hide snap-x">
+      <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 mb-4 sm:mb-6 lg:mb-10 scrollbar-hide snap-x w-full">
         {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map(
           (cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-md font-semibold text-[11px] whitespace-nowrap border transition-all snap-start ${activeCategory === cat
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-semibold text-[10px] sm:text-[11px] whitespace-nowrap border transition-all snap-start flex-shrink-0 ${activeCategory === cat
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-background border-input hover:bg-accent"
                 }`}
@@ -474,7 +475,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
          * This avoids fighting Tailwind responsive prefixes for radically
          * different layouts inside a single card structure.
          */
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden">
           {displayed.map((product, i) => (
             <motion.div
               key={product.id}
@@ -482,7 +483,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="w-full min-w-0"
+              className="w-full min-w-0 overflow-hidden"
             >
               {/* Mobile card — hidden from sm upward */}
               <div className="block sm:hidden w-full">

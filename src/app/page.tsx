@@ -38,7 +38,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6 border border-primary/20">
             <Zap size={14} className="fill-primary" /> The B2B Commerce Standard
           </div>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.1] sm:leading-[0.9]">
+           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.0] sm:leading-[1.1]">
             Source Smarter. <br className="hidden sm:block" />
             <span className="gradient-text">Trade Better.</span>
           </h1>
@@ -54,22 +54,22 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-8 pt-16 sm:pt-20 border-t border-borderline/30">
+      <section className="max-w-7xl mx-auto px-6 sm:px-8 py-16 sm:py-24 lg:py-32 border-t border-border">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-5xl font-black mb-4 tracking-tighter italic">Why BuySell?</h2>
-          <p className="text-muted-foreground text-sm sm:text-lg max-w-2xl mx-auto font-medium">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 tracking-tight">Why BuySell?</h2>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto font-medium">
             We're building the infrastructure that powers the next generation of commerce across the continent.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
           {features.map((feature, index) => (
-            <div key={index} className="solid-card p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] hover:ring-4 hover:ring-primary/5 transition-all group">
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-primary/5 dark:bg-slate-900 rounded-2xl w-fit shadow-inner group-hover:scale-110 transition-transform">
+            <div key={index} className="solid-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl hover:shadow-lg hover:border-primary/20 transition-all group">
+              <div className="mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-primary/10 to-primary/5 dark:bg-slate-900 rounded-2xl w-fit shadow-lg shadow-primary/10 group-hover:shadow-xl group-hover:shadow-primary/20 group-hover:scale-110 transition-all duration-300">
                 {feature.icon}
               </div>
-              <h3 className="text-lg sm:text-xl font-black mb-2 sm:mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed font-medium opacity-80">
+              <h3 className="text-lg sm:text-xl font-black mb-3 sm:mb-4 tracking-tight">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed font-medium">
                 {feature.description}
               </p>
             </div>
@@ -123,18 +123,18 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-10 md:p-16 text-center text-white overflow-hidden relative group">
-          <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-primary/20 rounded-full blur-[80px] sm:blur-[100px] -mr-10 sm:-mr-20 -mt-10 sm:-mt-20 group-hover:bg-primary/30 transition-colors" />
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black mb-6 sm:mb-8 relative z-10 tracking-tighter">Ready to scale?</h2>
-          <p className="text-slate-400 max-w-xl mx-auto mb-8 sm:mb-12 text-sm sm:text-lg font-medium relative z-10 leading-relaxed">
-            Join the ecosystem of elite manufacturers and fast-growing wholesalers today.
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] p-8 sm:p-12 md:p-16 lg:p-20 text-center text-white overflow-hidden relative group">
+          <div className="absolute top-0 right-0 w-80 sm:w-96 lg:w-[500px] h-80 sm:h-96 lg:h-[500px] bg-primary/20 rounded-full blur-[100px] sm:blur-[120px] -mr-20 sm:-mr-40 -mt-20 sm:-mt-40 group-hover:bg-primary/30 transition-colors duration-500" />
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 sm:mb-8 relative z-10 tracking-tight">Ready to scale?</h2>
+          <p className="text-slate-300 max-w-2xl mx-auto mb-10 sm:mb-12 text-base sm:text-lg font-medium relative z-10 leading-relaxed">
+            Join the ecosystem of elite manufacturers and fast-growing wholesalers today. Start for free—no credit card required.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 relative z-10">
-            <button className="px-8 sm:px-12 py-3.5 sm:py-5 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[2rem] font-black text-base sm:text-xl hover:scale-105 transition-all shadow-2xl flex items-center justify-center gap-3 w-full sm:w-auto">
-              Open Account <ArrowRight size={20} />
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 relative z-10">
+            <button className="group/btn px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto min-h-[48px]">
+              Open Account <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
             </button>
-            <button className="px-8 sm:px-12 py-3.5 sm:py-5 border-2 border-white/10 hover:border-white/30 rounded-xl sm:rounded-2xl md:rounded-[2rem] font-black text-base sm:text-xl transition-all backdrop-blur-sm w-full sm:w-auto">
-              Contact Sales
+            <button className="px-8 sm:px-12 py-4 sm:py-6 border-2 border-white/20 hover:border-white/40 hover:bg-white/10 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg transition-all backdrop-blur-sm w-full sm:w-auto min-h-[48px]">
+              Schedule Demo
             </button>
           </div>
         </div>

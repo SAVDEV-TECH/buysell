@@ -268,7 +268,7 @@ export default function CheckoutPage() {
                    />
 
                    {/* Payment Buttons */}
-                   <div className="flex gap-4 justify-center flex-wrap [&>button]:py-5 [&>button]:font-bold [&>button]:text-lg [&>button]:w-16 [&>button]:h-16">
+                   <div className="flex gap-4 justify-center flex-wrap [&>button]:py-5 [&>button]:font-bold [&>button]:text-lg [&>button]:min-h-[48px]">
                       {paymentMethod === "paystack" && (
                         <PaystackButton product={mockProductForPaystack} user={user} />
                       )}
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
 
                    <button 
                      onClick={prevStep}
-                     className="w-full py-3 border border-borderline rounded-2xl hover:bg-muted transition-all font-medium"
+                     className="w-full py-4 border border-borderline rounded-2xl hover:bg-muted transition-all font-black min-h-[48px]"
                    >
                       ← Modify Shipping Details
                    </button>
@@ -381,3 +381,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+
