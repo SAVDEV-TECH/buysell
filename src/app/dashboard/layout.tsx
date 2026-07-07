@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package, ShieldCheck } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -41,6 +41,9 @@ export default function DashboardLayout({
     { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
     ...(role === "MANUFACTURER" || role === "WHOLESALER" || role === "ADMIN" ? [
       { name: "My Products", href: "/dashboard/products", icon: Package }
+    ] : []),
+    ...(role === "MANUFACTURER" ? [
+      { name: "Verification", href: "/dashboard/verification", icon: ShieldCheck }
     ] : []),
     { name: "Analytics", href: "/dashboard/analytics", icon: PieChart },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },

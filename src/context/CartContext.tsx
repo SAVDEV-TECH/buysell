@@ -33,7 +33,19 @@ interface CartContextType {
   setIsCartOpen: (isOpen: boolean) => void;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+const defaultCartContext: CartContextType = {
+  cartItems: [],
+  addToCart: () => {},
+  removeFromCart: () => {},
+  updateQuantity: () => {},
+  clearCart: () => {},
+  cartCount: 0,
+  cartTotal: 0,
+  isCartOpen: false,
+  setIsCartOpen: () => {},
+};
+
+const CartContext = createContext<CartContextType>(defaultCartContext);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

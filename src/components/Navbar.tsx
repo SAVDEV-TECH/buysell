@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MessageSquare, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, MessageSquare, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import { useNotifications } from "@/context/NotificationContext";
 import CurrencySelector from "./CurrencySelector";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
+  const { cartCount, setIsCartOpen } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -26,17 +29,14 @@ const Navbar = () => {
           </div>
           
           {/* Center Links */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
-            <Link
-              href="/manufacturers"
-              className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Search size={18} /> Browse
+          <nav className="hidden md:flex items-center gap-5 lg:gap-7" suppressHydrationWarning>
+            <Link href="/marketplace" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
+              <Search size={18} /> Products
             </Link>
-            <Link
-              href="/dashboard/messages"
-              className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors relative"
-            >
+            <Link href="/manufacturers" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
+              <Search size={18} /> Manufacturers
+            </Link>
+            <Link href="/dashboard/messages" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors relative">
               <MessageSquare size={18} /> Messages
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-2 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse"></span>
@@ -46,7 +46,21 @@ const Navbar = () => {
           
           {/* Desktop Actions */}
           <div className="flex items-center gap-3 lg:gap-4">
+            <LanguageSwitcher />
             <CurrencySelector />
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors"
+              aria-label="Open cart"
+            >
+              <ShoppingCart size={18} />
+              <span className="hidden md:inline">Art</span>
+              {cartCount > 0 && (
+                <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary text-white text-[10px] font-black">
+                  {cartCount}
+                </span>
+              )}
+            </button>
             {user ? (
               <div className="hidden sm:flex items-center gap-3">
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -82,13 +96,19 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1 shadow-lg absolute w-full z-40">
+          <Link href="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50 border-b border-slate-50">
+            Products
+          </Link>
           <Link href="/manufacturers" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50 border-b border-slate-50">
-            Browse Manufacturers
+            Manufacturers
           </Link>
           <Link href="/dashboard/messages" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50">
             Messages 
             {unreadCount > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{unreadCount}</span>}
           </Link>
+          <div className="px-3 py-2 border-b border-slate-50">
+            <LanguageSwitcher />
+          </div>
           {!user && (
             <div className="pt-4 mt-2 flex flex-col gap-3">
               <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 text-center rounded-md text-base font-semibold text-[#0f172a] hover:bg-slate-50 border border-slate-200">

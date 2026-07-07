@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-background border-t border-border pt-16 pb-8 mt-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -13,7 +18,7 @@ export default function Footer() {
               <span className="font-bold text-2xl tracking-tight text-foreground">BuySell</span>
             </Link>
             <p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed">
-              The premier B2B sourcing platform connecting verified manufacturers with global wholesalers. Streamline your supply chain with confidence.
+              {t("footer_tagline")}
             </p>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -33,34 +38,34 @@ export default function Footer() {
 
           {/* Sourcing Solutions */}
           <div>
-            <h4 className="font-bold text-foreground mb-6">Sourcing Solutions</h4>
+            <h4 className="font-bold text-foreground mb-6">{t("footer_sourcing")}</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Submit RFQ</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Verified Suppliers</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Wholesale Market</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Regional Channels</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_rfq")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_verified")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_wholesale")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_regional")}</Link></li>
             </ul>
           </div>
 
           {/* Trade Services */}
           <div>
-            <h4 className="font-bold text-foreground mb-6">Trade Services</h4>
+            <h4 className="font-bold text-foreground mb-6">{t("footer_trade")}</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Trade Assurance</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Logistics Services</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Production Monitoring</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Secure Payment</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_assurance")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_logistics")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_monitoring")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_payment")}</Link></li>
             </ul>
           </div>
 
           {/* Customer Care */}
           <div>
-            <h4 className="font-bold text-foreground mb-6">Customer Care</h4>
+            <h4 className="font-bold text-foreground mb-6">{t("footer_care")}</h4>
             <ul className="space-y-4">
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Help Center</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Submit a Dispute</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Policies & Rules</Link></li>
-              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">Report Intellectual Property Infringement</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_help")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_dispute")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_policies")}</Link></li>
+              <li><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{t("footer_ip")}</Link></li>
             </ul>
           </div>
         </div>
@@ -83,15 +88,15 @@ export default function Footer() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-            <Link href="#" className="hover:text-foreground transition-colors">Terms of Use</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t("footer_terms")}</Link>
             <span>|</span>
-            <Link href="#" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t("footer_privacy")}</Link>
             <span>|</span>
-            <Link href="#" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+            <Link href="#" className="hover:text-foreground transition-colors">{t("footer_cookie")}</Link>
           </div>
           
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} BuySell Platform. All rights reserved.
+            &copy; {new Date().getFullYear()} {t("footer_copyright")}
           </p>
         </div>
       </div>

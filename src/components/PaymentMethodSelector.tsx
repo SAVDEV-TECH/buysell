@@ -87,7 +87,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
       name: "Paystack",
       description: "Fast & Secure (Nigeria, Kenya, South Africa)",
       icon: <CreditCard size={20} />,
-      available: ["NG", "KE", "ZA"].includes(countryInfo?.country || ""),
+      available: ["Nigeria", "Kenya", "South Africa"].includes(countryInfo?.country || ""),
     },
     {
       id: "flutterwave",

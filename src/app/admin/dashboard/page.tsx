@@ -42,6 +42,8 @@ export default function AdminDashboard() {
   const [pendingWholesalers, setPendingWholesalers] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("payouts");
   const [submitting, setSubmitting] = useState(false);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -140,7 +142,10 @@ export default function AdminDashboard() {
   const approvePartner = async (sellerId: string) => {
     setSubmitting(true);
     try {
-      await updateDoc(doc(db, "users", sellerId), { isVerified: true });
+      await updateDoc(doc(db, "users", sellerId), { 
+        isVerified: true,
+        verificationStatus: "verified"
+      });
       
       // Notify the wholesaler
       await sendNotification(
@@ -155,6 +160,34 @@ export default function AdminDashboard() {
       alert("Account status verified successfully!");
     } catch (error) {
       console.error("Error verifying wholesaler:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const rejectPartner = async (sellerId: string) => {
+    if (!rejectReason.trim()) return;
+    setSubmitting(true);
+    try {
+      await updateDoc(doc(db, "users", sellerId), { 
+        verificationStatus: "rejected", 
+        verificationRejectionReason: rejectReason.trim(),
+        isVerified: false
+      });
+      
+      await sendNotification(
+        sellerId,
+        "Verification Rejected ❌",
+        `Your verification application was rejected: ${rejectReason.trim()}`,
+        "SYSTEM",
+        "/dashboard/verification"
+      );
+
+      setPendingWholesalers(prev => prev.filter(s => s.id !== sellerId));
+      setRejectingId(null);
+      setRejectReason("");
+    } catch (error) {
+      console.error("Error rejecting partner:", error);
     } finally {
       setSubmitting(false);
     }
@@ -217,9 +250,14 @@ export default function AdminDashboard() {
                  <button 
                    key={tab}
                    onClick={() => setActiveTab(tab)}
-                   className={`px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border ${activeTab === tab ? 'bg-primary text-white border-primary shadow-2xl shadow-primary/20' : 'glass border-borderline hover:bg-muted/50'}`}
+                   className={`relative px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border ${activeTab === tab ? 'bg-primary text-white border-primary shadow-2xl shadow-primary/20' : 'glass border-borderline hover:bg-muted/50'}`}
                  >
                    {tab === "payouts" ? "Payout Protocol" : "Account Vetting"}
+                   {tab === "verification" && pendingWholesalers.filter(s => s.verificationStatus === "pending").length > 0 && (
+                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg">
+                       {pendingWholesalers.filter(s => s.verificationStatus === "pending").length}
+                     </span>
+                   )}
                  </button>
                ))}
             </div>
@@ -270,28 +308,112 @@ export default function AdminDashboard() {
                     {pendingWholesalers.length === 0 ? (
                        <div className="py-20 text-center opacity-30 italic">All accounts verified at current telemetry level.</div>
                     ) : (
-                      pendingWholesalers.map(seller => (
-                        <div key={seller.id} className="p-6 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-borderline flex items-center justify-between gap-6">
-                           <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-xl font-black">
-                                 {seller.name?.charAt(0) || "W"}
-                              </div>
-                              <div>
-                                 <p className="font-black">{seller.businessName || seller.name}</p>
-                                 <p className="text-[10px] text-muted-foreground font-bold uppercase">{seller.role} • {seller.email}</p>
-                              </div>
-                           </div>
-                           <div className="flex gap-2">
-                              <button 
-                                onClick={() => approvePartner(seller.id)}
-                                disabled={submitting}
-                                className="px-6 py-2 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
-                              >
-                                 {submitting ? <Loader2 className="animate-spin" size={14}/> : "Verify Access"}
-                              </button>
-                           </div>
-                        </div>
-                      ))
+                      pendingWholesalers.map(seller => {
+                        const hasVerificationData = !!seller.verificationStatus;
+                        const isPending = seller.verificationStatus === "pending";
+                        
+                        return (
+                          <div key={seller.id} className="p-6 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-borderline flex flex-col gap-4">
+                             <div className="flex items-center justify-between gap-6">
+                                <div className="flex items-center gap-4">
+                                   <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-xl font-black">
+                                      {seller.name?.charAt(0) || "W"}
+                                   </div>
+                                   <div>
+                                      <p className="font-black">{seller.businessName || seller.name}</p>
+                                      <p className="text-[10px] text-muted-foreground font-bold uppercase">
+                                         {seller.role} • {seller.email}
+                                      </p>
+                                   </div>
+                                </div>
+                                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                                  seller.verificationStatus === "pending" ? "bg-blue-500/10 text-blue-500" :
+                                  seller.verificationStatus === "rejected" ? "bg-red-500/10 text-red-500" :
+                                  "bg-slate-500/10 text-slate-500"
+                                }`}>
+                                   {seller.verificationStatus || "No application"}
+                                </span>
+                             </div>
+
+                             {hasVerificationData && (
+                                <div className="p-4 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-borderline/50 text-xs space-y-3">
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                         <p className="text-[9px] text-muted-foreground font-bold uppercase font-mono">REGISTRATION NUMBER</p>
+                                         <p className="font-semibold">{seller.registrationNumber || "N/A"}</p>
+                                      </div>
+                                      <div>
+                                         <p className="text-[9px] text-muted-foreground font-bold uppercase font-mono">BUSINESS ADDRESS</p>
+                                         <p className="font-semibold">{seller.businessAddress || "N/A"}</p>
+                                      </div>
+                                   </div>
+                                   {seller.verificationDocumentUrl && (
+                                      <div className="pt-2 border-t border-borderline/30 flex items-center justify-between">
+                                         <span className="font-medium text-muted-foreground text-[10px] uppercase">LICENSE FILE:</span>
+                                         <a 
+                                            href={seller.verificationDocumentUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="text-primary font-bold hover:underline flex items-center gap-1 text-[11px]"
+                                         >
+                                            📄 View Document
+                                         </a>
+                                      </div>
+                                   )}
+                                </div>
+                             )}
+
+                             <div className="flex gap-2 justify-end pt-2 border-t border-borderline/20">
+                                {isPending && rejectingId !== seller.id && (
+                                   <button 
+                                     onClick={() => { setRejectingId(seller.id); setRejectReason(""); }}
+                                     disabled={submitting}
+                                     className="px-4 py-2 border border-red-500/20 text-red-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                                   >
+                                      Reject
+                                   </button>
+                                )}
+                                <button 
+                                  onClick={() => approvePartner(seller.id)}
+                                  disabled={submitting}
+                                  className="px-6 py-2 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
+                                >
+                                   {submitting ? <Loader2 className="animate-spin" size={14}/> : "Verify Access"}
+                                </button>
+                             </div>
+
+                             {/* Inline rejection reason input */}
+                             {rejectingId === seller.id && (
+                               <div className="mt-2 p-4 rounded-2xl bg-red-500/5 border border-red-500/20 space-y-3">
+                                 <p className="text-xs font-black text-red-500 uppercase tracking-wider">Enter Rejection Reason</p>
+                                 <textarea
+                                   rows={2}
+                                   value={rejectReason}
+                                   onChange={(e) => setRejectReason(e.target.value)}
+                                   placeholder="e.g. Blurry documents, address mismatch..."
+                                   className="w-full px-3 py-2 text-xs bg-white/60 dark:bg-slate-900/60 border border-borderline rounded-xl focus:ring-2 focus:ring-red-500/20 outline-none resize-none font-medium"
+                                 />
+                                 <div className="flex gap-2 justify-end">
+                                   <button
+                                     onClick={() => { setRejectingId(null); setRejectReason(""); }}
+                                     className="px-4 py-2 text-xs font-bold uppercase tracking-widest border border-borderline rounded-xl hover:bg-muted transition-all"
+                                   >
+                                     Cancel
+                                   </button>
+                                   <button
+                                     onClick={() => rejectPartner(seller.id)}
+                                     disabled={submitting || !rejectReason.trim()}
+                                     className="px-4 py-2 bg-red-500 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                                   >
+                                     {submitting ? <Loader2 className="animate-spin" size={12}/> : null}
+                                     Confirm Reject
+                                   </button>
+                                 </div>
+                               </div>
+                             )}
+                          </div>
+                        );
+                      })
                     )}
                  </div>
                )}

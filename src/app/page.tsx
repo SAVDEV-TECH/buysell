@@ -1,49 +1,55 @@
+"use client";
+
 import ProductExplorer from "@/components/ProductExplorer";
-import { Package, ShieldCheck, Zap, Globe, Search, ArrowRight } from "lucide-react";
+import { Package, ShieldCheck, Zap, Globe, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import Link from "next/link";
 
 export default function Home() {
+  const { t } = useLanguage();
+
   const features = [
     {
-      title: "Efficient Sourcing",
-      description: "Stop wasting time searching. Find exactly what you need from verified wholesalers in seconds.",
+      title: t("feat_sourcing_title"),
+      description: t("feat_sourcing_desc"),
       icon: <Zap className="text-primary" size={24} />,
     },
     {
-      title: "Digital Visibility",
-      description: "Manufacturers get a dedicated digital storefront to reach wholesalers globally.",
+      title: t("feat_visibility_title"),
+      description: t("feat_visibility_desc"),
       icon: <Globe className="text-primary" size={24} />,
     },
     {
-      title: "Secure Transactions",
-      description: "Integrated Paystack payments and order tracking ensure every deal is safe and transparent.",
+      title: t("feat_secure_title"),
+      description: t("feat_secure_desc"),
       icon: <ShieldCheck className="text-primary" size={24} />,
     },
     {
-      title: "Bulk Order Management",
-      description: "Automated bulk pricing and minimum order quantity management for smarter selling.",
+      title: t("feat_bulk_title"),
+      description: t("feat_bulk_desc"),
       icon: <Package className="text-primary" size={24} />,
     },
   ];
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden w-full">
-      {/* Hero Section - Search Centric */}
+    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden w-full" suppressHydrationWarning>
+      {/* Hero Section */}
       <section className="relative pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10">
            <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-primary rounded-full blur-[80px] sm:blur-[120px] animate-blob" />
            <div className="absolute top-1/3 right-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-secondary rounded-full blur-[80px] sm:blur-[120px] animate-blob animation-delay-2000" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6 border border-primary/20">
-            <Zap size={14} className="fill-primary" /> The B2B Commerce Standard
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 text-center" suppressHydrationWarning>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6 border border-primary/20" suppressHydrationWarning>
+            <Zap size={14} className="fill-primary" /> {t("home_badge")}
           </div>
-           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.0] sm:leading-[1.1]">
-            Source Smarter. <br className="hidden sm:block" />
-            <span className="gradient-text">Trade Better.</span>
+           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-[1.0] sm:leading-[1.1]" suppressHydrationWarning>
+            {t("home_h1_line1")} <br className="hidden sm:block" />
+            <span className="gradient-text">{t("home_h1_line2")}</span>
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-            Africa's premier marketplace connecting verified manufacturers with wholesalers in one unified hub.
+          <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-10 font-medium leading-relaxed" suppressHydrationWarning>
+            {t("home_subtitle")}
           </p>
         </div>
       </section>
@@ -56,9 +62,9 @@ export default function Home() {
       {/* Features Section */}
       <section className="max-w-7xl mx-auto px-6 sm:px-8 py-16 sm:py-24 lg:py-32 border-t border-border">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 tracking-tight">Why BuySell?</h2>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 tracking-tight">{t("home_why_title")}</h2>
           <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto font-medium">
-            We're building the infrastructure that powers the next generation of commerce across the continent.
+            {t("home_why_subtitle")}
           </p>
         </div>
 
@@ -88,24 +94,22 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col lg:flex-row items-center gap-12 sm:gap-16 relative z-10">
           <div className="flex-1 order-2 lg:order-1 text-center lg:text-left">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 sm:mb-8 tracking-tighter leading-tight">Simplifying Commerce, <br /><span className="text-primary italic">Connecting</span> Opportunities</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 sm:mb-8 tracking-tighter leading-tight">
+              {t("home_solution_title")} <br /><span className="text-primary italic">{t("home_solution_highlight")}</span> {t("home_solution_rest")}
+            </h2>
             <div className="space-y-4 sm:space-y-6 text-muted-foreground text-base sm:text-lg font-medium leading-relaxed">
-              <p>
-                Our platform acts as a central hub where manufacturers upload products in bulk, and wholesalers can easily access inventory at competitive prices.
-              </p>
-              <p>
-                For bulk purchasers, we offer a transparent and fast procurement experience with secure payment integration and real-time order tracking.
-              </p>
+              <p>{t("home_solution_p1")}</p>
+              <p>{t("home_solution_p2")}</p>
             </div>
             <div className="mt-10 sm:mt-12 flex justify-center lg:justify-start gap-8">
               <div className="flex flex-col items-center lg:items-start">
                 <span className="text-3xl sm:text-4xl font-black text-primary tracking-tighter">24/7</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">Global Visibility</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">{t("home_stat1")}</span>
               </div>
               <div className="w-px h-12 sm:h-16 bg-primary/20 mx-2" />
               <div className="flex flex-col items-center lg:items-start">
                 <span className="text-3xl sm:text-4xl font-black text-primary tracking-tighter">100%</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">Secure Escrow</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">{t("home_stat2")}</span>
               </div>
             </div>
           </div>
@@ -125,16 +129,16 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] p-8 sm:p-12 md:p-16 lg:p-20 text-center text-white overflow-hidden relative group">
           <div className="absolute top-0 right-0 w-80 sm:w-96 lg:w-[500px] h-80 sm:h-96 lg:h-[500px] bg-primary/20 rounded-full blur-[100px] sm:blur-[120px] -mr-20 sm:-mr-40 -mt-20 sm:-mt-40 group-hover:bg-primary/30 transition-colors duration-500" />
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 sm:mb-8 relative z-10 tracking-tight">Ready to scale?</h2>
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 sm:mb-8 relative z-10 tracking-tight">{t("home_cta_title")}</h2>
           <p className="text-slate-300 max-w-2xl mx-auto mb-10 sm:mb-12 text-base sm:text-lg font-medium relative z-10 leading-relaxed">
-            Join the ecosystem of elite manufacturers and fast-growing wholesalers today. Start for free—no credit card required.
+            {t("home_cta_subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 relative z-10">
-            <button className="group/btn px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto min-h-[48px]">
-              Open Account <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
-            </button>
+            <Link href="/register" className="group/btn px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto min-h-[48px]">
+              {t("home_cta_open")} <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
+            </Link>
             <button className="px-8 sm:px-12 py-4 sm:py-6 border-2 border-white/20 hover:border-white/40 hover:bg-white/10 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg transition-all backdrop-blur-sm w-full sm:w-auto min-h-[48px]">
-              Schedule Demo
+              {t("home_cta_demo")}
             </button>
           </div>
         </div>

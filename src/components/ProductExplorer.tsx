@@ -17,13 +17,36 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import dynamic from "next/dynamic";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, getDocs, getDoc, doc } from "firebase/firestore";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { useLanguage } from "@/context/LanguageContext";
 
 const PayWithPaystack = dynamic(() => import("@/components/PaystackButton"), {
   ssr: false,
 });
+const FloatingChatBox = dynamic(() => import("@/components/FloatingChatBox"), {
+  ssr: false,
+});
+
+// Stable hash function to mock consistent B2B metadata based on product ID/name
+function getB2BMetadata(product: Product) {
+  const idStr = String(product.id);
+  const hash = idStr.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  const tenure = (hash % 7) + 2; // 2 to 8 years
+  const responseRate = 92 + (hash % 8); // 92% to 99%
+  const basePrice = product.price;
+  const baseMOQ = product.moq || 10;
+
+  const tiers = [
+    { minQty: baseMOQ, price: basePrice },
+    { minQty: baseMOQ * 5, price: Math.round(basePrice * 0.9) },
+    { minQty: baseMOQ * 10, price: Math.round(basePrice * 0.8) }
+  ];
+
+  return { tenure, responseRate, tiers };
+}
 
 export interface Product {
   id: number | string;
@@ -40,6 +63,7 @@ export interface Product {
   sellerName?: string;
   moq?: number;
   leadTime?: string;
+  isSellerVerified?: boolean;
 }
 
 const MOCK_PRODUCTS: Product[] = [
@@ -92,10 +116,15 @@ const MOCK_PRODUCTS: Product[] = [
 function MobileProductCard({
   product,
   user,
+  onContactSupplier,
 }: {
   product: Product;
   user: any;
+  onContactSupplier: (sellerId: string, sellerName: string) => void;
 }) {
+  const isGold = product.isSellerVerified === true;
+  const meta = getB2BMetadata(product);
+
   return (
     <div className="flex flex-col overflow-hidden rounded-lg sm:rounded-xl border border-border bg-card w-full h-full">
       {/* Image */}
@@ -112,38 +141,57 @@ function MobileProductCard({
           </div>
         )}
         {/* Rating pill over image */}
-        <div className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 flex items-center gap-0.5 bg-black/60 text-white rounded px-0.5 sm:px-1 py-0.5">
+        <div className="absolute top-1 left-1 flex items-center gap-0.5 bg-black/60 text-white rounded px-1 py-0.5">
           <Star size={7} fill="currentColor" className="text-orange-400" />
-          <span className="text-[7px] sm:text-[9px] font-bold leading-none">{product.rating}</span>
+          <span className="text-[7px] font-bold leading-none">{product.rating}</span>
         </div>
-        {/* Wishlist */}
-        <button className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 w-5 sm:w-6 h-5 sm:h-6 flex items-center justify-center bg-white/70 dark:bg-black/70 rounded-full z-10">
-          <Heart size={9} className="text-slate-600 dark:text-slate-300" />
-        </button>
+        {/* Gold Supplier Badge – only shown for admin-verified sellers */}
+        {isGold ? (
+          <div className="absolute bottom-1 left-1 bg-amber-500 text-black text-[7px] font-black rounded px-1 py-0.5 flex items-center gap-0.5 shadow-sm">
+            🏅 Gold
+          </div>
+        ) : (
+          <div className="absolute bottom-1 left-1 bg-slate-700/80 text-white text-[7px] font-bold rounded px-1 py-0.5 flex items-center gap-0.5">
+            {meta.tenure}Y
+          </div>
+        )}
       </Link>
 
       {/* Body */}
-      <div className="p-1 sm:p-1.5 flex flex-col gap-0.5 sm:gap-1">
-        {/* Category */}
-        <span className="text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-muted-foreground truncate">
-          {product.category}
-        </span>
+      <div className="p-1.5 flex flex-col gap-0.5">
+        {/* Category + Response rate */}
+        <div className="flex items-center justify-between text-[7px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+          <span>{product.category}</span>
+          <span className="text-emerald-500 font-black">{meta.responseRate}% Resp</span>
+        </div>
 
         {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
-          <p className="text-[9px] sm:text-[10px] font-bold leading-tight line-clamp-2 text-foreground">
+          <p className="text-[9px] font-bold leading-tight line-clamp-1 text-foreground">
             {product.name}
           </p>
         </Link>
 
-        {/* Price */}
-        <p className="text-[9px] sm:text-[10px] font-black text-foreground tracking-tight">
-          ₦{product.price.toLocaleString()}
-        </p>
+        {/* MOQ & Price range */}
+        <div className="flex flex-col gap-0.5 my-0.5 border-t border-border/50 pt-1">
+          <p className="text-[7px] text-muted-foreground uppercase font-black">Min Order: {product.moq || 10} units</p>
+          <p className="text-[9px] font-black text-primary tracking-tight">
+            ₦{meta.tiers[2].price.toLocaleString()} - ₦{meta.tiers[0].price.toLocaleString()}
+          </p>
+        </div>
 
-        {/* CTA — full width, no Plus button at this size */}
-        <div className="w-full overflow-hidden rounded-lg mt-0.5 sm:mt-1">
-          <PayWithPaystack product={product} user={user} />
+        {/* Action CTAs */}
+        <div className="flex gap-1 items-stretch mt-0.5">
+          <button
+            onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
+            className="px-2 bg-muted hover:bg-accent text-primary rounded border border-border text-[9px] font-bold flex items-center justify-center"
+            title="Chat with Supplier"
+          >
+            💬
+          </button>
+          <div className="flex-1 overflow-hidden rounded">
+            <PayWithPaystack product={product} user={user} />
+          </div>
         </div>
       </div>
     </div>
@@ -158,11 +206,16 @@ function DesktopProductCard({
   product,
   user,
   onAddToCart,
+  onContactSupplier,
 }: {
   product: Product;
   user: any;
   onAddToCart: (product: Product) => void;
+  onContactSupplier: (sellerId: string, sellerName: string) => void;
 }) {
+  const isGold = product.isSellerVerified === true;
+  const meta = getB2BMetadata(product);
+
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full group hover:shadow-lg transition-all duration-300">
       {/* Image */}
@@ -203,28 +256,52 @@ function DesktopProductCard({
           </div>
         </div>
 
-        {/* Seller */}
-        <Link
-          href={`/manufacturers/${product.sellerId}`}
-          className="flex items-center gap-1.5 group/seller min-w-0"
-        >
-          <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-black uppercase text-primary border border-primary/10 shrink-0">
-            {product.sellerName ? product.sellerName.charAt(0) : "S"}
-          </div>
-          <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
-            {product.sellerName || "Partner"}
+        {/* Seller Info & Gold Status & Response Rate */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Link
+            href={`/manufacturers/${product.sellerId}`}
+            className="flex items-center gap-1 group/seller min-w-0"
+          >
+            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-black uppercase text-primary border border-primary/10 shrink-0">
+              {product.sellerName ? product.sellerName.charAt(0) : "S"}
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
+              {product.sellerName || "Partner"}
+            </span>
+          </Link>
+          {isGold ? (
+            <span className="px-1.5 py-0.5 bg-amber-500 text-black text-[8px] font-black rounded flex items-center gap-0.5 shadow-sm" title="Admin-verified Gold Supplier">
+              🏅 Gold Supplier
+            </span>
+          ) : (
+            <span className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[8px] font-bold rounded flex items-center gap-0.5 border border-border/50">
+              {meta.tenure} YRS
+            </span>
+          )}
+          <span className="text-[8px] font-medium text-emerald-500 bg-emerald-500/10 px-1 py-0.5 rounded">
+            {meta.responseRate}% Resp
           </span>
-        </Link>
+        </div>
 
         {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
-          <h3 className="text-sm md:text-[15px] font-black tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
+          <h3 className="text-sm md:text-[14px] font-black tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
 
+        {/* Alibaba Tiered Pricing Grid */}
+        <div className="grid grid-cols-3 gap-1 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl text-center text-[9px] border border-border/50 my-1 font-medium">
+          {meta.tiers.map((t, idx) => (
+            <div key={idx} className="flex flex-col border-r last:border-r-0 border-border/40">
+              <span className="text-muted-foreground">{t.minQty}+ units</span>
+              <span className="font-bold text-primary">₦{t.price.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+
         {/* MOQ + Lead */}
-        <div className="flex flex-col gap-1 text-xs text-muted-foreground border-y border-border py-2">
+        <div className="flex flex-col gap-1 text-[11px] text-muted-foreground border-t border-border/50 pt-2">
           <div className="flex justify-between gap-2">
             <span className="shrink-0">MOQ:</span>
             <span className="font-semibold text-foreground truncate text-right">
@@ -240,19 +317,25 @@ function DesktopProductCard({
         </div>
 
         {/* Price + actions */}
-        <div className="mt-auto flex flex-col gap-2">
-          <p className="text-base md:text-lg font-black text-foreground tracking-tighter">
-            ₦{product.price.toLocaleString()}
+        <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
+          <p className="text-sm font-black text-foreground tracking-tighter">
+            ₦{meta.tiers[2].price.toLocaleString()} - ₦{meta.tiers[0].price.toLocaleString()} <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
           </p>
-          <div className="flex gap-2 items-stretch">
+          <div className="flex gap-1 items-stretch">
             <button
               onClick={() => onAddToCart(product)}
-              className="w-9 h-9 shrink-0 bg-muted/50 dark:bg-slate-800 text-primary rounded-lg hover:bg-accent transition-all flex items-center justify-center border border-border"
+              className="w-8.5 h-8.5 shrink-0 bg-muted/50 dark:bg-slate-800 text-primary rounded-lg hover:bg-accent transition-all flex items-center justify-center border border-border"
               title="Add to PO"
             >
-              <Plus size={15} />
+              <Plus size={14} />
             </button>
-            <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-md shadow-primary/10">
+            <button
+              onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
+              className="flex-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all text-[11px] font-bold uppercase tracking-wider text-center"
+            >
+              Contact
+            </button>
+            <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
               <PayWithPaystack product={product} user={user} />
             </div>
           </div>
@@ -268,6 +351,7 @@ function DesktopProductCard({
 export default function ProductExplorer({ limit }: { limit?: number }) {
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -276,17 +360,38 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const [maxPrice, setMaxPrice] = useState<number>(1000000);
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
+  const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
-        const live: Product[] = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          desc: doc.data().description || doc.data().desc,
-        })) as any;
+        const liveDocs = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+          desc: d.data().description || d.data().desc,
+        })) as any[];
+
+        // Fetch unique seller verification statuses in one batch
+        const sellerIds = [...new Set(liveDocs.map((p: any) => p.sellerId).filter(Boolean))];
+        const sellerVerifiedMap: Record<string, boolean> = {};
+        await Promise.all(
+          sellerIds.map(async (sid: string) => {
+            try {
+              const userSnap = await getDoc(doc(db, "users", sid));
+              if (userSnap.exists()) {
+                sellerVerifiedMap[sid] = userSnap.data()?.isVerified === true;
+              }
+            } catch { /* ignore individual user fetch errors */ }
+          })
+        );
+
+        const live: Product[] = liveDocs.map((p: any) => ({
+          ...p,
+          isSellerVerified: sellerVerifiedMap[p.sellerId] ?? false,
+        }));
+
         setProducts(live.length > 0 ? live : MOCK_PRODUCTS);
       } catch {
         setProducts(MOCK_PRODUCTS);
@@ -344,7 +449,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           />
           <input
             type="text"
-            placeholder="Search products, categories or wholesalers..."
+            placeholder={t("market_search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm"
@@ -354,13 +459,13 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${showFilters
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background border-input hover:bg-accent text-muted-foreground"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-background border-input hover:bg-accent text-muted-foreground"
               }`}
           >
             <Filter size={14} className="sm:hidden" />
             <Filter size={16} className="hidden sm:block" />
-            <span className="hidden sm:inline">Filters</span>
+            <span className="hidden sm:inline">{t("market_filters")}</span>
           </button>
           <div className="flex-1 sm:flex-none lg:flex-none relative flex-shrink-0 min-w-0">
             <select
@@ -368,10 +473,10 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-xs sm:text-sm appearance-none whitespace-nowrap"
             >
-              <option value="Newest">Newest</option>
-              <option value="Price: Low to High">Price ↑</option>
-              <option value="Price: High to Low">Price ↓</option>
-              <option value="Top Rated">Top Rated</option>
+              <option value="Newest">{t("market_sort_newest")}</option>
+              <option value="Price: Low to High">{t("market_sort_low")}</option>
+              <option value="Price: High to Low">{t("market_sort_high")}</option>
+              <option value="Top Rated">{t("market_sort_rated")}</option>
             </select>
             <ArrowUpRight
               size={14}
@@ -434,8 +539,8 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-semibold text-[10px] sm:text-[11px] whitespace-nowrap border transition-all snap-start flex-shrink-0 ${activeCategory === cat
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background border-input hover:bg-accent"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background border-input hover:bg-accent"
                 }`}
             >
               {cat}
@@ -487,7 +592,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             >
               {/* Mobile card — hidden from sm upward */}
               <div className="block sm:hidden w-full">
-                <MobileProductCard product={product} user={user} />
+                <MobileProductCard
+                  product={product}
+                  user={user}
+                  onContactSupplier={(sellerId, name) => setActiveChat({ id: sellerId, name })}
+                />
               </div>
 
               {/* Desktop card — hidden below sm */}
@@ -496,6 +605,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                   product={product}
                   user={user}
                   onAddToCart={handleAddToCart}
+                  onContactSupplier={(sellerId, name) => setActiveChat({ id: sellerId, name })}
                 />
               </div>
             </motion.div>
@@ -510,10 +620,20 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             href="/marketplace"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 sm:px-10 py-4 bg-primary text-white rounded-2xl font-black text-base sm:text-lg hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary/20 group"
           >
-            Explore Complete Marketplace
+            {t("market_explore")}
             <ArrowRight size={22} className="group-hover:translate-x-2 transition-transform" />
           </Link>
         </div>
+      )}
+
+      {/* Floating Chat Box for B2B Sourcing Inquiry */}
+      {activeChat && (
+        <FloatingChatBox
+          manufacturerId={activeChat.id}
+          manufacturerName={activeChat.name}
+          isOpen={!!activeChat}
+          onClose={() => setActiveChat(null)}
+        />
       )}
     </div>
   );

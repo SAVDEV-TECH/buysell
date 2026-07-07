@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { admin, adminDb } from "@/lib/firebaseAdmin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,8 +17,8 @@ export async function POST(request: NextRequest) {
     const ussdCode = generateUSSDCode(amount, phoneNumber);
     const reference = `mm-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-    // Create transaction record
-    await addDoc(collection(db, "transactions"), {
+    // Create transaction record using Admin SDK (bypasses Firestore security rules)
+    await adminDb.collection("transactions").add({
       type: "mobile_money",
       provider,
       phoneNumber,
@@ -30,7 +29,7 @@ export async function POST(request: NextRequest) {
       reference,
       status: "initiated",
       ussdCode,
-      createdAt: Timestamp.now(),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({
