@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Escrow Admin - Failed Auto Releases</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .card { border: 1px solid #ddd; padding: 12px; margin: 8px 0; border-radius: 6px; }
+    button { padding: 6px 10px; }
+    .error { color: #b00020; }
+  </style>
+</head>
+<body>
+  <h1>Escrow Admin — Failed Auto Releases</h1>
+  <p>This admin UI lists escrows that failed auto-release. Sign in as an admin to view and retry transfers.</p>
+
+  <div id="auth">
+    <button id="signIn">Sign in with Google</button>
+    <button id="signOut" style="display:none">Sign out</button>
+    <span id="userInfo"></span>
+  </div>
+
+  <div>
+    <button id="refresh">Refresh list</button>
+  </div>
+
+  <div id="list"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-functions-compat.js"></script>
+
+  <script>
+    // TODO: Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "REPLACE_ME",
+      authDomain: "REPLACE_ME",
+      projectId: "REPLACE_ME",
+      // storageBucket, messagingSenderId, appId optional
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const functions = firebase.functions();
+
+    const signInBtn = document.getElementById('signIn');
+    const signOutBtn = document.getElementById('signOut');
+    const userInfo = document.getElementById('userInfo');
+    const refreshBtn = document.getElementById('refresh');
+    const listEl = document.getElementById('list');
+
+    signInBtn.onclick = async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithPopup(provider);
+    };
+    signOutBtn.onclick = async () => { await auth.signOut(); };
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        signInBtn.style.display = 'none';
+        signOutBtn.style.display = '';
+        userInfo.textContent = `Signed in as ${user.email}`;
+
+        // check admin claim
+        const idTokenResult = await user.getIdTokenResult();
+        if (!idTokenResult.claims || !idTokenResult.claims.admin) {
+          listEl.innerHTML = '<p class="error">You are not an admin. Please ensure your account has admin custom claim.</p>';
+          return;
+        }
+
+        loadList();
+      } else {
+        signInBtn.style.display = '';
+        signOutBtn.style.display = 'none';
+        userInfo.textContent = '';
+        listEl.innerHTML = '<p>Please sign in as admin to see failed auto-releases.</p>';
+      }
+    });
+
+    refreshBtn.onclick = loadList;
+
+    async function loadList() {
+      listEl.innerHTML = '<p>Loading...</p>';
+      try {
+        const listFn = functions.httpsCallable('listFailedAutoReleases');
+        const res = await listFn();
+        const items = res.data && res.data.items ? res.data.items : [];
+        if (!items.length) {
+          listEl.innerHTML = '<p>No failed auto-releases found.</p>';
+          return;
+        }
+
+        listEl.innerHTML = '';
+        for (const it of items) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <strong>Escrow ID:</strong> ${it.id}<br>
+            <strong>Order:</strong> ${it.orderId || '-'}<br>
+            <strong>Amount:</strong> ${it.amount || '-'} ${it.currency || ''}<br>
+            <strong>Status:</strong> ${it.status || '-'}<br>
+            <strong>autoReleaseAt:</strong> ${it.timeline && it.timeline.autoReleaseAt ? new Date(it.timeline.autoReleaseAt._seconds * 1000).toString() : '-'}<br>
+            <div class="error"><strong>autoReleaseError:</strong> ${it.autoReleaseError || ''}</div>
+            <div class="error"><strong>lastRetryError:</strong> ${it.lastRetryError || ''}</div>
+          `;
+
+          const btn = document.createElement('button');
+          btn.textContent = 'Retry Transfer (admin)';
+          btn.onclick = async () => {
+            if (!confirm('Retry transfer for ' + it.id + '?')) return;
+            btn.disabled = true;
+            try {
+              const retryFn = functions.httpsCallable('retryTransfer');
+              const r = await retryFn({ escrowId: it.id });
+              alert('Success: ' + JSON.stringify(r.data));
+              loadList();
+            } catch (err) {
+              alert('Retry failed: ' + (err.message || JSON.stringify(err)));
+              btn.disabled = false;
+            }
+          };
+          card.appendChild(btn);
+          listEl.appendChild(card);
+        }
+      } catch (err) {
+        listEl.innerHTML = '<p class="error">Failed to load list: ' + (err.message || JSON.stringify(err)) + '</p>';
+      }
+    }
+
+    // initial content
+    listEl.innerHTML = '<p>Sign in to manage failed auto-releases.</p>';
+  </script>
+</body>
+</html>

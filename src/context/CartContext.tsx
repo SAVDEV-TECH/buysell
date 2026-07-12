@@ -50,6 +50,7 @@ const CartContext = createContext<CartContextType>(defaultCartContext);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Helper: Get product price based on quantity tiers
   const getTieredPrice = (product: Product, quantity: number) => {
@@ -70,6 +71,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Failed to parse cart", error);
       }
     }
+    setIsHydrated(true);
   }, []);
 
   // Save cart to local storage on change
@@ -110,13 +112,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCartItems([]);
   };
 
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const cartCount = isHydrated ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
   
   // Calculate total with dynamic tiered pricing
-  const cartTotal = cartItems.reduce((total, item) => {
+  const cartTotal = isHydrated ? cartItems.reduce((total, item) => {
     const unitPrice = getTieredPrice(item, item.quantity);
     return total + (unitPrice * item.quantity);
-  }, 0);
+  }, 0) : 0;
 
   return (
     <CartContext.Provider

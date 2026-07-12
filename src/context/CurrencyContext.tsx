@@ -16,8 +16,15 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [country, setCountryState] = useState<CountryData>(COUNTRY_CONFIG.NG);
   const [loading, setLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
     // Detect country on mount
     const detectAndSetCountry = async () => {
       try {
@@ -37,7 +44,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     };
 
     detectAndSetCountry();
-  }, []);
+  }, [isHydrated]);
 
   const setCountry = (countryCode: string) => {
     if (COUNTRY_CONFIG[countryCode]) {

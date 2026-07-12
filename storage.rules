@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Allow reading publicly where appropriate; most evidence files should be private
+    // Evidence path: /escrow_evidence/{escrowId}/{file}
+    match /escrow_evidence/{escrowId}/{allPaths=**} {
+      // Allow read for participants or admins (reads will be authorized by Firestore document check)
+      allow read: if request.auth != null && (
+        // check escrow document for participant ids
+        (exists(/databases/$(database)/documents/escrows/$(escrowId)) && (
+          request.auth.uid == get(/databases/$(database)/documents/escrows/$(escrowId)).data.buyerId ||
+          request.auth.uid == get(/databases/$(database)/documents/escrows/$(escrowId)).data.manufacturerId ||
+          (get(/databases/$(database)/documents/escrows/$(escrowId)).data.wholesalerId != null && request.auth.uid == get(/databases/$(database)/documents/escrows/$(escrowId)).data.wholesalerId)
+        )) || (request.auth.token.admin == true)
+      );
+
+      // Writes: Only authenticated buyer for this escrow or admin can upload evidence/proof
+      allow write: if request.auth != null && (
+        (exists(/databases/$(database)/documents/escrows/$(escrowId)) && request.auth.uid == get(/databases/$(database)/documents/escrows/$(escrowId)).data.buyerId)
+        || request.auth.token.admin == true
+      ) &&
+      // optionally restrict file size and content type
+      request.resource.size < 10 * 1024 * 1024 && // < 10 MB
+      request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('application/pdf');
+    }
+
+    // Optionally, allow public product images under products/...
+    match /products/{productId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token != null && request.auth.token.role in ['MANUFACTURER', 'WHOLESALER'];
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

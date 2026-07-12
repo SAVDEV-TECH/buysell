@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, MessageSquare, Menu, X } from "lucide-react";
+import { Search, MessageSquare, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
 import { useNotifications } from "@/context/NotificationContext";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -12,7 +11,6 @@ import LanguageSwitcher from "./LanguageSwitcher";
 const Navbar = () => {
   const { user } = useAuth();
   const { unreadCount } = useNotifications();
-  const { cartCount, setIsCartOpen } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -29,7 +27,7 @@ const Navbar = () => {
           </div>
           
           {/* Center Links */}
-          <nav className="hidden md:flex items-center gap-5 lg:gap-7" suppressHydrationWarning>
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8" suppressHydrationWarning>
             <Link href="/marketplace" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
               <Search size={18} /> Products
             </Link>
@@ -48,19 +46,6 @@ const Navbar = () => {
           <div className="flex items-center gap-3 lg:gap-4">
             <LanguageSwitcher />
             <CurrencySelector />
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="hidden sm:inline-flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors"
-              aria-label="Open cart"
-            >
-              <ShoppingCart size={18} />
-              <span className="hidden md:inline">Art</span>
-              {cartCount > 0 && (
-                <span className="inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-primary text-white text-[10px] font-black">
-                  {cartCount}
-                </span>
-              )}
-            </button>
             {user ? (
               <div className="hidden sm:flex items-center gap-3">
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">

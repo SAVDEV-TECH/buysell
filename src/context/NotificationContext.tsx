@@ -28,11 +28,18 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      setNotifications([]);
-      setUnreadCount(0);
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!user || !isHydrated) {
+      if (!user) {
+        setNotifications([]);
+        setUnreadCount(0);
+      }
       return;
     }
 
@@ -66,7 +73,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user, isHydrated]);
 
   const markAsRead = async (id: string) => {
     try {

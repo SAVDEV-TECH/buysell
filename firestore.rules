@@ -245,5 +245,119 @@ service cloud.firestore {
       
       allow delete: if false;
     }
+
+    // Escrow documents - controls payments held in escrow between buyer/manufacturer/wholesaler
+    match /escrows/{escrowId} {
+      // Read: participants and admins only
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.buyerId ||
+        request.auth.uid == resource.data.manufacturerId ||
+        (resource.data.wholesalerId != null && request.auth.uid == resource.data.wholesalerId) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN')
+      );
+
+      // Create: buyer creates escrows
+      allow create: if request.auth != null && validCreate(request.resource.data);
+
+      // Update: participants or admin with rules enforced in validUpdate
+      allow update: if request.auth != null && validUpdate(resource.data, request.resource.data);
+
+      // Delete: admins only
+      allow delete: if request.auth != null && (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN');
+
+      function validCreate(data) {
+        return
+          data.orderId is string
+          && data.buyerId is string
+          && data.manufacturerId is string
+          && data.amount is int && data.amount > 0
+          && data.currency == 'NGN'
+          && data.paymentMethod in ['paystack', 'bank_transfer']
+          && data.status in ['pending_payment', 'awaiting_link']
+          && data.buyerId == request.auth.uid
+          && (data.wholesalerId == null || data.wholesalerId is string)
+          && (data.paystackReference == null || data.paystackReference is string)
+          && (data.paystackTransferCode == null)
+          && (data.proofOfPaymentUrl == null || data.proofOfPaymentUrl is string)
+          && data.timeline is map
+          && data.timeline.orderedAt is timestamp
+          && (data.timeline.fundedAt == null || data.timeline.fundedAt is timestamp)
+          && (data.timeline.shippedAt == null || data.timeline.shippedAt is timestamp)
+          && (data.disputeReason == null || data.disputeReason is string)
+          && (data.disputeEvidence == null || (data.disputeEvidence is list && data.disputeEvidence.size() <= 10))
+          && data.createdAt is timestamp
+          && data.updatedAt is timestamp;
+      }
+
+      function allowedStatusTransition(oldStatus, newStatus, actorIsBuyer, actorIsManufacturer, actorIsAdmin) {
+        return oldStatus == newStatus || (
+          (oldStatus == 'pending_payment' && newStatus == 'awaiting_link' && actorIsBuyer) ||
+          ((oldStatus == 'pending_payment' || oldStatus == 'awaiting_link') && newStatus == 'funded' && actorIsAdmin) ||
+          (oldStatus == 'funded' && newStatus == 'shipped' && actorIsManufacturer) ||
+          (oldStatus == 'shipped' && newStatus == 'released' && actorIsAdmin) ||
+          (oldStatus == 'funded' && newStatus == 'refunded' && actorIsAdmin) ||
+          (newStatus == 'disputed' && (actorIsBuyer || actorIsManufacturer))
+        );
+      }
+
+      function validUpdate(oldData, newData) {
+        // immutable fields
+        let immutableUnchanged = newData.orderId == oldData.orderId
+          && newData.buyerId == oldData.buyerId
+          && newData.manufacturerId == oldData.manufacturerId
+          && newData.amount == oldData.amount
+          && newData.currency == oldData.currency
+          && (oldData.createdAt == null || newData.createdAt == oldData.createdAt);
+
+        if (!immutableUnchanged) { return false; }
+
+        let actorIsBuyer = request.auth.uid == oldData.buyerId;
+        let actorIsManufacturer = request.auth.uid == oldData.manufacturerId;
+        let actorIsWholesaler = (oldData.wholesalerId != null && request.auth.uid == oldData.wholesalerId);
+        let actorIsAdmin = (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN');
+
+        if (!allowedStatusTransition(oldData.status, newData.status, actorIsBuyer, actorIsManufacturer, actorIsAdmin)) {
+          return false;
+        }
+
+        // server-only
+        if (newData.paystackTransferCode != oldData.paystackTransferCode && !actorIsAdmin) { return false; }
+
+        if (newData.paystackReference != oldData.paystackReference && !(actorIsBuyer || actorIsAdmin)) { return false; }
+
+        if (newData.proofOfPaymentUrl != oldData.proofOfPaymentUrl && !actorIsBuyer) { return false; }
+
+        if (oldData.status != 'funded' && newData.status == 'funded') {
+          if (!(newData.timeline.fundedAt is timestamp)) { return false; }
+          if (!actorIsAdmin) { return false; }
+        }
+
+        if (oldData.status != 'shipped' && newData.status == 'shipped') {
+          if (!(newData.timeline.shippedAt is timestamp)) { return false; }
+          if (!actorIsManufacturer) { return false; }
+        }
+
+        if ((newData.status == 'released' || newData.status == 'refunded') && !actorIsAdmin) { return false; }
+
+        if (newData.status == 'disputed') {
+          if (!(newData.disputeReason is string && newData.disputeReason.size() > 0)) { return false; }
+          if (newData.disputeEvidence != null) {
+            if (!(newData.disputeEvidence is list && newData.disputeEvidence.size() <= 10)) { return false; }
+            if (!newData.disputeEvidence.reduce((acc, e) => acc && (e is string), true)) { return false; }
+          }
+        }
+
+        if (newData.timeline.autoReleaseAt != null && newData.timeline.fundedAt != null) {
+          if (!(newData.timeline.autoReleaseAt is timestamp && newData.timeline.fundedAt is timestamp)) { return false; }
+          if (!(newData.timeline.autoReleaseAt >= newData.timeline.fundedAt)) { return false; }
+        }
+
+        if (!(newData.updatedAt is timestamp)) { return false; }
+
+        if (!(newData.amount is int && newData.amount > 0)) { return false; }
+
+        return true;
+      }
+    }
   }
 }

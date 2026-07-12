@@ -18,6 +18,7 @@ const LanguageContext = createContext<LanguageContextType>({
 });
 
 function applyDom(newLocale: Locale) {
+  if (typeof document === "undefined") return;
   const localeConfig = LOCALES.find((l) => l.code === newLocale);
   const dir = localeConfig?.dir ?? "ltr";
   document.documentElement.dir = dir;
@@ -26,15 +27,22 @@ function applyDom(newLocale: Locale) {
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Load saved locale from localStorage on mount — runs after first render
   useEffect(() => {
+    if (!isHydrated) return;
+
     const saved = localStorage.getItem("buysell_locale") as Locale | null;
     if (saved && (["en", "pidgin", "ar", "zh"] as string[]).includes(saved)) {
       setLocaleState(saved);
       applyDom(saved);
     }
-  }, []);
+  }, [isHydrated]);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
