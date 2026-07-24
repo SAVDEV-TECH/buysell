@@ -80,10 +80,10 @@ export default function NotificationsPage() {
     if (!user) return;
     setIsSendingDemo(true);
 
-    const types: NotificationType[] = ["ORDER", "RFQ", "VERIFICATION", "SYSTEM"];
+    const types: NotificationType[] = ["ORDER", "RFQ", "MESSAGE", "VERIFICATION", "SYSTEM"];
     const randomType = types[Math.floor(Math.random() * types.length)];
 
-    const samples = {
+    const samples: Record<NotificationType, { title: string; message: string; link: string }> = {
       ORDER: {
         title: "New Wholesale Order #BS-" + Math.floor(1000 + Math.random() * 9000),
         message: "A buyer placed an order for 500 units of Industrial Raw Cotton ($12,500.00).",
@@ -93,6 +93,11 @@ export default function NotificationsPage() {
         title: "RFQ Response Received",
         message: "Apex Manufacturing submitted a custom quotation for your requested specifications.",
         link: "/dashboard/rfqs",
+      },
+      MESSAGE: {
+        title: "New Direct Message Received",
+        message: "A verified supplier sent a message regarding product availability.",
+        link: "/dashboard/messages",
       },
       VERIFICATION: {
         title: "Business Document Verified",
