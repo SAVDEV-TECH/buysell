@@ -6,23 +6,19 @@ CREATE TABLE IF NOT EXISTS public.approval_rules (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID        NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   
-  -- Human-readable + machine identifier
   rule_name       TEXT        NOT NULL,
-  rule_key        TEXT        NOT NULL, -- e.g., 'spending_limit_default'
+  rule_key        TEXT        NOT NULL,
   
-  -- Conditions (all must match for rule to trigger)
   min_amount      NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  max_amount      NUMERIC(12, 2), -- NULL = no upper bound
+  max_amount      NUMERIC(12, 2),
   category_id     UUID        REFERENCES public.product_categories(id) ON DELETE SET NULL,
   
-  -- Approval configuration
-  approver_role   TEXT        NOT NULL, -- references roles system
-  sequence_order  INT         NOT NULL DEFAULT 1, -- 1 = first tier, 2 = second, etc.
-  required_count  INT         NOT NULL DEFAULT 1, -- how many people with this role must approve
+  approver_role   TEXT        NOT NULL,
+  sequence_order  INT         NOT NULL DEFAULT 1,
+  required_count  INT         NOT NULL DEFAULT 1,
   
-  -- Escalation
-  auto_escalate_after_minutes INT, -- NULL = no auto-escalation
-  escalate_to_role TEXT, -- role to escalate to if timeout
+  auto_escalate_after_minutes INT,
+  escalate_to_role TEXT,
   
   is_active       BOOLEAN     NOT NULL DEFAULT true,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -47,13 +43,11 @@ CREATE TABLE IF NOT EXISTS public.order_approvals (
   order_id         UUID        NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   organization_id  UUID        NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   
-  -- Snapshot of what triggered this (defensive against order changes)
   rule_id          UUID        REFERENCES public.approval_rules(id) ON DELETE SET NULL,
-  triggered_amount NUMERIC(12, 2) NOT NULL DEFAULT 0, -- order total at time of creation
+  triggered_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
   
   status           TEXT        NOT NULL DEFAULT 'pending',
   
-  -- Who and when
   requested_by     UUID        NOT NULL REFERENCES public.users(id),
   requested_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
   
@@ -64,10 +58,8 @@ CREATE TABLE IF NOT EXISTS public.order_approvals (
   rejected_at      TIMESTAMPTZ,
   rejection_reason TEXT        CHECK (length(rejection_reason) <= 1000),
   
-  -- Expiration
   expires_at       TIMESTAMPTZ,
   
-  -- Audit
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   
@@ -79,8 +71,6 @@ CREATE INDEX IF NOT EXISTS idx_order_approvals_order_status
   ON public.order_approvals(order_id, status);
 CREATE INDEX IF NOT EXISTS idx_order_approvals_org_pending 
   ON public.order_approvals(organization_id, status) WHERE status = 'pending';
-CREATE INDEX IF NOT EXISTS idx_order_approvals_expires 
-  ON public.order_approvals(expires_at) WHERE status = 'pending';
 
 -- ============================================
 -- 3. APPROVAL ACTIONS (Audit trail — append-only)
@@ -91,7 +81,7 @@ CREATE TABLE IF NOT EXISTS public.approval_actions (
   order_id        UUID        NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
   approval_id     UUID        NOT NULL REFERENCES public.order_approvals(id) ON DELETE CASCADE,
   actor_id        UUID        NOT NULL REFERENCES public.users(id),
-  action          TEXT        NOT NULL, -- 'submitted', 'approved', 'rejected', 'escalated', 'cancelled'
+  action          TEXT        NOT NULL,
   notes           TEXT        CHECK (length(notes) <= 2000),
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -122,14 +112,13 @@ CREATE TRIGGER trg_order_approvals_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- ============================================
--- 5. RLS POLICIES
+-- 5. RLS POLICIES (Using role::text casting)
 -- ============================================
 
 ALTER TABLE public.approval_rules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.order_approvals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.approval_actions ENABLE ROW LEVEL SECURITY;
 
--- Helper: is user member of org?
 CREATE OR REPLACE FUNCTION public.is_org_member(org_id UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -140,13 +129,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
 
--- Approval Rules: Read for org members
 DROP POLICY IF EXISTS "Org members read approval rules" ON public.approval_rules;
 CREATE POLICY "Org members read approval rules"
   ON public.approval_rules FOR SELECT
   USING (public.is_org_member(organization_id));
 
--- Approval Rules: Write only for org admins
 DROP POLICY IF EXISTS "Org admins manage approval rules" ON public.approval_rules;
 CREATE POLICY "Org admins manage approval rules"
   ON public.approval_rules FOR ALL
@@ -154,17 +141,15 @@ CREATE POLICY "Org admins manage approval rules"
     public.is_org_member(organization_id) 
     AND EXISTS (
       SELECT 1 FROM public.users 
-      WHERE id = auth.uid() AND role IN ('org_admin', 'buyer_admin', 'super_admin')
+      WHERE id = auth.uid() AND role::text IN ('buyer_admin', 'supplier_admin', 'super_admin', 'procurement_manager')
     )
   );
 
--- Order Approvals: Read for org members
 DROP POLICY IF EXISTS "Org members read order approvals" ON public.order_approvals;
 CREATE POLICY "Org members read order approvals"
   ON public.order_approvals FOR SELECT
   USING (public.is_org_member(organization_id));
 
--- Order Approvals: Update only by assigned approvers or admins
 DROP POLICY IF EXISTS "Approvers can update order approvals" ON public.order_approvals;
 CREATE POLICY "Approvers can update order approvals"
   ON public.order_approvals FOR UPDATE
@@ -174,15 +159,14 @@ CREATE POLICY "Approvers can update order approvals"
       EXISTS (
         SELECT 1 FROM public.approval_rules ar
         WHERE ar.id = order_approvals.rule_id
-        AND ar.approver_role = (SELECT role FROM public.users WHERE id = auth.uid())
+        AND ar.approver_role = (SELECT role::text FROM public.users WHERE id = auth.uid())
       )
       OR EXISTS (
-        SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('org_admin', 'buyer_admin', 'super_admin')
+        SELECT 1 FROM public.users WHERE id = auth.uid() AND role::text IN ('buyer_admin', 'supplier_admin', 'super_admin', 'procurement_manager')
       )
     )
   );
 
--- Approval Actions: Append-only by org members
 DROP POLICY IF EXISTS "Org members create approval actions" ON public.approval_actions;
 CREATE POLICY "Org members create approval actions"
   ON public.approval_actions FOR INSERT
