@@ -135,9 +135,9 @@ export default function GoogleOneTap() {
         client_id: clientId,
         callback: handleCredentialResponse,
         nonce: hashedNonce,
-        auto_select: true,           // Silently sign in returning users
+        auto_select: true,
         cancel_on_tap_outside: true,
-        itp_support: true,           // Required for Safari / strict-privacy Chrome
+        itp_support: true,
         context: "signin",
         use_fedcm_for_prompt: !isPlainLocalhost,
       });
