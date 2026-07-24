@@ -120,19 +120,36 @@ export default function ApprovalsPage() {
 
     try {
       // 1. Update order_approvals table
+      const updateData: any = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+      if (status === "approved") {
+        updateData.approved_by = user.id;
+        updateData.approved_at = new Date().toISOString();
+      } else {
+        updateData.rejected_by = user.id;
+        updateData.rejected_at = new Date().toISOString();
+        updateData.rejection_reason = rejectionReason;
+      }
+
       const { error: approvalErr } = await supabase
         .from("order_approvals")
-        .update({
-          status,
-          approved_by: user.id,
-          rejection_reason: status === "rejected" ? rejectionReason : null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", selectedApproval.id);
 
       if (approvalErr) throw approvalErr;
 
-      // 2. Update orders table status
+      // 2. Insert into append-only approval_actions audit trail
+      await supabase.from("approval_actions").insert({
+        order_id: selectedApproval.order_id,
+        approval_id: selectedApproval.id,
+        actor_id: user.id,
+        action: status,
+        notes: status === "rejected" ? rejectionReason : "Approved by procurement manager",
+      });
+
+      // 3. Update orders table status
       if (selectedApproval.order_id) {
         await supabase
           .from("orders")
@@ -164,11 +181,15 @@ export default function ApprovalsPage() {
     setSavingRule(true);
 
     try {
+      const generatedKey = newRuleName.toLowerCase().trim().replace(/[^a-z0-9]+/g, "_") + "_" + Date.now().toString().slice(-4);
       const { data, error } = await supabase.from("approval_rules").insert({
         organization_id: profile.organization_id,
         rule_name: newRuleName,
+        rule_key: generatedKey,
         min_amount: newMinAmount,
         approver_role: "procurement_manager",
+        sequence_order: 1,
+        required_count: 1,
       }).select().single();
 
       if (error) throw error;
