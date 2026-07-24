@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package, ShieldCheck, Layers, CheckSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 import NotificationPopover from "@/components/NotificationPopover";
@@ -50,6 +50,8 @@ export default function DashboardLayout({
   const navItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
+    { name: "Quick Order", href: "/dashboard/quick-order", icon: Layers },
+    { name: "Approvals", href: "/dashboard/approvals", icon: CheckSquare },
     { name: "My Products", href: "/dashboard/products", icon: Package },
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Verification", href: "/dashboard/verification", icon: ShieldCheck },
