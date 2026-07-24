@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,24 +46,6 @@ const Stat = ({ value, label }: { value: string; label: string }) => (
 
 /* ──────────────────────────────────────────────────────────────────────────── */
 
-/** Build a Supabase browser client that stores its session in the
- *  correct storage backend based on the user's "remember me" choice.
- *  - rememberMe=true  → localStorage  (survives browser restart)
- *  - rememberMe=false → sessionStorage (cleared when tab/window closes)
- */
-function makeSupabaseClient(rememberMe: boolean) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  return createBrowserClient(url, key, {
-    auth: {
-      persistSession: true,
-      storage: rememberMe
-        ? (typeof window !== "undefined" ? window.localStorage : undefined)
-        : (typeof window !== "undefined" ? window.sessionStorage : undefined),
-    },
-  });
-}
-
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -74,10 +56,10 @@ export default function LoginPage() {
   const [checkingSession, setCheckingSession] = useState(true);
   const router = useRouter();
 
+  const supabase = createClient();
+
   // ── Auto-redirect already authenticated users ──────────────────────────
   useEffect(() => {
-    // Use the default (localStorage) client to check for an existing session.
-    const supabase = makeSupabaseClient(true);
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         router.replace("/dashboard");
@@ -85,7 +67,7 @@ export default function LoginPage() {
         setCheckingSession(false);
       }
     });
-  }, [router]);
+  }, [router, supabase]);
 
   const getRedirectPath = () => {
     if (typeof window === "undefined") return "/dashboard";
@@ -93,12 +75,8 @@ export default function LoginPage() {
     return params.get("redirect") || "/dashboard";
   };
 
-  // Derive the correctly-configured client from the current rememberMe state.
-  const getSupabase = () => makeSupabaseClient(rememberMe);
-
   /** Routes the user based on account status and role. */
   const routeAfterAuth = async (userId: string) => {
-    const supabase = getSupabase();
     try {
       const { data, error: profileError } = await supabase
         .from("users")
@@ -146,10 +124,6 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // Build the client with the correct storage backend NOW, so the session
-    // lands in localStorage (remember=true) or sessionStorage (remember=false).
-    const supabase = getSupabase();
-
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
@@ -157,7 +131,6 @@ export default function LoginPage() {
       });
 
       if (signInError) {
-        // Surface a friendly message for the most common errors
         if (signInError.message.toLowerCase().includes("invalid")) {
           setError("The email or password you entered is incorrect.");
         } else {
@@ -184,9 +157,6 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
-    // Google OAuth always uses the default (localStorage) client — the session
-    // is managed server-side via the callback route and cookies.
-    const supabase = makeSupabaseClient(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
