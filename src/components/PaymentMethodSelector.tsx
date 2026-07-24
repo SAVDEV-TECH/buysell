@@ -67,7 +67,8 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
   useEffect(() => {
     detectCountry().then((info) => {
       setCountryInfo(info);
-      onMethodChange(info.preferredMethod);
+      // Always default to paystack for escrow — it works globally with cards
+      onMethodChange("paystack");
       setLoading(false);
     });
   }, [onMethodChange]);
@@ -85,16 +86,18 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
     {
       id: "paystack",
       name: "Paystack",
-      description: "Fast & Secure (Nigeria, Kenya, South Africa)",
+      description: "Escrow-protected · Pay with card, bank transfer or USSD",
       icon: <CreditCard size={20} />,
-      available: ["Nigeria", "Kenya", "South Africa"].includes(countryInfo?.country || ""),
+      available: true, // always available — supports cards globally
+      recommended: true,
     },
     {
       id: "flutterwave",
       name: "Flutterwave",
-      description: `Available in ${countryInfo?.country}. Works with cards & wallets.`,
+      description: `Available in ${countryInfo?.country || "your country"}. Works with cards & wallets.`,
       icon: <Zap size={20} />,
       available: true,
+      recommended: false,
     },
     {
       id: "mobile-money",
@@ -102,6 +105,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
       description: "Pay with MTN, Airtel, Vodafone - Works on any phone",
       icon: <Smartphone size={20} />,
       available: true,
+      recommended: false,
     },
   ];
 
@@ -124,7 +128,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
               selectedMethod === method.id
                 ? "border-primary bg-primary/5"
                 : "border-borderline hover:border-primary/50 bg-background"
-            } ${!method.available ? "opacity-50 cursor-not-allowed" : ""}`}
+            }`}
           >
             <input
               type="radio"
@@ -132,14 +136,17 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
               value={method.id}
               checked={selectedMethod === method.id}
               onChange={() => onMethodChange(method.id as "paystack" | "flutterwave" | "mobile-money")}
-              disabled={!method.available}
               className="mt-1 accent-primary"
             />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 {method.icon}
                 <span className="font-bold">{method.name}</span>
-                {!method.available && <span className="text-xs text-destructive font-medium">Not available in your region</span>}
+                {method.recommended && (
+                  <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-primary text-white rounded-full">
+                    Recommended
+                  </span>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">{method.description}</p>
             </div>

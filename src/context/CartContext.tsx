@@ -13,6 +13,8 @@ export interface Product {
   rating?: number;
   reviews?: number;
   sellerName?: string;
+  sellerId?: string;
+  manufacturerId?: string;
   moq?: number;
   tiers?: { minQty: number; price: number }[];
 }

@@ -9,16 +9,17 @@ import CurrencySelector from "./CurrencySelector";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { unreadCount } = useNotifications();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || "User";
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex h-20 lg:h-16 items-center justify-between">
           
-          {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2 20h20"/><path d="M4 20V8l4-4 4 4v12"/><path d="M12 20v-8l4-4 4 4v8"/><path d="M8 12h8"/></svg>
@@ -26,7 +27,6 @@ const Navbar = () => {
             </Link>
           </div>
           
-          {/* Center Links */}
           <nav className="hidden md:flex items-center gap-6 lg:gap-8" suppressHydrationWarning>
             <Link href="/marketplace" className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors">
               <Search size={18} /> Products
@@ -42,7 +42,6 @@ const Navbar = () => {
             </Link>
           </nav>
           
-          {/* Desktop Actions */}
           <div className="flex items-center gap-3 lg:gap-4">
             <LanguageSwitcher />
             <CurrencySelector />
@@ -50,10 +49,10 @@ const Navbar = () => {
               <div className="hidden sm:flex items-center gap-3">
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold uppercase">
-                    {user.displayName ? user.displayName.charAt(0) : user.email?.charAt(0) || "U"}
+                    {displayName?.charAt(0) || "U"}
                   </div>
                   <span className="text-sm font-semibold text-foreground hidden md:block">
-                    {user.displayName || user.email?.split('@')[0] || "User"}
+                    {displayName}
                   </span>
                 </Link>
               </div>
@@ -78,7 +77,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1 shadow-lg absolute w-full z-40">
           <Link href="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 rounded-md text-base font-semibold text-slate-700 hover:text-[#0f172a] hover:bg-slate-50 border-b border-slate-50">

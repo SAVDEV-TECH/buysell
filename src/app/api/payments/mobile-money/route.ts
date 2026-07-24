@@ -1,37 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebaseAdmin";
-import { FieldValue } from "firebase-admin/firestore";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { provider, phoneNumber, amount, currency, productId, userId } = body;
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!phoneNumber || !amount || !currency || !productId || !userId) {
+    if (!user) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { provider, phoneNumber, amount, currency, productId } = body;
+
+    if (!phoneNumber || !amount || !currency || !productId) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Generate USSD code for mobile money
-    const ussdCode = generateUSSDCode(amount, phoneNumber);
+    const ussdCode = `*165*3*${Math.round(amount)}*${phoneNumber.replace(/\D/g, "").slice(-10)}#`;
     const reference = `mm-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-
-    // Create transaction record using Admin SDK (bypasses Firestore security rules)
-    await adminDb.collection("transactions").add({
-      type: "mobile_money",
-      provider,
-      phoneNumber,
-      amount,
-      currency,
-      productId,
-      userId,
-      reference,
-      status: "initiated",
-      ussdCode,
-      createdAt: FieldValue.serverTimestamp(),
-    });
 
     return NextResponse.json({
       success: true,
@@ -39,18 +29,14 @@ export async function POST(request: NextRequest) {
       ussdCode,
       message: `Dial ${ussdCode} to complete payment`,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Mobile money API error:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Failed to initialize mobile money payment" },
+      {
+        success: false,
+        message: "Failed to initialize mobile money payment",
+      },
       { status: 500 }
     );
   }
-}
-
-function generateUSSDCode(amount: number, phone: string): string {
-  // Format USSD code for African mobile money
-  // Common format: *165*3*amount*phone#
-  const cleanPhone = phone.replace(/\D/g, "").slice(-10);
-  return `*165*3*${Math.round(amount)}*${cleanPhone}#`;
 }

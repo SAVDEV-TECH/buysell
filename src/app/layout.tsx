@@ -11,10 +11,14 @@ import CartDrawer from "@/components/CartDrawer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import PwaRegister from "@/components/PwaRegister";
+import GoogleOneTap from "@/components/GoogleOneTap";
+import NotificationToast from "@/components/NotificationToast";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  fallback: ["system-ui", "arial"],
 });
 
 export const metadata: Metadata = {
@@ -56,6 +60,8 @@ export default function RootLayout({
                   <Footer />
                   <MobileBottomNav />
                   <PwaRegister />
+                  <GoogleOneTap />
+                  <NotificationToast />
                 </CartProvider>
               </NotificationProvider>
             </AuthProvider>

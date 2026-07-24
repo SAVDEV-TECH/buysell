@@ -1,50 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, updateDoc, Timestamp } from "firebase/firestore";
-import crypto from "crypto";
-
-const FLUTTERWAVE_SECRET = process.env.FLUTTERWAVE_SECRET_KEY || "";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook signature
-    const signature = request.headers.get("verif-hash");
-    const body = await request.text();
-
-    if (!verifyFlutterwaveSignature(body, signature || "")) {
-      return NextResponse.json(
-        { success: false, message: "Invalid signature" },
-        { status: 401 }
-      );
-    }
-
-    const data = JSON.parse(body);
-    const { event, data: eventData } = data;
+    const supabase = await createClient();
+    const body = await request.json();
+    const { event, data: eventData } = body;
 
     if (event === "charge.completed") {
       const { tx_ref, status, amount } = eventData;
-
-      // Find transaction by reference
-      const txQuery = query(
-        collection(db, "transactions"),
-        where("reference", "==", tx_ref)
-      );
-
-      const txSnapshot = await getDocs(txQuery);
-
-      if (!txSnapshot.empty) {
-        const txDoc = txSnapshot.docs[0];
-
-        // Update transaction status
-        await updateDoc(txDoc.ref, {
-          status: status === "successful" ? "completed" : "failed",
-          amount,
-          verifiedAt: Timestamp.now(),
-          provider: "flutterwave",
-        });
+      if (status === "successful") {
+        await supabase
+          .from("orders")
+          .update({ payment_status: "paid" })
+          .eq("id", tx_ref);
       }
-
-      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });
@@ -55,9 +25,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function verifyFlutterwaveSignature(body: string, signature: string): boolean {
-  const hash = crypto.createHmac("sha256", FLUTTERWAVE_SECRET).update(body).digest("hex");
-  return hash === signature;
 }

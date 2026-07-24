@@ -11,13 +11,14 @@ import {
   Search,
   Plus,
   ArrowUpRight,
+  MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import dynamic from "next/dynamic";
-import { db } from "@/lib/firebase";
-import { collection, query, orderBy, getDocs, getDoc, doc } from "firebase/firestore";
+import { createClient } from "@/lib/supabase/client";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useLanguage } from "@/context/LanguageContext";
@@ -29,23 +30,25 @@ const FloatingChatBox = dynamic(() => import("@/components/FloatingChatBox"), {
   ssr: false,
 });
 
-// Stable hash function to mock consistent B2B metadata based on product ID/name
-function getB2BMetadata(product: Product) {
-  const idStr = String(product.id);
-  const hash = idStr.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  const tenure = (hash % 7) + 2; // 2 to 8 years
-  const responseRate = 92 + (hash % 8); // 92% to 99%
+function getProductPricing(product: Product) {
+  const baseMOQ = product.moq || 1;
   const basePrice = product.price;
-  const baseMOQ = product.moq || 10;
+  const rawTiers =
+    product.tiers && product.tiers.length > 0
+      ? [...product.tiers].sort((a, b) => a.minQty - b.minQty)
+      : [
+          { minQty: baseMOQ, price: basePrice },
+        ];
 
-  const tiers = [
-    { minQty: baseMOQ, price: basePrice },
-    { minQty: baseMOQ * 5, price: Math.round(basePrice * 0.9) },
-    { minQty: baseMOQ * 10, price: Math.round(basePrice * 0.8) }
-  ];
+  const tiers = rawTiers.filter(
+    (t, idx, arr) => idx === 0 || t.price !== arr[idx - 1].price || t.minQty !== arr[idx - 1].minQty
+  );
 
-  return { tenure, responseRate, tiers };
+  return {
+    tiers,
+    minPrice: tiers[0].price,
+    maxPrice: tiers[tiers.length - 1].price,
+  };
 }
 
 export interface Product {
@@ -64,55 +67,77 @@ export interface Product {
   moq?: number;
   leadTime?: string;
   isSellerVerified?: boolean;
+  tiers?: { minQty: number; price: number }[];
 }
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "mock1",
-    name: "Premium Wireless Headphones",
-    price: 45000,
-    category: "Electronics",
-    rating: 4.8,
-    reviews: 124,
-    desc: "Experience crystal clear sound with our latest noise-cancelling technology.",
-    sellerId: "seller1",
-    sellerName: "Audio Master",
-    moq: 100,
-    leadTime: "7-14 Days",
-  },
-  {
-    id: "mock2",
-    name: "Ergonomic Office Chair",
-    price: 85000,
-    category: "Furniture",
-    rating: 4.5,
-    reviews: 89,
-    desc: "Designed for comfort and productivity during long work sessions.",
-    sellerId: "seller2",
-    sellerName: "WorkSpace Pro",
-    moq: 50,
-    leadTime: "15-30 Days",
-  },
-  {
-    id: "mock3",
-    name: "Smart Watch Series X",
-    price: 32000,
-    category: "Wearables",
-    rating: 4.9,
-    reviews: 215,
-    desc: "Stay connected and track your fitness with precision and style.",
-    sellerId: "seller3",
-    sellerName: "Tech Wear",
-    moq: 500,
-    leadTime: "30-45 Days",
-  },
-];
+function GoldSupplierPill({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-0.5 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-full dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 ${
+        compact ? "text-[8px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"
+      }`}
+      title="Gold Supplier — enhanced marketplace tier"
+    >
+      <Sparkles size={compact ? 8 : 10} className="shrink-0" />
+      Gold Supplier
+    </span>
+  );
+}
 
-// ─────────────────────────────────────────────────────────────
-// MOBILE CARD  (shown below sm breakpoint)
-// Designed for exactly ~170px card width in a 2-col grid.
-// Bare minimum: image · name · price · one CTA.
-// ─────────────────────────────────────────────────────────────
+function RatingBadge({ rating, reviews, compact = false }: { rating: number; reviews: number; compact?: boolean }) {
+  if (!reviews || reviews <= 0) {
+    return (
+      <span
+        className={`font-bold uppercase tracking-wide text-muted-foreground bg-muted rounded ${
+          compact ? "text-[7px] px-1 py-0.5" : "text-[9px] px-1.5 py-0.5"
+        }`}
+      >
+        New
+      </span>
+    );
+  }
+  return (
+    <div
+      className={`flex items-center gap-0.5 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded border border-orange-500/10 ${
+        compact ? "text-[7px] px-1 py-0.5" : "text-[10px] px-1.5 py-0.5"
+      }`}
+    >
+      <Star size={compact ? 7 : 10} fill="currentColor" />
+      <span className="font-black">{rating.toFixed(1)}</span>
+    </div>
+  );
+}
+
+function MoqLeadTimeRows({ product, compact = false }: { product: Product; compact?: boolean }) {
+  const hasMoq = !!product.moq;
+  const hasLead = !!product.leadTime;
+
+  if (!hasMoq && !hasLead) {
+    return (
+      <p className={`text-muted-foreground italic ${compact ? "text-[8px]" : "text-[11px]"}`}>
+        Contact supplier for MOQ &amp; lead time
+      </p>
+    );
+  }
+
+  return (
+    <div className={`flex flex-col gap-0.5 ${compact ? "text-[8px]" : "text-[11px]"} text-muted-foreground`}>
+      {hasMoq && (
+        <div className="flex justify-between gap-2">
+          <span className="shrink-0">MOQ:</span>
+          <span className="font-semibold text-foreground truncate text-right">{product.moq} units</span>
+        </div>
+      )}
+      {hasLead && (
+        <div className="flex justify-between gap-2">
+          <span className="shrink-0">Lead time:</span>
+          <span className="font-semibold text-foreground truncate text-right">{product.leadTime}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileProductCard({
   product,
   user,
@@ -123,73 +148,60 @@ function MobileProductCard({
   onContactSupplier: (sellerId: string, sellerName: string) => void;
 }) {
   const isGold = product.isSellerVerified === true;
-  const meta = getB2BMetadata(product);
+  const pricing = getProductPricing(product);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg sm:rounded-xl border border-border bg-card w-full h-full">
-      {/* Image */}
-      <Link href={`/marketplace/${product.id}`} className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full h-full">
+      <Link
+        href={`/marketplace/${product.id}`}
+        className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0"
+      >
         {product.imageUrl ? (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+          <img src={product.imageUrl} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Package size={20} className="text-muted-foreground opacity-20" />
           </div>
         )}
-        {/* Rating pill over image */}
-        <div className="absolute top-1 left-1 flex items-center gap-0.5 bg-black/60 text-white rounded px-1 py-0.5">
-          <Star size={7} fill="currentColor" className="text-orange-400" />
-          <span className="text-[7px] font-bold leading-none">{product.rating}</span>
+        <div className="absolute top-1.5 left-1.5">
+          <RatingBadge rating={product.rating} reviews={product.reviews} compact />
         </div>
-        {/* Gold Supplier Badge – only shown for admin-verified sellers */}
-        {isGold ? (
-          <div className="absolute bottom-1 left-1 bg-amber-500 text-black text-[7px] font-black rounded px-1 py-0.5 flex items-center gap-0.5 shadow-sm">
-            🏅 Gold
-          </div>
-        ) : (
-          <div className="absolute bottom-1 left-1 bg-slate-700/80 text-white text-[7px] font-bold rounded px-1 py-0.5 flex items-center gap-0.5">
-            {meta.tenure}Y
-          </div>
-        )}
+        <div className="absolute top-1.5 right-1.5">
+          <VerifiedBadge showText={false} />
+        </div>
       </Link>
 
-      {/* Body */}
-      <div className="p-1.5 flex flex-col gap-0.5">
-        {/* Category + Response rate */}
-        <div className="flex items-center justify-between text-[7px] font-bold uppercase tracking-wider text-muted-foreground truncate">
-          <span>{product.category}</span>
-          <span className="text-emerald-500 font-black">{meta.responseRate}% Resp</span>
+      <div className="p-2 flex flex-col gap-1">
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate">
+            {product.category}
+          </span>
+          {isGold && <GoldSupplierPill compact />}
         </div>
 
-        {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
-          <p className="text-[9px] font-bold leading-tight line-clamp-1 text-foreground">
+          <p className="text-[11px] font-bold leading-tight line-clamp-2 text-foreground min-h-[2.2em]">
             {product.name}
           </p>
         </Link>
 
-        {/* MOQ & Price range */}
-        <div className="flex flex-col gap-0.5 my-0.5 border-t border-border/50 pt-1">
-          <p className="text-[7px] text-muted-foreground uppercase font-black">Min Order: {product.moq || 10} units</p>
-          <p className="text-[9px] font-black text-primary tracking-tight">
-            ₦{meta.tiers[2].price.toLocaleString()} - ₦{meta.tiers[0].price.toLocaleString()}
-          </p>
+        <div className="border-t border-border/50 pt-1 mt-0.5">
+          <MoqLeadTimeRows product={product} compact />
         </div>
 
-        {/* Action CTAs */}
-        <div className="flex gap-1 items-stretch mt-0.5">
+        <p className="text-xs font-black text-primary tracking-tight mt-0.5">
+          ${pricing.minPrice.toLocaleString()}
+        </p>
+
+        <div className="flex gap-1 items-stretch mt-1">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-            className="px-2 bg-muted hover:bg-accent text-primary rounded border border-border text-[9px] font-bold flex items-center justify-center"
+            className="px-2 bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0"
             title="Chat with Supplier"
           >
-            💬
+            <MessageCircle size={13} />
           </button>
-          <div className="flex-1 overflow-hidden rounded">
+          <div className="flex-1 overflow-hidden rounded-lg">
             <PayWithPaystack product={product} user={user} />
           </div>
         </div>
@@ -198,10 +210,6 @@ function MobileProductCard({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// DESKTOP CARD  (shown from sm breakpoint upward)
-// Full-featured card with seller info, MOQ, lead time, both buttons.
-// ─────────────────────────────────────────────────────────────
 function DesktopProductCard({
   product,
   user,
@@ -214,11 +222,10 @@ function DesktopProductCard({
   onContactSupplier: (sellerId: string, sellerName: string) => void;
 }) {
   const isGold = product.isSellerVerified === true;
-  const meta = getB2BMetadata(product);
+  const pricing = getProductPricing(product);
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full group hover:shadow-lg transition-all duration-300">
-      {/* Image */}
       <div className="relative aspect-[4/3] bg-muted/30 dark:bg-slate-900 overflow-hidden">
         <Link href={`/marketplace/${product.id}`} className="absolute inset-0 z-10">
           <span className="sr-only">View product</span>
@@ -232,10 +239,13 @@ function DesktopProductCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Package size={36} className="text-muted-foreground opacity-20 group-hover:scale-110 transition-transform duration-700" />
+            <Package
+              size={36}
+              className="text-muted-foreground opacity-20 group-hover:scale-110 transition-transform duration-700"
+            />
           </div>
         )}
-        <button className="absolute top-2 right-2 p-1.5 bg-white/60 dark:bg-black/60 backdrop-blur-sm rounded-full hover:text-red-500 transition-all z-20 shadow">
+        <button className="absolute top-2 right-2 p-1.5 bg-white/70 dark:bg-black/60 backdrop-blur-sm rounded-full hover:text-red-500 transition-all z-20 shadow">
           <Heart size={13} />
         </button>
         <div className="absolute bottom-2 left-2 z-20">
@@ -243,25 +253,16 @@ function DesktopProductCard({
         </div>
       </div>
 
-      {/* Body */}
       <div className="p-3 md:p-4 flex-1 flex flex-col gap-2">
-        {/* Category + Rating */}
         <div className="flex items-center justify-between gap-2">
           <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground italic truncate">
             {product.category}
           </span>
-          <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-500/10 text-orange-500 rounded border border-orange-500/10 shrink-0">
-            <Star size={10} fill="currentColor" />
-            <span className="text-[10px] font-black">{product.rating}</span>
-          </div>
+          <RatingBadge rating={product.rating} reviews={product.reviews} />
         </div>
 
-        {/* Seller Info & Gold Status & Response Rate */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <Link
-            href={`/manufacturers/${product.sellerId}`}
-            className="flex items-center gap-1 group/seller min-w-0"
-          >
+          <Link href={`/manufacturers/${product.sellerId}`} className="flex items-center gap-1 group/seller min-w-0">
             <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-black uppercase text-primary border border-primary/10 shrink-0">
               {product.sellerName ? product.sellerName.charAt(0) : "S"}
             </div>
@@ -269,57 +270,23 @@ function DesktopProductCard({
               {product.sellerName || "Partner"}
             </span>
           </Link>
-          {isGold ? (
-            <span className="px-1.5 py-0.5 bg-amber-500 text-black text-[8px] font-black rounded flex items-center gap-0.5 shadow-sm" title="Admin-verified Gold Supplier">
-              🏅 Gold Supplier
-            </span>
-          ) : (
-            <span className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[8px] font-bold rounded flex items-center gap-0.5 border border-border/50">
-              {meta.tenure} YRS
-            </span>
-          )}
-          <span className="text-[8px] font-medium text-emerald-500 bg-emerald-500/10 px-1 py-0.5 rounded">
-            {meta.responseRate}% Resp
-          </span>
+          {isGold && <GoldSupplierPill />}
         </div>
 
-        {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
           <h3 className="text-sm md:text-[14px] font-black tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        {/* Alibaba Tiered Pricing Grid */}
-        <div className="grid grid-cols-3 gap-1 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl text-center text-[9px] border border-border/50 my-1 font-medium">
-          {meta.tiers.map((t, idx) => (
-            <div key={idx} className="flex flex-col border-r last:border-r-0 border-border/40">
-              <span className="text-muted-foreground">{t.minQty}+ units</span>
-              <span className="font-bold text-primary">₦{t.price.toLocaleString()}</span>
-            </div>
-          ))}
+        <div className="border-t border-border/50 pt-2">
+          <MoqLeadTimeRows product={product} />
         </div>
 
-        {/* MOQ + Lead */}
-        <div className="flex flex-col gap-1 text-[11px] text-muted-foreground border-t border-border/50 pt-2">
-          <div className="flex justify-between gap-2">
-            <span className="shrink-0">MOQ:</span>
-            <span className="font-semibold text-foreground truncate text-right">
-              {product.moq ? `${product.moq} units` : "Ask Supplier"}
-            </span>
-          </div>
-          <div className="flex justify-between gap-2">
-            <span className="shrink-0">Lead time:</span>
-            <span className="font-semibold text-foreground truncate text-right">
-              {product.leadTime || "Ask Supplier"}
-            </span>
-          </div>
-        </div>
-
-        {/* Price + actions */}
         <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
           <p className="text-sm font-black text-foreground tracking-tighter">
-            ₦{meta.tiers[2].price.toLocaleString()} - ₦{meta.tiers[0].price.toLocaleString()} <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
+            ${pricing.minPrice.toLocaleString()}{" "}
+            <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
           </p>
           <div className="flex gap-1 items-stretch">
             <button
@@ -331,8 +298,9 @@ function DesktopProductCard({
             </button>
             <button
               onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-              className="flex-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all text-[11px] font-bold uppercase tracking-wider text-center"
+              className="flex-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all text-[11px] font-bold uppercase tracking-wider text-center flex items-center justify-center gap-1"
             >
+              <MessageCircle size={12} />
               Contact
             </button>
             <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
@@ -345,9 +313,6 @@ function DesktopProductCard({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// MAIN EXPLORER
-// ─────────────────────────────────────────────────────────────
 export default function ProductExplorer({ limit }: { limit?: number }) {
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -361,46 +326,38 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        const liveDocs = snap.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-          desc: d.data().description || d.data().desc,
-        })) as any[];
+        const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
 
-        // Fetch unique seller verification statuses in one batch
-        const sellerIds = [...new Set(liveDocs.map((p: any) => p.sellerId).filter(Boolean))];
-        const sellerVerifiedMap: Record<string, boolean> = {};
-        await Promise.all(
-          sellerIds.map(async (sid: string) => {
-            try {
-              const userSnap = await getDoc(doc(db, "users", sid));
-              if (userSnap.exists()) {
-                sellerVerifiedMap[sid] = userSnap.data()?.isVerified === true;
-              }
-            } catch { /* ignore individual user fetch errors */ }
-          })
-        );
-
-        const live: Product[] = liveDocs.map((p: any) => ({
-          ...p,
-          isSellerVerified: sellerVerifiedMap[p.sellerId] ?? false,
+        const formatted: Product[] = (data || []).map((p: any) => ({
+          id: p.id,
+          name: p.title,
+          price: p.tiered_pricing?.[0]?.unit_price || 10,
+          category: "Industrial",
+          desc: p.description || "",
+          rating: 4.8,
+          reviews: 12,
+          sellerId: p.supplier_organization_id || "supplier",
+          sellerName: "Supplier Node",
+          moq: p.min_order_quantity || 1,
+          isSellerVerified: true,
         }));
 
-        setProducts(live.length > 0 ? live : MOCK_PRODUCTS);
-      } catch {
-        setProducts(MOCK_PRODUCTS);
+        setProducts(formatted);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
-  }, []);
+  }, [supabase]);
 
   const handleAddToCart = (product: Product) => {
     addToCart({
@@ -410,6 +367,10 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
       category: product.category,
       imageUrl: product.imageUrl,
       desc: product.desc,
+      sellerId: product.sellerId,
+      manufacturerId: product.sellerId,
+      moq: product.moq,
+      tiers: product.tiers,
     });
   };
 
@@ -440,7 +401,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* Search + Sort */}
       <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0">
         <div className="flex-1 relative group min-w-0">
           <Search
@@ -458,10 +418,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         <div className="flex gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${showFilters
-              ? "bg-primary text-primary-foreground border-primary"
-              : "bg-background border-input hover:bg-accent text-muted-foreground"
-              }`}
+            className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+              showFilters
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background border-input hover:bg-accent text-muted-foreground"
+            }`}
           >
             <Filter size={14} className="sm:hidden" />
             <Filter size={16} className="hidden sm:block" />
@@ -486,7 +447,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       </div>
 
-      {/* Filters panel */}
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -498,7 +458,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             <div className="bg-card p-3 sm:p-5 md:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
-                  Price Range (₦)
+                  Price Range ($)
                 </p>
                 <div className="flex items-center gap-3">
                   <input
@@ -531,25 +491,22 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         )}
       </AnimatePresence>
 
-      {/* Categories */}
       <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 mb-4 sm:mb-6 lg:mb-10 scrollbar-hide snap-x w-full">
-        {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map(
-          (cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-semibold text-[10px] sm:text-[11px] whitespace-nowrap border transition-all snap-start flex-shrink-0 ${activeCategory === cat
+        {["All Products", "Industrial", "Electronics", "Fashion"].map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setActiveCategory(cat)}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-semibold text-[10px] sm:text-[11px] whitespace-nowrap border transition-all snap-start flex-shrink-0 ${
+              activeCategory === cat
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background border-input hover:bg-accent"
-                }`}
-            >
-              {cat}
-            </button>
-          )
-        )}
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
       </div>
 
-      {/* Grid */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
           {[...Array(limit || 6)].map((_, i) => (
@@ -561,25 +518,12 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Search size={28} className="text-muted-foreground opacity-30" />
           </div>
-          <h3 className="text-2xl font-black mb-2 tracking-tighter">No Suppliers Found</h3>
+          <h3 className="text-2xl font-black mb-2 tracking-tighter">No Products Listed Yet</h3>
           <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-8">
-            Adjust your filters or search terms to source specific manufacturers.
+            Check back soon as suppliers list items in PostgreSQL.
           </p>
-          <button
-            onClick={resetFilters}
-            className="px-8 py-3.5 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20"
-          >
-            Clear All Filters
-          </button>
         </div>
       ) : (
-        /*
-         * Two-column grid on all screen sizes.
-         * The card components themselves differ between mobile and desktop —
-         * MobileProductCard is shown below sm, DesktopProductCard from sm up.
-         * This avoids fighting Tailwind responsive prefixes for radically
-         * different layouts inside a single card structure.
-         */
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden">
           {displayed.map((product, i) => (
             <motion.div
@@ -590,7 +534,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               transition={{ delay: i * 0.04 }}
               className="w-full min-w-0 overflow-hidden"
             >
-              {/* Mobile card — hidden from sm upward */}
               <div className="block sm:hidden w-full">
                 <MobileProductCard
                   product={product}
@@ -599,7 +542,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                 />
               </div>
 
-              {/* Desktop card — hidden below sm */}
               <div className="hidden sm:block w-full">
                 <DesktopProductCard
                   product={product}
@@ -613,7 +555,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       )}
 
-      {/* View all */}
       {limit && filtered.length > limit && (
         <div className="mt-12 sm:mt-16 text-center">
           <Link
@@ -626,7 +567,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       )}
 
-      {/* Floating Chat Box for B2B Sourcing Inquiry */}
       {activeChat && (
         <FloatingChatBox
           manufacturerId={activeChat.id}

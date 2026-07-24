@@ -1,4 +1,4 @@
-const CACHE_NAME = 'buysell-cache-v1';
+const CACHE_NAME = 'buysell-cache-v2';
 const OFFLINE_URL = '/';
 
 // Static resources to cache immediately during installation

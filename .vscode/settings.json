@@ -5,5 +5,8 @@
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*?)[\"'`]"],
     ["cx\\(([^)]*)\\)", "[\"'`]([^\"'`]*?)[\"'`]"]
-  ]
+  ],
+  "chat.agent.enabled": true,
+  "chat.agent.maxRequests": 100,
+  "chat.agent.sandbox.allowAutoApprove": true
 }

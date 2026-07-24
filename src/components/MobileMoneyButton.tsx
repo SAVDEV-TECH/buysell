@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Smartphone } from "lucide-react";
-import { User as FirebaseUser } from "firebase/auth";
+import { Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { getAuthHeaders } from "@/lib/clientAuth";
 
 interface Product {
   id: number | string;
@@ -20,7 +20,7 @@ interface Product {
 
 interface MobileMoneyButtonProps {
   product: Product;
-  user: FirebaseUser | null;
+  user: any;
   currency?: string;
 }
 
@@ -35,10 +35,9 @@ const MOBILE_MONEY_PROVIDERS = [
 export default function MobileMoneyButton({
   product,
   user,
-  currency = "NGN",
+  currency = "USD",
 }: MobileMoneyButtonProps) {
   const [showProviders, setShowProviders] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -52,24 +51,21 @@ export default function MobileMoneyButton({
     setLoading(true);
 
     try {
-      // Call server action to process mobile money payment
       const response = await fetch("/api/payments/mobile-money", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await getAuthHeaders(),
         body: JSON.stringify({
           provider,
           phoneNumber,
           amount: product.price,
           currency,
           productId: product.id,
-          userId: user?.uid,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Show USSD code or redirect to provider
         alert(`${data.ussdCode}\n\nDial this code to complete payment`);
         router.push(`/checkout/success?ref=${data.reference}`);
       } else {

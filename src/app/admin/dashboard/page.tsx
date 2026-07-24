@@ -2,17 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-import { 
-  collection, 
-  query, 
-  getDocs, 
-  where, 
-  updateDoc, 
-  doc, 
-  Timestamp,
-  orderBy
-} from "firebase/firestore";
+import { createClient } from "@/lib/supabase/client";
 import { 
   Users, 
   ShoppingBag, 
@@ -21,78 +11,42 @@ import {
   X, 
   Loader2, 
   ShieldAlert, 
-  ArrowUpRight,
   UserCheck,
-  Package,
   TrendingUp,
   AlertTriangle,
   History,
   Building
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNotifications } from "@/context/NotificationContext";
-import { processPaystackPayout } from "@/app/actions/payout";
+import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
   const { user, role } = useAuth();
-  const { sendNotification } = useNotifications();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ users: 0, products: 0, volume: 0, pendingPayouts: 0 });
-  const [payoutRequests, setPayoutRequests] = useState<any[]>([]);
   const [pendingWholesalers, setPendingWholesalers] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("payouts");
-  const [submitting, setSubmitting] = useState(false);
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      if (role !== "ADMIN") return;
+      if (role !== "super_admin") return;
       setLoading(true);
       try {
-        const [usersSnap, productsSnap, ordersSnap] = await Promise.all([
-          getDocs(collection(db, "users")).catch(() => ({ size: 0, docs: [] })),
-          getDocs(collection(db, "products")).catch(() => ({ size: 0, docs: [] })),
-          getDocs(collection(db, "orders")).catch(() => ({ size: 0, docs: [] }))
-        ]);
+        const { count: usersCount } = await supabase.from("users").select("*", { count: "exact", head: true });
+        const { count: productsCount } = await supabase.from("products").select("*", { count: "exact", head: true });
         
-        let totalVolume = 0;
-        if ("docs" in ordersSnap) {
-          (ordersSnap as any).docs.forEach((doc: any) => {
-            totalVolume += doc.data()?.totalAmount || 0;
-          });
-        }
-
         setStats({
-          users: usersSnap.size,
-          products: productsSnap.size,
-          volume: totalVolume,
+          users: usersCount || 0,
+          products: productsCount || 0,
+          volume: 0,
           pendingPayouts: 0
         });
 
-        // Fetch Payout Requests
-        const payoutsQ = query(collection(db, "payoutRequests"), where("status", "==", "Pending"));
-        const payoutsSnap = await getDocs(payoutsQ);
-        const fetchedPayouts = payoutsSnap.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        
-        setPayoutRequests(fetchedPayouts);
-        setStats(prev => ({ ...prev, pendingPayouts: fetchedPayouts.length }));
+        const { data: orgs } = await supabase
+          .from("organizations")
+          .select("*")
+          .eq("verification_level", "pending");
 
-        // Fetch Pending Verifications (Wholesalers & Manufacturers)
-        // We fetch all to catch legacy accounts where isVerified might be missing
-        const sellersQ = query(
-          collection(db, "users"), 
-          where("role", "in", ["WHOLESALER", "MANUFACTURER"])
-        );
-        const sellersSnap = await getDocs(sellersQ);
-        const fetchedSellers = sellersSnap.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter((user: any) => user.isVerified !== true);
-        
-        setPendingWholesalers(fetchedSellers);
-
+        setPendingWholesalers(orgs || []);
       } catch (error) {
         console.error("Admin fetch error:", error);
       } finally {
@@ -101,108 +55,48 @@ export default function AdminDashboard() {
     };
 
     fetchAdminData();
-  }, [role]);
+  }, [role, supabase]);
 
-  const approvePayout = async (request: any) => {
-    if (!request.bankDetails?.bankCode) {
-      alert("Invalid bank details. Wholesaler needs to reconnect bank account.");
-      return;
-    }
-    
-    setSubmitting(true);
+  const approveOrg = async (orgId: string) => {
     try {
-      const result = await processPaystackPayout(
-        user?.uid || "",
-        request.id, 
-        request.userId, 
-        request.amount, 
-        request.bankDetails
-      );
+      // 1. Update organization verification status & active status
+      const { error: updateErr } = await supabase
+        .from("organizations")
+        .update({
+          verification_level: "verified",
+          is_verified: true,
+          is_active: true,
+        })
+        .eq("id", orgId);
 
-      if (!result.success) throw new Error(result.message);
+      if (updateErr) throw updateErr;
 
-      await sendNotification(
-        request.userId,
-        "Withdrawal Approved! 💸",
-        `Your request for ₦${request.amount.toLocaleString()} has been processed. The funds are now in transit to your bank.`,
-        "ORDER",
-        "/dashboard/payouts"
-      );
+      // 2. Fetch primary user of this organization to send notification
+      const { data: orgUsers } = await supabase
+        .from("users")
+        .select("id")
+        .eq("organization_id", orgId);
 
-      setPayoutRequests(prev => prev.filter(p => p.id !== request.id));
-      alert(result.message);
-    } catch (error: any) {
-       console.error("Payout error:", error);
-       alert(`Payout failed: ${error.message}`);
-    } finally {
-       setSubmitting(false);
+      if (orgUsers && orgUsers.length > 0) {
+        for (const u of orgUsers) {
+          await supabase.from("notifications").insert({
+            user_id: u.id,
+            title: "🎉 Business Verification Approved!",
+            message: "Congratulations! Your business profile and KYB credentials have been verified by admin. You can now list products and receive payouts.",
+            type: "VERIFICATION",
+            link: "/dashboard",
+            read: false,
+          });
+        }
+      }
+
+      setPendingWholesalers((prev) => prev.filter((o) => o.id !== orgId));
+      alert("Organization approved successfully!");
+    } catch (err: any) {
+      console.error("Error approving org:", err);
+      alert("Failed to approve organization: " + (err.message || err));
     }
   };
-
-  const approvePartner = async (sellerId: string) => {
-    setSubmitting(true);
-    try {
-      await updateDoc(doc(db, "users", sellerId), { 
-        isVerified: true,
-        verificationStatus: "verified"
-      });
-      
-      // Notify the wholesaler
-      await sendNotification(
-        sellerId,
-        "Account Verified! 🔓",
-        "Your partner identity has been verified. You now have full clearance to manage products and payouts.",
-        "SYSTEM",
-        "/dashboard"
-      );
-
-      setPendingWholesalers(prev => prev.filter(s => s.id !== sellerId));
-      alert("Account status verified successfully!");
-    } catch (error) {
-      console.error("Error verifying wholesaler:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const rejectPartner = async (sellerId: string) => {
-    if (!rejectReason.trim()) return;
-    setSubmitting(true);
-    try {
-      await updateDoc(doc(db, "users", sellerId), { 
-        verificationStatus: "rejected", 
-        verificationRejectionReason: rejectReason.trim(),
-        isVerified: false
-      });
-      
-      await sendNotification(
-        sellerId,
-        "Verification Rejected ❌",
-        `Your verification application was rejected: ${rejectReason.trim()}`,
-        "SYSTEM",
-        "/dashboard/verification"
-      );
-
-      setPendingWholesalers(prev => prev.filter(s => s.id !== sellerId));
-      setRejectingId(null);
-      setRejectReason("");
-    } catch (error) {
-      console.error("Error rejecting partner:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (role !== "ADMIN") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-8 bg-slate-900 text-white">
-         <ShieldAlert size={64} className="text-red-500 mb-6 drop-shadow-2xl" />
-         <h1 className="text-4xl font-black mb-4">RESTRICTED ZONE</h1>
-         <p className="text-slate-400 font-medium mb-8 max-w-sm">Access to this command center is limited to authenticated administrative protocols.</p>
-         <button onClick={() => window.location.href = "/"} className="px-8 py-4 bg-white text-black rounded-2xl font-black hover:scale-105 active:scale-95 transition-all">Emergency Egress</button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-10">
@@ -211,20 +105,16 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-black flex items-center gap-3">
                COMMAND <span className="text-primary tracking-tighter">CENTER</span>
             </h1>
-            <p className="text-muted-foreground font-medium">Monitoring platform-wide telemetry & protocols.</p>
-         </div>
-         <div className="px-4 py-2 bg-emerald-500/10 text-emerald-600 rounded-xl font-black text-[10px] uppercase tracking-widest border border-emerald-500/20">
-            Node: Live-Alpha-BuySell
+            <p className="text-muted-foreground font-medium">Monitoring platform-wide telemetry & protocols in PostgreSQL.</p>
          </div>
       </div>
 
-      {/* Analytics Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
          {[
-           { label: "Aggregate Volume", val: "₦" + stats.volume.toLocaleString(), icon: <DollarSign />, color: "text-emerald-500" },
+           { label: "Aggregate Volume", val: "$0.00", icon: <DollarSign />, color: "text-emerald-500" },
            { label: "Active Nodes", val: stats.users, icon: <Users />, color: "text-blue-500" },
            { label: "Total Assets", val: stats.products, icon: <ShoppingBag />, color: "text-purple-500" },
-           { label: "Pending Payouts", val: stats.pendingPayouts, icon: <AlertTriangle />, color: "text-orange-500" }
+           { label: "Pending Orgs", val: pendingWholesalers.length, icon: <AlertTriangle />, color: "text-orange-500" }
          ].map((stat, i) => (
            <motion.div 
              key={i}
@@ -242,217 +132,28 @@ export default function AdminDashboard() {
          ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-         {/* Command Management Tabs */}
-         <div className="lg:col-span-2 space-y-6">
-            <div className="flex gap-4 mb-4">
-               {["payouts", "verification"].map(tab => (
-                 <button 
-                   key={tab}
-                   onClick={() => setActiveTab(tab)}
-                   className={`relative px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all border ${activeTab === tab ? 'bg-primary text-white border-primary shadow-2xl shadow-primary/20' : 'glass border-borderline hover:bg-muted/50'}`}
-                 >
-                   {tab === "payouts" ? "Payout Protocol" : "Account Vetting"}
-                   {tab === "verification" && pendingWholesalers.filter(s => s.verificationStatus === "pending").length > 0 && (
-                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-lg">
-                       {pendingWholesalers.filter(s => s.verificationStatus === "pending").length}
-                     </span>
-                   )}
-                 </button>
-               ))}
-            </div>
-
-            <div className="glass p-10 rounded-[3rem] border border-borderline min-h-[400px]">
-               {activeTab === "payouts" ? (
-                 <div className="space-y-6">
-                    <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
-                       <History size={20} className="text-primary" /> Pending Financial Requests
-                    </h3>
-                    
-                    {payoutRequests.length === 0 ? (
-                       <div className="py-20 text-center opacity-30 italic">No pending payout requests.</div>
-                    ) : (
-                      payoutRequests.map(req => (
-                        <div key={req.id} className="p-6 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-borderline flex items-center justify-between gap-6 hover:bg-white/60 transition-all">
-                           <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center">
-                                 <Building size={24} />
-                              </div>
-                              <div>
-                                 <p className="font-black text-lg">₦{req.amount?.toLocaleString()}</p>
-                                 <p className="text-[10px] text-muted-foreground font-bold uppercase">{req.bankDetails?.bankName} • {req.bankDetails?.accountName}</p>
-                              </div>
-                           </div>
-                           <div className="flex gap-2">
-                              <button 
-                                onClick={() => approvePayout(req)}
-                                disabled={submitting}
-                                className="p-3 bg-emerald-500 text-white rounded-xl hover:scale-110 active:scale-95 transition-all shadow-lg"
-                                title="Approve & Distribute"
-                              >
-                                 {submitting ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18} />}
-                              </button>
-                              <button className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm">
-                                 <X size={18} />
-                              </button>
-                           </div>
-                        </div>
-                      ))
-                    )}
-                 </div>
-               ) : (
-                 <div className="space-y-6">
-                    <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
-                       <UserCheck size={20} className="text-primary" /> Identity Authentication
-                    </h3>
-                    {pendingWholesalers.length === 0 ? (
-                       <div className="py-20 text-center opacity-30 italic">All accounts verified at current telemetry level.</div>
-                    ) : (
-                      pendingWholesalers.map(seller => {
-                        const hasVerificationData = !!seller.verificationStatus;
-                        const isPending = seller.verificationStatus === "pending";
-                        
-                        return (
-                          <div key={seller.id} className="p-6 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-borderline flex flex-col gap-4">
-                             <div className="flex items-center justify-between gap-6">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center text-xl font-black">
-                                      {seller.name?.charAt(0) || "W"}
-                                   </div>
-                                   <div>
-                                      <p className="font-black">{seller.businessName || seller.name}</p>
-                                      <p className="text-[10px] text-muted-foreground font-bold uppercase">
-                                         {seller.role} • {seller.email}
-                                      </p>
-                                   </div>
-                                </div>
-                                <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${
-                                  seller.verificationStatus === "pending" ? "bg-blue-500/10 text-blue-500" :
-                                  seller.verificationStatus === "rejected" ? "bg-red-500/10 text-red-500" :
-                                  "bg-slate-500/10 text-slate-500"
-                                }`}>
-                                   {seller.verificationStatus || "No application"}
-                                </span>
-                             </div>
-
-                             {hasVerificationData && (
-                                <div className="p-4 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-borderline/50 text-xs space-y-3">
-                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div>
-                                         <p className="text-[9px] text-muted-foreground font-bold uppercase font-mono">REGISTRATION NUMBER</p>
-                                         <p className="font-semibold">{seller.registrationNumber || "N/A"}</p>
-                                      </div>
-                                      <div>
-                                         <p className="text-[9px] text-muted-foreground font-bold uppercase font-mono">BUSINESS ADDRESS</p>
-                                         <p className="font-semibold">{seller.businessAddress || "N/A"}</p>
-                                      </div>
-                                   </div>
-                                   {seller.verificationDocumentUrl && (
-                                      <div className="pt-2 border-t border-borderline/30 flex items-center justify-between">
-                                         <span className="font-medium text-muted-foreground text-[10px] uppercase">LICENSE FILE:</span>
-                                         <a 
-                                            href={seller.verificationDocumentUrl} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            className="text-primary font-bold hover:underline flex items-center gap-1 text-[11px]"
-                                         >
-                                            📄 View Document
-                                         </a>
-                                      </div>
-                                   )}
-                                </div>
-                             )}
-
-                             <div className="flex gap-2 justify-end pt-2 border-t border-borderline/20">
-                                {isPending && rejectingId !== seller.id && (
-                                   <button 
-                                     onClick={() => { setRejectingId(seller.id); setRejectReason(""); }}
-                                     disabled={submitting}
-                                     className="px-4 py-2 border border-red-500/20 text-red-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
-                                   >
-                                      Reject
-                                   </button>
-                                )}
-                                <button 
-                                  onClick={() => approvePartner(seller.id)}
-                                  disabled={submitting}
-                                  className="px-6 py-2 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all"
-                                >
-                                   {submitting ? <Loader2 className="animate-spin" size={14}/> : "Verify Access"}
-                                </button>
-                             </div>
-
-                             {/* Inline rejection reason input */}
-                             {rejectingId === seller.id && (
-                               <div className="mt-2 p-4 rounded-2xl bg-red-500/5 border border-red-500/20 space-y-3">
-                                 <p className="text-xs font-black text-red-500 uppercase tracking-wider">Enter Rejection Reason</p>
-                                 <textarea
-                                   rows={2}
-                                   value={rejectReason}
-                                   onChange={(e) => setRejectReason(e.target.value)}
-                                   placeholder="e.g. Blurry documents, address mismatch..."
-                                   className="w-full px-3 py-2 text-xs bg-white/60 dark:bg-slate-900/60 border border-borderline rounded-xl focus:ring-2 focus:ring-red-500/20 outline-none resize-none font-medium"
-                                 />
-                                 <div className="flex gap-2 justify-end">
-                                   <button
-                                     onClick={() => { setRejectingId(null); setRejectReason(""); }}
-                                     className="px-4 py-2 text-xs font-bold uppercase tracking-widest border border-borderline rounded-xl hover:bg-muted transition-all"
-                                   >
-                                     Cancel
-                                   </button>
-                                   <button
-                                     onClick={() => rejectPartner(seller.id)}
-                                     disabled={submitting || !rejectReason.trim()}
-                                     className="px-4 py-2 bg-red-500 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
-                                   >
-                                     {submitting ? <Loader2 className="animate-spin" size={12}/> : null}
-                                     Confirm Reject
-                                   </button>
-                                 </div>
-                               </div>
-                             )}
-                          </div>
-                        );
-                      })
-                    )}
-                 </div>
-               )}
-            </div>
-         </div>
-
-         {/* Side Telemetry */}
-         <div className="lg:col-span-1 space-y-6">
-            <div className="glass p-8 rounded-[3rem] border border-borderline h-full flex flex-col justify-between">
+      <div className="glass p-10 rounded-[3rem] border border-borderline">
+        <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
+           <UserCheck size={20} className="text-primary" /> Pending Organization Verifications
+        </h3>
+        {pendingWholesalers.length === 0 ? (
+           <div className="py-20 text-center opacity-30 italic">No pending verifications found.</div>
+        ) : (
+          pendingWholesalers.map(org => (
+            <div key={org.id} className="p-6 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-borderline flex items-center justify-between gap-6 mb-4">
                <div>
-                  <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
-                     <TrendingUp className="text-primary" size={20} /> System Vitality
-                  </h3>
-                  
-                  <div className="space-y-6">
-                     <div className="p-4 rounded-2xl bg-white/30 dark:bg-slate-800/30 border border-borderline flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted-foreground uppercase opacity-70">Uptime</span>
-                        <span className="text-xs font-black text-emerald-500">99.99% PROTOCOL-OK</span>
-                     </div>
-                     <div className="p-4 rounded-2xl bg-white/30 dark:bg-slate-800/30 border border-borderline flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted-foreground uppercase opacity-70">Latency</span>
-                        <span className="text-xs font-black text-blue-500">22MS (LOCAL)</span>
-                     </div>
-                     <div className="p-4 rounded-2xl bg-white/30 dark:bg-slate-800/30 border border-borderline flex items-center justify-between">
-                        <span className="text-xs font-bold text-muted-foreground uppercase opacity-70">Traffic Level</span>
-                        <span className="text-xs font-black text-orange-500 uppercase">High Nominal</span>
-                     </div>
-                  </div>
+                  <p className="font-black">{org.company_name}</p>
+                  <p className="text-xs text-muted-foreground">Reg #: {org.legal_registration_number}</p>
                </div>
-
-               <div className="mt-10 p-6 rounded-[2rem] bg-slate-900 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-6 opacity-10">
-                     <Package size={64} />
-                  </div>
-                  <h4 className="text-sm font-black mb-2 uppercase tracking-widest">Protocol Updates</h4>
-                  <p className="text-[10px] text-white/50 leading-relaxed font-medium">Automatic system backups initiated at 03:00 UTC. Next verification cycle in 14 hours.</p>
-               </div>
+               <button 
+                 onClick={() => approveOrg(org.id)}
+                 className="px-6 py-2 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all"
+               >
+                  Approve Organization
+               </button>
             </div>
-         </div>
+          ))
+        )}
       </div>
     </div>
   );

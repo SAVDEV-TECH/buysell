@@ -1,22 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { db } from "@/lib/firebase";
-import { 
-  collection, 
-  query, 
-  where, 
-  onSnapshot, 
-  addDoc, 
-  Timestamp, 
-  limit,
-  doc,
-  getDoc
-} from "firebase/firestore";
 import { 
   Star, 
-  User, 
   MessageSquare, 
   ThumbsUp, 
   ShieldCheck, 
@@ -38,35 +25,11 @@ interface Review {
 export default function ReviewSection({ productId }: { productId: string }) {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!productId) return;
-
-    const q = query(
-      collection(db, "reviews"),
-      where("productId", "==", productId),
-      limit(20)
-    );
-
-    const unsubscribe = onSnapshot(q, (snap) => {
-      const fetched = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Review[];
-      
-      // Sort in memory
-      fetched.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-      setReviews(fetched);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [productId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,23 +41,22 @@ export default function ReviewSection({ productId }: { productId: string }) {
 
     setSubmitting(true);
     setError("");
-    try {
-      await addDoc(collection(db, "reviews"), {
-        productId,
-        userId: user.uid,
-        userName: user.displayName || user.email?.split("@")[0] || "Verified Wholesaler",
+
+    setReviews(prev => [
+      {
+        id: Math.random().toString(),
+        userId: user.id,
+        userName: user.email?.split("@")[0] || "Verified Buyer",
         rating,
         comment: comment.trim(),
-        createdAt: Timestamp.now()
-      });
-      setComment("");
-      setRating(5);
-    } catch (err) {
-      console.error("Error posting review:", err);
-      setError("Failed to post signal. Check database clearance.");
-    } finally {
-      setSubmitting(false);
-    }
+        createdAt: new Date(),
+      },
+      ...prev
+    ]);
+
+    setComment("");
+    setRating(5);
+    setSubmitting(false);
   };
 
   return (
@@ -117,7 +79,6 @@ export default function ReviewSection({ productId }: { productId: string }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-         {/* Review Form */}
          <div className="lg:col-span-1">
             <div className="glass p-8 rounded-[2.5rem] border border-borderline sticky top-24">
                <h4 className="text-lg font-black mb-6">Write a Review</h4>
@@ -141,7 +102,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 block italic">Review Details</label>
                     <textarea 
-                      placeholder="Comment on quality, delivery speed, and wholesaler reliability..."
+                      placeholder="Comment on quality, delivery speed, and supplier reliability..."
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       rows={4}
@@ -173,7 +134,6 @@ export default function ReviewSection({ productId }: { productId: string }) {
             </div>
          </div>
 
-         {/* Reviews List */}
          <div className="lg:col-span-2 space-y-6">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 opacity-50">
@@ -213,7 +173,6 @@ export default function ReviewSection({ productId }: { productId: string }) {
                               <Star key={s} size={12} fill={r.rating >= s ? "currentColor" : "none"} className={r.rating < s ? 'opacity-20' : ''} />
                             ))}
                          </div>
-                         <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-40">{r.createdAt?.toDate().toLocaleDateString()}</p>
                       </div>
                    </div>
                    
@@ -222,9 +181,6 @@ export default function ReviewSection({ productId }: { productId: string }) {
                    <div className="mt-8 flex items-center gap-6 pt-6 border-t border-borderline/50">
                       <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all">
                         <ThumbsUp size={14} /> Helpful Review
-                      </button>
-                      <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-red-500 transition-all">
-                        Report Review
                       </button>
                    </div>
                 </motion.div>

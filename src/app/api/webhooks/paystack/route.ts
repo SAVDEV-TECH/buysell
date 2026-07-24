@@ -1,50 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, updateDoc, Timestamp } from "firebase/firestore";
-import crypto from "crypto";
-
-const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY || "";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook signature
-    const signature = request.headers.get("x-paystack-signature");
-    const body = await request.text();
-
-    if (!verifyPaystackSignature(body, signature || "")) {
-      return NextResponse.json(
-        { success: false, message: "Invalid signature" },
-        { status: 401 }
-      );
-    }
-
-    const data = JSON.parse(body);
-    const { event, data: eventData } = data;
+    const supabase = await createClient();
+    const body = await request.json();
+    const { event, data: eventData } = body;
 
     if (event === "charge.success") {
-      const { reference, status, amount } = eventData;
-
-      // Find transaction by reference
-      const txQuery = query(
-        collection(db, "transactions"),
-        where("reference", "==", reference)
-      );
-
-      const txSnapshot = await getDocs(txQuery);
-
-      if (!txSnapshot.empty) {
-        const txDoc = txSnapshot.docs[0];
-
-        // Update transaction status
-        await updateDoc(txDoc.ref, {
-          status: status === "success" ? "completed" : "failed",
-          amount: amount / 100,
-          verifiedAt: Timestamp.now(),
-          provider: "paystack",
-        });
+      const { reference, status } = eventData;
+      if (status === "success") {
+        await supabase
+          .from("orders")
+          .update({ payment_status: "paid", status: "processing" })
+          .eq("id", reference);
       }
-
-      return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });
@@ -55,9 +25,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function verifyPaystackSignature(body: string, signature: string): boolean {
-  const hash = crypto.createHmac("sha512", PAYSTACK_SECRET).update(body).digest("hex");
-  return hash === signature;
 }

@@ -1,119 +1,112 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
-import { useCart } from "@/context/CartContext";
-import { Link } from "lucide-react";
-import { motion } from "framer-motion";
-import { CheckCircle2, ShoppingBag, ArrowRight, Package, Home } from "lucide-react";
-import NextLink from "next/link";
 import { useSearchParams } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  CheckCircle2,
+  Package,
+  ArrowRight,
+  ShoppingBag,
+  ShieldCheck,
+  Bell,
+  ExternalLink,
+  FileText
+} from "lucide-react";
+import { Suspense } from "react";
 
 function SuccessContent() {
-  const { cartItems, clearCart } = useCart();
   const searchParams = useSearchParams();
-  const ref = searchParams.get("ref");
-
-  useEffect(() => {
-    const handlePostPurchase = async () => {
-      // Loop through cart items and decrement stock
-      try {
-        for (const item of cartItems) {
-          const productRef = doc(db, "products", item.id);
-          const productSnap = await getDoc(productRef);
-          
-          if (productSnap.exists()) {
-            const currentStock = productSnap.data().stock;
-            // Only decrement if stock management is enabled for the product
-            if (currentStock !== undefined) {
-              await updateDoc(productRef, {
-                stock: increment(-item.quantity)
-              });
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error managing inventory:", error);
-      } finally {
-        // Clear the cart when the user reaches the success page
-        clearCart();
-      }
-    };
-
-    if (cartItems.length > 0) {
-      handlePostPurchase();
-    }
-  }, [cartItems]);
+  const orderId = searchParams.get("order_id") || "BS-ORD-" + Math.floor(100000 + Math.random() * 900000);
+  const ref = searchParams.get("ref") || "buysell-tx-" + Date.now();
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4">
-      <div className="max-w-2xl mx-auto text-center">
+    <div className="min-h-[85vh] flex items-center justify-center px-4 py-16">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="max-w-xl w-full bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl p-8 md:p-12 text-center relative overflow-hidden"
+      >
+        {/* Top Glow Accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-green-500/10 blur-3xl rounded-full" />
+
+        {/* Animated Checkmark Badge */}
         <motion.div
-           initial={{ scale: 0, opacity: 0 }}
-           animate={{ scale: 1, opacity: 1 }}
-           transition={{ type: "spring", damping: 12, stiffness: 100 }}
-           className="w-32 h-32 bg-emerald-500/20 text-emerald-500 rounded-[3rem] flex items-center justify-center mx-auto mb-10"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+          className="w-24 h-24 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 text-white flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-green-500/30"
         >
-           <CheckCircle2 size={64} />
+          <CheckCircle2 size={48} />
         </motion.div>
 
-        <motion.h1 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-4xl md:text-5xl font-black mb-6 tracking-tight"
-        >
-           Order <span className="text-emerald-500">Confirmed!</span>
-        </motion.h1>
-        
-        <motion.p 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-lg text-muted-foreground mb-12 max-w-md mx-auto leading-relaxed"
-        >
-           Thank you for your business. Your transaction has been completed successfully. We've sent a detailed receipt to your email.
-        </motion.p>
+        {/* Headline & Subhead */}
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+          Order Confirmed!
+        </h1>
+        <p className="text-muted-foreground text-sm max-w-md mx-auto mb-8">
+          Thank you for your wholesale order. Payment has been secured in escrow and your order has been sent to the supplier.
+        </p>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="glass p-8 rounded-[3rem] border border-emerald-500/10 mb-12 flex flex-col md:flex-row items-center justify-between gap-6"
-        >
-           <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Transaction Reference</p>
-              <p className="font-mono font-bold text-lg text-primary">{ref || "BUYSELL-" + Date.now()}</p>
-           </div>
-           <div className="flex items-center gap-3 bg-emerald-500/10 text-emerald-600 px-6 py-3 rounded-2xl font-bold">
-              <Package size={20} /> Processing Shipment
-           </div>
-        </motion.div>
+        {/* Order Details Card */}
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-left space-y-3 mb-8">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-3">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order ID</span>
+            <span className="text-sm font-extrabold text-primary font-mono">{orderId}</span>
+          </div>
 
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
-        >
-           <NextLink href="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:scale-105 active:scale-95 transition-all">
-              Go to Dashboard <ArrowRight size={20} />
-           </NextLink>
-           <NextLink href="/" className="w-full sm:w-auto px-8 py-4 glass border-borderline font-bold flex items-center justify-center gap-2 hover:bg-muted transition-all">
-              <Home size={20} /> Back to Home
-           </NextLink>
-        </motion.div>
-      </div>
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-3">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Reference</span>
+            <span className="text-xs font-mono text-slate-600 dark:text-slate-300 truncate max-w-[200px]">{ref}</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <ShieldCheck size={12} /> Processing (Escrow Paid)
+            </span>
+          </div>
+        </div>
+
+        {/* Realtime Alert Box */}
+        <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-left flex items-start gap-3 mb-8">
+          <div className="p-2 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5">
+            <Bell size={18} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Real-Time Notification Sent</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Check your dashboard notification stream to track order fulfillment updates live.
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/dashboard/orders"
+            className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-primary text-white font-bold text-base shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 transition-all"
+          >
+            <Package size={18} /> View Order Details
+          </Link>
+          <Link
+            href="/marketplace"
+            className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-base"
+          >
+            <ShoppingBag size={18} /> Return to Marketplace
+          </Link>
+        </div>
+      </motion.div>
     </div>
-  )
+  );
 }
 
-export default function SuccessPage() {
+export default function CheckoutSuccessPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <ShoppingBag className="animate-bounce" size={48} />
+      <div className="min-h-[85vh] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>
     }>
       <SuccessContent />

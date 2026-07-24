@@ -1,48 +1,58 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { auth } from "@/lib/firebase";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, CheckCircle, AlertCircle, Loader } from "lucide-react";
+import { Mail, CheckCircle, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function VerifyEmailPage() {
   const [verified, setVerified] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [resendSent, setResendSent] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!auth.currentUser) {
-      router.push("/login");
-      return;
-    }
-
-    // Check verification status every 2 seconds
-    const interval = setInterval(async () => {
-      await auth.currentUser?.reload();
-      if (auth.currentUser?.emailVerified) {
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      setUserEmail(user.email ?? null);
+      if (user.email_confirmed_at) {
         setVerified(true);
-        setChecking(false);
-        
-        // Redirect to dashboard after 2 seconds
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/onboarding/business");
         }, 2000);
       }
-    }, 2000);
+    }
 
-    setChecking(false);
+    checkUser();
+
+    const interval = setInterval(async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email_confirmed_at) {
+        setVerified(true);
+        setTimeout(() => {
+          router.push("/onboarding/business");
+        }, 2000);
+      }
+    }, 3000);
+
     return () => clearInterval(interval);
-  }, [router]);
+  }, [router, supabase]);
 
   const handleResendEmail = async () => {
+    if (!userEmail) return;
     try {
-      if (auth.currentUser) {
-        const { sendEmailVerification } = await import("firebase/auth");
-        await sendEmailVerification(auth.currentUser);
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: userEmail,
+      });
+      if (!error) {
         setResendSent(true);
         setTimeout(() => setResendSent(false), 3000);
       }
@@ -53,7 +63,7 @@ export default function VerifyEmailPage() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await supabase.auth.signOut();
       router.push("/login");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -68,7 +78,6 @@ export default function VerifyEmailPage() {
         className="max-w-md w-full"
       >
         <div className="glass rounded-2xl border border-borderline p-8 text-center">
-          {/* Header */}
           <div className="mb-8">
             {verified ? (
               <motion.div
@@ -89,24 +98,22 @@ export default function VerifyEmailPage() {
             </h1>
             <p className="text-muted-foreground text-sm">
               {verified
-                ? "Your email has been verified. Redirecting to dashboard..."
+                ? "Your email has been verified. Redirecting to next step..."
                 : "We've sent a verification link to your email. Please click it to continue."}
             </p>
           </div>
 
-          {/* Status Message */}
           {resendSent && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-green-500 text-sm"
+              className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-green-500 text-sm font-medium justify-center"
             >
               <CheckCircle size={16} />
               <span>Verification email sent!</span>
             </motion.div>
           )}
 
-          {/* Verification Status */}
           {!verified && (
             <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
               <div className="flex items-center justify-center gap-2 text-amber-600 text-sm mb-3">
@@ -119,21 +126,19 @@ export default function VerifyEmailPage() {
             </div>
           )}
 
-          {/* Success Message */}
           {verified && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-lg"
             >
-              <div className="flex items-center justify-center gap-2 text-green-600 text-sm">
+              <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium">
                 <CheckCircle size={16} />
                 <span>Email verified successfully!</span>
               </div>
             </motion.div>
           )}
 
-          {/* Action Buttons */}
           <div className="space-y-3">
             {!verified && (
               <>
@@ -153,19 +158,8 @@ export default function VerifyEmailPage() {
                 </button>
               </>
             )}
-
-            {verified && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-muted-foreground"
-              >
-                Redirecting to dashboard...
-              </motion.div>
-            )}
           </div>
 
-          {/* Footer Help Text */}
           <div className="mt-6 pt-6 border-t border-borderline/30">
             <p className="text-xs text-muted-foreground">
               Need help?{" "}

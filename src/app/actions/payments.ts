@@ -1,7 +1,6 @@
 "use server";
 
-import { db } from "@/lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { createClient } from "@/lib/supabase/server";
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY || "";
 const FLUTTERWAVE_SECRET = process.env.FLUTTERWAVE_SECRET_KEY || "";
@@ -28,27 +27,37 @@ export async function initializePayment(payload: PaymentPayload) {
       throw new Error("Invalid amount");
     }
 
-    // Create pending transaction record
-    const transactionRef = await addDoc(collection(db, "transactions"), {
-      userId,
-      productId,
-      amount,
-      currency,
-      provider,
-      status: "pending",
-      email: userEmail,
-      phone: phone || null,
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    });
+    const supabase = await createClient();
+
+    // Create order or transaction record in Supabase
+    // Insert into orders or a custom transactions table
+    const { data: order, error: dbError } = await supabase
+      .from("orders")
+      .insert({
+        buyer_organization_id: userId, // Assuming user ID or org ID
+        supplier_organization_id: userId,
+        total_amount: amount,
+        currency,
+        status: "pending_escrow",
+        shipping_details: { email: userEmail, phone: phone || null, provider },
+      })
+      .select()
+      .single();
+
+    if (dbError || !order) {
+      console.error("Order creation failed in database:", dbError);
+      throw new Error("Could not initialize order transaction.");
+    }
+
+    const txId = order.id;
 
     switch (provider) {
       case "paystack":
-        return initializePaystack(amount, currency, userEmail, transactionRef.id);
+        return initializePaystack(amount, currency, userEmail, txId);
       case "flutterwave":
-        return initializeFlutterwave(amount, currency, userEmail, transactionRef.id);
+        return initializeFlutterwave(amount, currency, userEmail, txId);
       case "mobile-money":
-        return initializeMobileMoneyTransaction(amount, currency, phone, transactionRef.id);
+        return initializeMobileMoneyTransaction(amount, currency, phone, txId);
       default:
         throw new Error("Unsupported payment provider");
     }
@@ -59,8 +68,7 @@ export async function initializePayment(payload: PaymentPayload) {
 }
 
 function initializePaystack(amount: number, currency: string, email: string, txId: string) {
-  // Paystack only supports NGN, but we can convert
-  const paystackAmount = convertToNGN(amount, currency) * 100; // Convert to kobo
+  const paystackAmount = convertToNGN(amount, currency) * 100;
 
   return {
     success: true,
@@ -100,7 +108,6 @@ function initializeMobileMoneyTransaction(
     throw new Error("Phone number is required for mobile money");
   }
 
-  // Generate USSD code format
   const ussdCode = generateUSSDCode(amount, phone);
 
   return {
@@ -113,14 +120,11 @@ function initializeMobileMoneyTransaction(
 }
 
 function generateUSSDCode(amount: number, phone: string): string {
-  // Format: *165*3*amount*phone#
-  // This is a common format for African mobile money providers
   const cleanPhone = phone.replace(/\D/g, "").slice(-10);
   return `*165*3*${Math.round(amount)}*${cleanPhone}#`;
 }
 
 function convertToNGN(amount: number, currency: string): number {
-  // Exchange rates (simplified, would be real-time in production)
   const rates: Record<string, number> = {
     NGN: 1,
     GHS: 50,

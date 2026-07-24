@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { useNotifications } from "@/context/NotificationContext";
 import { X, Send, Loader2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -13,8 +11,9 @@ interface RFQModalProps {
   onClose: () => void;
   product?: {
     id: string;
-    name: string;
-    price: number;
+    title?: string;
+    name?: string;
+    price?: number;
     moq?: number;
   };
   manufacturer: {
@@ -24,43 +23,30 @@ interface RFQModalProps {
 }
 
 export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQModalProps) {
-  const { user } = useAuth();
-  const { sendNotification } = useNotifications();
+  const { user, organizationId } = useAuth();
   const [quantity, setQuantity] = useState(product?.moq || 100);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const supabase = createClient();
+
+  const productName = product?.title || product?.name;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !organizationId) return;
 
     setLoading(true);
     try {
-      const rfqData = {
-        wholesalerId: user.uid,
-        wholesalerName: user.displayName || "Verified Wholesaler",
-        manufacturerId: manufacturer.id,
-        manufacturerName: manufacturer.name,
-        productId: product?.id || "general",
-        productName: product?.name || "General Inquiry",
-        quantity: Number(quantity),
-        status: "pending",
-        notes,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-      };
+      const { error } = await supabase.from("rfqs").insert({
+        buyer_organization_id: organizationId,
+        title: productName ? `RFQ for ${productName}` : "General Inquiry",
+        destination_country: "US",
+        requirements_spec: { notes, quantity: Number(quantity), productId: product?.id },
+        status: "published",
+      });
 
-      await addDoc(collection(db, "rfqs"), rfqData);
-
-      // Notify Manufacturer
-      await sendNotification(
-        manufacturer.id,
-        "New RFQ Received",
-        `${user.displayName || "A wholesaler"} requested a quote for ${quantity} units of ${product?.name || "general services"}.`,
-        "SYSTEM",
-        "/dashboard/rfqs"
-      );
+      if (error) throw error;
 
       setSuccess(true);
       setTimeout(() => {
@@ -100,14 +86,14 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                   <CheckCircle2 size={48} />
                 </div>
                 <h2 className="text-2xl font-black mb-2">Request Transmitted</h2>
-                <p className="text-muted-foreground">Your RFQ has been sent to {manufacturer.name}. You will be notified when they respond.</p>
+                <p className="text-muted-foreground">Your RFQ has been sent to {manufacturer?.name || "Supplier"}.</p>
               </div>
             ) : (
               <>
                 <div className="p-8 border-b border-borderline flex items-center justify-between bg-primary/5">
                   <div>
                     <h2 className="text-xl font-black uppercase tracking-tighter text-primary">Request for Quotation</h2>
-                    <p className="text-xs text-muted-foreground font-bold">Inquiry for {manufacturer.name}</p>
+                    <p className="text-xs text-muted-foreground font-bold">Inquiry for {manufacturer?.name || "Supplier"}</p>
                   </div>
                   <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
                     <X size={20} />
@@ -118,11 +104,11 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                   {product && (
                     <div className="p-4 bg-muted/30 rounded-2xl border border-borderline flex items-center gap-4">
                       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary font-bold shadow-sm">
-                        {product.name.charAt(0)}
+                        {((product as any).title || product.name || "Product").charAt(0)}
                       </div>
                       <div>
                         <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Target Product</p>
-                        <p className="font-bold text-sm">{product.name}</p>
+                        <p className="font-bold text-sm">{(product as any).title || product.name}</p>
                       </div>
                     </div>
                   )}
@@ -137,9 +123,6 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                       className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-borderline rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
                       placeholder="e.g. 5000"
                     />
-                    {product?.moq && (
-                      <p className="text-[10px] text-muted-foreground ml-1">Manufacturer's Minimum: {product.moq} units</p>
-                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -150,7 +133,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                       onChange={(e) => setNotes(e.target.value)}
                       rows={4}
                       className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-borderline rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none"
-                      placeholder="Specify colors, branding, lead time requirements, or other custom details..."
+                      placeholder="Specify requirements..."
                     />
                   </div>
 

@@ -1,9 +1,8 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect } from "react";
-import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, limit, orderBy, doc, getDoc } from "firebase/firestore";
+import { useState, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { 
   ShoppingBag, 
   Users, 
@@ -18,94 +17,65 @@ import {
   Zap,
   Settings,
   ShieldCheck,
-  FileText
+  FileText,
+  Rocket,
+  Store,
+  ArrowRight
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function DashboardOverview() {
-  const { user, role, isVerified, loading: authLoading } = useAuth();
+  const { user, profile, role, organizationId, verificationLevel, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([
     { label: "Total Orders", value: "0", icon: ShoppingBag, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Revenue", value: "₦0", icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
+    { label: "Revenue", value: "$0", icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
     { label: "Products", value: "0", icon: Package, color: "text-purple-500", bg: "bg-purple-500/10" },
     { label: "Growth", value: "0%", icon: TrendingUp, color: "text-orange-500", bg: "bg-orange-500/10" },
   ]);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [newManufacturers, setNewManufacturers] = useState<any[]>([]);
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      // Don't fetch if still loading auth or if no user
       if (authLoading || !user) return;
       
       setLoading(true);
       try {
-        // Fetch User Wallet Detail
-        let userData = {};
-        let walletBalance = 0;
-        try {
-          console.log("Fetching user doc for:", user.uid);
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          userData = userDocSnap.exists() ? userDocSnap.data() : {};
-          walletBalance = (userData as any).wallet || 0;
-        } catch (err: any) {
-          console.error("Error fetching user doc:", err);
-          if (err.code === 'permission-denied') console.error("Permission denied on users/uid");
-        }
-
-        // Determine role
-        const currentRole = role || (userData as any).role;
-        const isSeller = currentRole === "MANUFACTURER";
-        const fieldToQuery = isSeller ? "sellerId" : "wholesalerId";
-        
-        // Query orders
         let ordersCount = 0;
         let totalRev = 0;
         let fetchedOrders: any[] = [];
         
-        try {
-          console.log(`Querying orders with ${fieldToQuery} == ${user.uid} (Role: ${currentRole})`);
-          const ordersQ = query(
-            collection(db, "orders"),
-            where(fieldToQuery, "==", user.uid)
-          );
-          const ordersSnap = await getDocs(ordersQ);
-          ordersCount = ordersSnap.size;
-          
-          fetchedOrders = ordersSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        if (organizationId) {
+          const { data: ordersData, count } = await supabase
+            .from("orders")
+            .select("*", { count: "exact" })
+            .or(`buyer_organization_id.eq.${organizationId},supplier_organization_id.eq.${organizationId}`)
+            .order("created_at", { ascending: false })
+            .limit(5);
 
-          fetchedOrders.forEach((o: any) => totalRev += (o.totalAmount || 0));
-        } catch (err: any) {
-          console.error("Error fetching orders:", err);
-          if (err.code === 'permission-denied') console.error(`Permission denied on orders query (${fieldToQuery})`);
+          ordersCount = count || 0;
+          fetchedOrders = ordersData || [];
+          fetchedOrders.forEach((o: any) => totalRev += (Number(o.total_amount) || 0));
         }
 
-        // Query products - only for sellers
         let productsCount = 0;
-        if (isSeller) {
-          try {
-            console.log("Querying products for seller:", user.uid);
-            const productsQ = query(
-              collection(db, "products"),
-              where("sellerId", "==", user.uid)
-            );
-            const productsSnap = await getDocs(productsQ);
-            productsCount = productsSnap.size;
-          } catch (err: any) {
-            console.error("Error fetching products:", err);
-            if (err.code === 'permission-denied') console.error("Permission denied on products query");
-          }
+        if (organizationId) {
+          const { count } = await supabase
+            .from("products")
+            .select("*", { count: "exact", head: true })
+            .eq("supplier_organization_id", organizationId);
+          productsCount = count || 0;
         }
+
+        const isSeller = role?.startsWith("supplier");
 
         const newStats = [
           { label: "Total Orders", value: ordersCount.toString(), icon: ShoppingBag, color: "text-blue-500", bg: "bg-blue-500/10" },
-          { label: "Wallet Balance", value: `₦${walletBalance.toLocaleString()}`, icon: CreditCard, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-          { label: isSeller ? "Total Revenue" : "Total Spent", value: `₦${totalRev.toLocaleString()}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
+          { label: "Wallet Balance", value: "$0.00", icon: CreditCard, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+          { label: isSeller ? "Total Revenue" : "Total Spent", value: `$${totalRev.toLocaleString()}`, icon: DollarSign, color: "text-green-500", bg: "bg-green-500/10" },
         ];
 
         if (isSeller) {
@@ -114,24 +84,8 @@ export default function DashboardOverview() {
           newStats.push({ label: "Growth Status", value: "Active Node", icon: TrendingUp, color: "text-orange-500", bg: "bg-orange-500/10" });
         }
 
-        // Query new manufacturers for wholesalers
-        if (!isSeller) {
-          try {
-            const mfgQ = query(
-              collection(db, "users"),
-              where("role", "==", "MANUFACTURER"),
-              where("isPublic", "==", true),
-              limit(3)
-            );
-            const mfgSnap = await getDocs(mfgQ);
-            setNewManufacturers(mfgSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-          } catch (err) {
-            console.error("Error fetching new manufacturers for dashboard:", err);
-          }
-        }
-
         setStats(newStats);
-        setRecentOrders(fetchedOrders.slice(0, 5));
+        setRecentOrders(fetchedOrders);
       } catch (error: any) {
         console.error("Critical error in dashboard overview:", error);
       } finally {
@@ -140,12 +94,13 @@ export default function DashboardOverview() {
     };
 
     fetchDashboardData();
-  }, [user, role, authLoading]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, role, organizationId, authLoading]);
 
   return (
     <div className="space-y-10">
-      {/* Verification Notice for Partners */}
-      {(role === "MANUFACTURER" || role === "WHOLESALER") && !isVerified && (
+      {/* Verification Notice */}
+      {verificationLevel && verificationLevel !== "verified" && (
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -166,12 +121,60 @@ export default function DashboardOverview() {
         </motion.div>
       )}
 
+      {/* ── Supplier Upsell Banner (shown only to buyers with no organization) ── */}
+      {!organizationId && !authLoading && (
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative overflow-hidden rounded-[2rem] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6"
+          style={{
+            background: "linear-gradient(135deg, #1e40af 0%, #7c3aed 60%, #db2777 100%)",
+          }}
+        >
+          {/* Background decoration */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white blur-2xl" />
+          </div>
+
+          {/* Left: icon + copy */}
+          <div className="relative flex items-center gap-5 text-center md:text-left">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 shadow-lg">
+              <Store size={32} className="text-white" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Rocket size={14} className="text-yellow-300" />
+                <span className="text-yellow-300 text-xs font-bold uppercase tracking-widest">Become a Supplier</span>
+              </div>
+              <h3 className="text-white text-lg md:text-xl font-extrabold leading-tight">
+                Want to sell on BuySell?
+              </h3>
+              <p className="text-white/75 text-sm mt-1 max-w-sm">
+                Reach thousands of B2B buyers. Set up your business profile in 2 minutes and start listing products today.
+              </p>
+            </div>
+          </div>
+
+          {/* Right: CTA */}
+          <div className="relative flex-shrink-0">
+            <Link
+              href="/onboarding/business"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold text-sm hover:bg-slate-50 hover:scale-105 transition-all shadow-xl shadow-black/20 whitespace-nowrap"
+            >
+              Set Up Business Profile <ArrowRight size={18} />
+            </Link>
+          </div>
+        </motion.div>
+      )}
+
       {/* Welcome Section */}
       <section>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Hello, {user?.displayName || "User"} 👋</h1>
-            <p className="text-muted-foreground">Welcome to your <span className="text-primary font-bold">{role?.toLowerCase() || "user"}</span> dashboard</p>
+            <h1 className="text-3xl font-bold mb-1">Hello, {profile?.full_name || "User"} 👋</h1>
+            <p className="text-muted-foreground">Welcome to your <span className="text-primary font-bold">{role?.replace("_", " ") || "user"}</span> dashboard</p>
           </div>
           <div className="flex gap-4">
              <Link 
@@ -180,7 +183,7 @@ export default function DashboardOverview() {
              >
                <CreditCard size={18} /> Payouts
              </Link>
-             {role === "ADMIN" && (
+             {role === "super_admin" && (
                 <Link 
                   href="/admin/dashboard" 
                   className="px-6 py-2.5 bg-black text-white dark:bg-white dark:text-black rounded-xl text-sm font-black uppercase tracking-widest flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-black/10"
@@ -188,14 +191,12 @@ export default function DashboardOverview() {
                   <ShieldCheck size={18} /> System Console
                 </Link>
              )}
-             {(role === "MANUFACTURER" || role === "ADMIN") && (
-               <Link 
-                 href="/dashboard/new-product" 
-                 className={`px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 ${!isVerified && role === "MANUFACTURER" ? 'opacity-30 pointer-events-none grayscale' : ''}`}
-               >
-                 <Plus size={18} /> New Item
-               </Link>
-             )}
+             <Link 
+               href="/dashboard/new-product" 
+               className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+             >
+               <Plus size={18} /> New Item
+             </Link>
           </div>
         </div>
 
@@ -218,9 +219,6 @@ export default function DashboardOverview() {
               <p className="text-sm text-muted-foreground mb-1 font-medium">{stat.label}</p>
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold">{stat.value}</h2>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${stat.color === 'text-green-500' ? 'bg-green-500/10' : 'bg-blue-500/10'}`}>
-                  {stat.value === '124,000' ? 'Today' : 'Month'}
-                </span>
               </div>
             </motion.div>
           ))}
@@ -251,22 +249,18 @@ export default function DashboardOverview() {
                   </div>
                   <div>
                     <p className="font-bold">Order #{order.id.slice(0, 8).toUpperCase()}</p>
-                    <p className="text-xs text-muted-foreground">{order.customerName || "Guest"}</p>
+                    <p className="text-xs text-muted-foreground">{order.currency} {order.total_amount}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold">₦{(order.totalAmount || 0).toLocaleString()}</p>
+                  <p className="font-bold">${(order.total_amount || 0).toLocaleString()}</p>
                   <div className="flex items-center gap-1 justify-end">
                     <Clock size={12} className="text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">Recent</span>
                   </div>
                 </div>
                 <div className="hidden sm:flex ml-8">
-                   <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${
-                     order.status === 'Completed' || order.status === 'Delivered' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 
-                     order.status === 'Processing' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : 
-                     'bg-orange-500/10 text-orange-500 border border-orange-500/20'
-                   }`}>
+                   <span className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20`}>
                      {order.status || "Pending"}
                    </span>
                 </div>
@@ -279,36 +273,8 @@ export default function DashboardOverview() {
           </div>
         </motion.div>
 
-        {/* Quick Links / Next Steps */}
+        {/* Quick Links */}
         <div className="space-y-8">
-           {/* New Manufacturers for Wholesalers */}
-           {role === "WHOLESALER" && newManufacturers.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="glass rounded-3xl p-6 border border-emerald-500/20 shadow-sm"
-              >
-                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-emerald-500 italic">Verified Supply Nodes</h3>
-                    <Link href="/manufacturers" className="text-[10px] font-bold hover:underline">View All</Link>
-                 </div>
-                 <div className="space-y-4">
-                    {newManufacturers.map(mfg => (
-                      <Link key={mfg.id} href={`/manufacturers/${mfg.id}`} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-500/5 transition-all group border border-transparent hover:border-emerald-500/10">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold group-hover:scale-110 transition-transform">
-                          {mfg.businessName?.charAt(0) || mfg.name?.charAt(0) || "M"}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                           <p className="text-xs font-bold truncate">{mfg.businessName || mfg.name}</p>
-                           <p className="text-[10px] text-muted-foreground">{mfg.industry || "General Manufacturing"}</p>
-                        </div>
-                        <ChevronRight size={14} className="text-muted-foreground" />
-                      </Link>
-                    ))}
-                 </div>
-              </motion.div>
-           )}
-
            <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -319,19 +285,7 @@ export default function DashboardOverview() {
                 <QuickActionLink title="Custom RFQs" desc="Negotiate bulk prices" icon={<FileText size={18} />} href="/dashboard/rfqs" />
                 <QuickActionLink title="Store Settings" desc="Update your business details" icon={<Settings size={18} />} href="/dashboard/settings" />
                 <QuickActionLink title="Manage Products" desc="List or update items" icon={<ArrowUpRight size={18} />} href="/dashboard/products" />
-                <QuickActionLink title="Invite Team" desc="Add staff members" icon={<Users size={18} />} href="/dashboard/team" />
                 <QuickActionLink title="Help Center" desc="Get support for issues" icon={<ShieldCheck size={18} />} href="/help" />
-              </div>
-
-              <div className="mt-auto pt-8">
-                 <div className="p-6 bg-gradient-to-br from-primary to-accent rounded-2xl text-white relative overflow-hidden group hover:scale-[1.02] transition-transform shadow-xl shadow-primary/20 cursor-pointer">
-                    <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-125 transition-transform">
-                      <Zap size={32} />
-                    </div>
-                    <h3 className="font-extrabold text-lg mb-1">Upgrade to Pro</h3>
-                    <p className="text-sm opacity-90 mb-4">Unlimited listings and advanced analytics.</p>
-                    <button className="px-4 py-2 bg-white text-primary rounded-lg text-xs font-bold shadow-sm">Get Pro Access</button>
-                 </div>
               </div>
            </motion.div>
         </div>
@@ -339,8 +293,6 @@ export default function DashboardOverview() {
     </div>
   );
 }
-
-
 
 function QuickActionLink({ title, desc, icon, href }: { title: string, desc: string, icon: React.ReactNode, href: string }) {
   return (

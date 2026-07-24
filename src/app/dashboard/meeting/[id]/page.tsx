@@ -9,7 +9,7 @@ import { useState } from "react";
 
 export default function MeetingRoom() {
   const { id } = useParams() as { id: string };
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +73,7 @@ export default function MeetingRoom() {
             SHOW_JITSI_WATERMARK: false,
           }}
           userInfo={{
-            displayName: user.displayName || user.email?.split("@")[0] || "Wholesaler",
+            displayName: profile?.full_name || user.email?.split("@")[0] || "Wholesaler",
             email: user.email || ""
           }}
           onApiReady={(externalApi) => {

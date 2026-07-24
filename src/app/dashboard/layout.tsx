@@ -5,23 +5,34 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package, ShieldCheck } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
+import { createClient } from "@/lib/supabase/client";
+
+import NotificationPopover from "@/components/NotificationPopover";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, role, loading } = useAuth();
+  const { user, profile, role, verificationLevel, loading } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
+      return;
     }
-  }, [user, loading, router]);
+    // Redirect non-verified accounts away from dashboard
+    if (!loading && user && verificationLevel && verificationLevel !== "verified") {
+      if (verificationLevel === "pending") {
+        router.push("/pending-approval");
+      } else if (verificationLevel === "rejected") {
+        router.push("/pending-approval?status=rejected");
+      }
+    }
+  }, [user, loading, verificationLevel, router]);
 
   if (loading || !user) {
     return (
@@ -32,19 +43,16 @@ export default function DashboardLayout({
   }
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
     router.push("/");
   };
 
   const navItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
-    ...(role === "MANUFACTURER" || role === "WHOLESALER" || role === "ADMIN" ? [
-      { name: "My Products", href: "/dashboard/products", icon: Package }
-    ] : []),
-    ...(role === "MANUFACTURER" ? [
-      { name: "Verification", href: "/dashboard/verification", icon: ShieldCheck }
-    ] : []),
+    { name: "My Products", href: "/dashboard/products", icon: Package },
+    { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+    { name: "Verification", href: "/dashboard/verification", icon: ShieldCheck },
     { name: "Analytics", href: "/dashboard/analytics", icon: PieChart },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
@@ -98,17 +106,14 @@ export default function DashboardLayout({
           </button>
 
           <div className="flex items-center gap-4 ml-auto">
-            <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full relative">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white dark:ring-slate-900" />
-            </button>
+            <NotificationPopover />
             <div className="flex items-center gap-3 pl-4 border-l border-borderline">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold truncate">{user.displayName || "User"}</p>
+                <p className="text-sm font-bold truncate">{profile?.full_name || user.email || "User"}</p>
                 <p className="text-[10px] text-muted-foreground uppercase">{role}</p>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold border-2 border-white dark:border-slate-800 shadow-sm">
-                {user.displayName?.[0] || <User size={20} />}
+                {profile?.full_name?.[0] || <User size={20} />}
               </div>
             </div>
           </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { ShoppingCart } from "lucide-react";
-import { User as FirebaseUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
 interface Product {
@@ -18,14 +17,14 @@ interface Product {
 
 interface FlutterwaveButtonProps {
   product: Product;
-  user: FirebaseUser | null;
+  user: any;
   currency?: string;
 }
 
 export default function FlutterwaveButton({
   product,
   user,
-  currency = "NGN",
+  currency = "USD",
 }: FlutterwaveButtonProps) {
   const router = useRouter();
 
@@ -36,9 +35,6 @@ export default function FlutterwaveButton({
     }
 
     try {
-      // Dynamically import Flutterwave to avoid SSR issues
-      const { useFlutterwave, closePaymentModal } = await import("flutterwave-react-v3");
-
       const config = {
         public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY || "pk_test_placeholder",
         tx_ref: `tx-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -47,8 +43,8 @@ export default function FlutterwaveButton({
         payment_options: "card, account, ussd, mobilemoney, payattitude",
         customer: {
           email: user?.email || "customer@example.com",
-          phone_number: user?.phoneNumber || "",
-          name: user?.displayName || "Customer",
+          phone_number: user?.phone || "",
+          name: user?.full_name || "Customer",
         },
         customizations: {
           title: `Buy ${product.name}`,
@@ -57,14 +53,13 @@ export default function FlutterwaveButton({
         },
       };
 
-      // Open Flutterwave modal
       const flutterPaymentResponse = await fetch("/api/payments/flutterwave", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           config,
           productId: product.id,
-          userId: user.uid,
+          userId: user.id,
         }),
       });
 
