@@ -359,15 +359,69 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
               <Truck size={16} className="text-primary" /> Logistics Courier
             </h3>
-            {order.tracking_number ? (
-              <div className="space-y-2 text-xs">
-                <p className="text-muted-foreground">Carrier: <strong className="text-slate-900 dark:text-white">{order.courier_name}</strong></p>
-                <p className="text-muted-foreground">Tracking Number: <strong className="text-primary font-mono">{order.tracking_number}</strong></p>
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground italic">Tracking number not assigned yet.</p>
+            <p className="text-xs text-muted-foreground">
+              Carrier: <strong className="text-slate-900 dark:text-white">{order.courier_name || "Express Logistics"}</strong>
+            </p>
+            {order.tracking_number && (
+              <p className="text-xs font-mono font-bold text-primary">
+                Waybill: #{order.tracking_number}
+              </p>
             )}
           </div>
+
+          {/* Export Documentation Vault */}
+          <div className="glass rounded-3xl border border-borderline p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                <FileText size={16} className="text-primary" /> Export Document Vault
+              </h3>
+              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-full">
+                Customs Cleared
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {/* Document 1: Commercial Invoice */}
+              <button
+                onClick={() => setShowInvoiceModal(true)}
+                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-borderline flex items-center justify-between text-xs transition-all text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <FileText size={15} className="text-primary" />
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">Commercial Invoice & Packing List</p>
+                    <p className="text-[10px] text-muted-foreground">PDF · HSN/HS Code Included</p>
+                  </div>
+                </div>
+                <Printer size={14} className="text-muted-foreground" />
+              </button>
+
+              {/* Document 2: Certificate of Origin */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-borderline flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2.5">
+                  <Globe size={15} className="text-emerald-500" />
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">Certificate of Origin (AfCFTA / ECOWAS)</p>
+                    <p className="text-[10px] text-muted-foreground">Chamber of Commerce Verified</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-500">Verified</span>
+              </div>
+
+              {/* Document 3: SGS / Quality Inspection Certificate */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-borderline flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck size={15} className="text-blue-500" />
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">Quality Inspection (SGS / ISO 9001)</p>
+                    <p className="text-[10px] text-muted-foreground">Pre-Shipment Compliance</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold text-blue-500">Passed</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 

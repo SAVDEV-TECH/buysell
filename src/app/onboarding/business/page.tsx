@@ -1,6 +1,6 @@
  "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -23,6 +23,8 @@ import {
   FileText,
   ArrowRight,
   Briefcase,
+  AlertCircle,
+  Home,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -45,6 +47,8 @@ interface FormState {
   description: string;
 }
 
+type FieldErrors = Partial<Record<keyof FormState, string>>;
+
 const STEPS: { id: StepId; label: string }[] = [
   { id: "role", label: "Business Type" },
   { id: "company", label: "Company Info" },
@@ -59,56 +63,86 @@ const COUNTRIES = [
   "France","UAE","Canada","Australia","Brazil","Other",
 ];
 
-// Maps the full country name shown in the dropdown to the ISO-style code
-// stored in organizations.country_code
 const COUNTRY_CODES: Record<string, string> = {
-  "Nigeria": "NG",
-  "Ghana": "GH",
-  "Kenya": "KE",
-  "South Africa": "ZA",
-  "Egypt": "EG",
-  "Ethiopia": "ET",
-  "Tanzania": "TZ",
-  "Uganda": "UG",
-  "Senegal": "SN",
-  "Côte d'Ivoire": "CI",
-  "Cameroon": "CM",
-  "United States": "US",
-  "United Kingdom": "GB",
-  "China": "CN",
-  "India": "IN",
-  "Germany": "DE",
-  "France": "FR",
-  "UAE": "AE",
-  "Canada": "CA",
-  "Australia": "AU",
-  "Brazil": "BR",
-  "Other": "XX",
+  "Nigeria": "NG", "Ghana": "GH", "Kenya": "KE", "South Africa": "ZA",
+  "Egypt": "EG", "Ethiopia": "ET", "Tanzania": "TZ", "Uganda": "UG",
+  "Senegal": "SN", "Côte d'Ivoire": "CI", "Cameroon": "CM",
+  "United States": "US", "United Kingdom": "GB", "China": "CN",
+  "India": "IN", "Germany": "DE", "France": "FR", "UAE": "AE",
+  "Canada": "CA", "Australia": "AU", "Brazil": "BR", "Other": "XX",
 };
 
 const EMPLOYEE_RANGES = ["1–10","11–50","51–200","201–500","501–1,000","1,000+"];
 const REVENUE_RANGES  = ["Under $100K","$100K–$500K","$500K–$1M","$1M–$5M","$5M–$20M","$20M+"];
 
-const inputCls =
-  "w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-slate-400";
+// ─── Validation helpers ───────────────────────────────────────────────────────
+
+function validatePhone(phone: string): string | undefined {
+  const cleaned = phone.replace(/[\s\-\(\)\.]/g, "");
+  // Basic international format check: + followed by 7-15 digits
+  if (!cleaned) return "Phone number is required";
+  if (!cleaned.startsWith("+")) return "Please include country code (e.g. +234)";
+  if (!/^\+\d{7,15}$/.test(cleaned)) return "Invalid phone number format";
+  return undefined;
+}
+
+function validateWebsite(url: string): string | undefined {
+  if (!url.trim()) return undefined; // optional
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
+    if (!parsed.hostname.includes(".")) return "Please enter a valid domain";
+    return undefined;
+  } catch {
+    return "Please enter a valid URL";
+  }
+}
+
+function validateCompanyName(name: string): string | undefined {
+  if (!name.trim()) return "Company name is required";
+  if (name.trim().length < 2) return "Company name is too short";
+  return undefined;
+}
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+const inputBase =
+  "w-full px-4 py-3 rounded-xl border bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-slate-400";
+
+function inputCls(error?: string) {
+  return `${inputBase} ${
+    error
+      ? "border-red-300 dark:border-red-700 focus:ring-red-200 focus:border-red-400"
+      : "border-slate-200 dark:border-slate-700"
+  }`;
+}
 
 // ─── Field wrapper ─────────────────────────────────────────────────────────────
-// Defined OUTSIDE parent — never recreated on state change
-function Field({ label, required, children }: {
-  label: string; required?: boolean; children: React.ReactNode;
+function Field({ label, required, error, children, htmlFor }: {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+  htmlFor?: string;
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+      <label
+        htmlFor={htmlFor}
+        className="text-sm font-semibold text-slate-700 dark:text-slate-200"
+      >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {children}
+      {error && (
+        <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+          <AlertCircle size={12} /> {error}
+        </p>
+      )}
     </div>
   );
 }
 
 // ─── Step 1: Role ─────────────────────────────────────────────────────────────
-// OUTSIDE parent — stable reference, inputs never remount
 function StepRole({ orgType, setOrgType }: {
   orgType: OrgType | null;
   setOrgType: (v: OrgType) => void;
@@ -138,13 +172,15 @@ function StepRole({ orgType, setOrgType }: {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="radiogroup" aria-label="Select your business type">
       {cards.map(({ type, icon, color, title, description }) => {
         const selected = orgType === type;
         return (
           <button
             key={type}
             type="button"
+            role="radio"
+            aria-checked={selected}
             onClick={() => setOrgType(type)}
             className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-200 ${
               selected
@@ -172,56 +208,65 @@ function StepRole({ orgType, setOrgType }: {
 }
 
 // ─── Step 2: Company Info ─────────────────────────────────────────────────────
-// OUTSIDE parent — inputs maintain focus correctly across re-renders
-function StepCompany({ form, set }: {
+function StepCompany({ form, set, errors }: {
   form: FormState;
   set: (field: keyof FormState, value: string) => void;
+  errors: FieldErrors;
 }) {
   return (
     <div className="space-y-5">
-      <Field label="Company / Business Name" required>
+      <Field label="Company / Business Name" required error={errors.companyName} htmlFor="companyName">
         <div className="relative">
           <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
-            className={inputCls + " pl-10"}
+            id="companyName"
+            className={inputCls(errors.companyName) + " pl-10"}
             placeholder="e.g. Acme Industries Ltd."
             value={form.companyName}
             onChange={(e) => set("companyName", e.target.value)}
+            autoComplete="organization"
           />
         </div>
       </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Phone Number" required>
+        <Field label="Phone Number" required error={errors.phone} htmlFor="phone">
           <div className="relative">
             <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
-              className={inputCls + " pl-10"}
+              id="phone"
+              className={inputCls(errors.phone) + " pl-10"}
               placeholder="+234 800 000 0000"
               value={form.phone}
               onChange={(e) => set("phone", e.target.value)}
+              autoComplete="tel"
+              type="tel"
             />
           </div>
         </Field>
-        <Field label="Company Website">
+        <Field label="Company Website" error={errors.website} htmlFor="website">
           <div className="relative">
             <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
-              className={inputCls + " pl-10"}
+              id="website"
+              className={inputCls(errors.website) + " pl-10"}
               placeholder="https://yourcompany.com"
               value={form.website}
               onChange={(e) => set("website", e.target.value)}
+              autoComplete="url"
+              type="url"
             />
           </div>
         </Field>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Country" required>
+        <Field label="Country" required error={errors.country} htmlFor="country">
           <div className="relative">
             <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
             <select
-              className={inputCls + " pl-10 appearance-none"}
+              id="country"
+              className={inputCls(errors.country) + " pl-10 appearance-none"}
               value={form.country}
               onChange={(e) => set("country", e.target.value)}
             >
@@ -230,21 +275,38 @@ function StepCompany({ form, set }: {
             </select>
           </div>
         </Field>
-        <Field label="City">
+        <Field label="City" htmlFor="city">
           <input
-            className={inputCls}
+            id="city"
+            className={inputCls()}
             placeholder="Lagos, Accra, Nairobi…"
             value={form.city}
             onChange={(e) => set("city", e.target.value)}
+            autoComplete="address-level2"
           />
         </Field>
       </div>
 
-      <Field label="Business Registration Number">
+      <Field label="Street Address" htmlFor="address">
+        <div className="relative">
+          <Home size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <input
+            id="address"
+            className={inputCls() + " pl-10"}
+            placeholder="123 Business Street, Industrial Zone"
+            value={form.address}
+            onChange={(e) => set("address", e.target.value)}
+            autoComplete="street-address"
+          />
+        </div>
+      </Field>
+
+      <Field label="Business Registration Number" htmlFor="regNum">
         <div className="relative">
           <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
-            className={inputCls + " pl-10"}
+            id="regNum"
+            className={inputCls() + " pl-10"}
             placeholder="RC 123456 / CAC No."
             value={form.registrationNumber}
             onChange={(e) => set("registrationNumber", e.target.value)}
@@ -256,20 +318,21 @@ function StepCompany({ form, set }: {
 }
 
 // ─── Step 3: Business Details ─────────────────────────────────────────────────
-// OUTSIDE parent — stable reference
-function StepDetails({ form, set, submitError }: {
+function StepDetails({ form, set, submitError, errors }: {
   form: FormState;
   set: (field: keyof FormState, value: string) => void;
   submitError: string;
+  errors: FieldErrors;
 }) {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <Field label="Number of Employees" required>
+        <Field label="Number of Employees" required error={errors.employeeCount} htmlFor="employees">
           <div className="relative">
             <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
-              className={inputCls + " pl-10 appearance-none"}
+              id="employees"
+              className={inputCls(errors.employeeCount) + " pl-10 appearance-none"}
               value={form.employeeCount}
               onChange={(e) => set("employeeCount", e.target.value)}
             >
@@ -278,11 +341,12 @@ function StepDetails({ form, set, submitError }: {
             </select>
           </div>
         </Field>
-        <Field label="Annual Revenue Range">
+        <Field label="Annual Revenue Range" htmlFor="revenue">
           <div className="relative">
             <Briefcase size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
-              className={inputCls + " pl-10 appearance-none"}
+              id="revenue"
+              className={inputCls() + " pl-10 appearance-none"}
               value={form.annualRevenue}
               onChange={(e) => set("annualRevenue", e.target.value)}
             >
@@ -293,11 +357,12 @@ function StepDetails({ form, set, submitError }: {
         </Field>
       </div>
 
-      <Field label="Main Product / Service Categories">
+      <Field label="Main Product / Service Categories" htmlFor="products">
         <div className="relative">
           <Package size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <input
-            className={inputCls + " pl-10"}
+            id="products"
+            className={inputCls() + " pl-10"}
             placeholder="e.g. Steel, Agricultural Produce, Textiles, Electronics"
             value={form.productCategories}
             onChange={(e) => set("productCategories", e.target.value)}
@@ -305,10 +370,11 @@ function StepDetails({ form, set, submitError }: {
         </div>
       </Field>
 
-      <Field label="Business Description">
+      <Field label="Business Description" htmlFor="description">
         <textarea
+          id="description"
           rows={4}
-          className={inputCls + " resize-none"}
+          className={inputCls() + " resize-none"}
           placeholder="Briefly describe what your business does, your key strengths, and what you're looking for on BuySell…"
           value={form.description}
           onChange={(e) => set("description", e.target.value)}
@@ -316,9 +382,10 @@ function StepDetails({ form, set, submitError }: {
       </Field>
 
       {submitError && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3">
-          {submitError}
-        </p>
+        <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 flex items-start gap-2">
+          <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+          <span>{submitError}</span>
+        </div>
       )}
     </div>
   );
@@ -390,6 +457,9 @@ export default function OnboardingBusinessPage() {
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
   const [form, setForm] = useState<FormState>({
     orgType: null,
     companyName: "",
@@ -408,30 +478,79 @@ export default function OnboardingBusinessPage() {
   const currentStep = STEPS[stepIndex].id;
   const isLastStep = stepIndex === STEPS.length - 2;
 
-  // Stable setter — only the field value changes, not the function reference
-  const set = (field: keyof FormState, value: string) =>
+  const set = useCallback((field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user types
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }, []);
 
-  const setOrgType = (v: OrgType) =>
+  const setOrgType = useCallback((v: OrgType) => {
     setForm((prev) => ({ ...prev, orgType: v }));
+  }, []);
 
-  const canAdvance = () => {
+  const validateStep = useCallback((step: StepId): boolean => {
+    const errors: FieldErrors = {};
+
+    if (step === "company") {
+      errors.companyName = validateCompanyName(form.companyName);
+      errors.phone = validatePhone(form.phone);
+      errors.country = !form.country ? "Please select a country" : undefined;
+      errors.website = validateWebsite(form.website);
+    }
+
+    if (step === "details") {
+      errors.employeeCount = !form.employeeCount ? "Please select employee range" : undefined;
+    }
+
+    // Remove undefined values
+    const cleaned: FieldErrors = {};
+    for (const [k, v] of Object.entries(errors)) {
+      if (v) cleaned[k as keyof FieldErrors] = v;
+    }
+
+    setFieldErrors(cleaned);
+    return Object.keys(cleaned).length === 0;
+  }, [form]);
+
+  const canAdvance = useCallback(() => {
     if (currentStep === "role")    return !!form.orgType;
-    if (currentStep === "company") return form.companyName.trim().length > 1 && form.phone.trim().length > 4 && form.country.length > 0;
+    if (currentStep === "company") {
+      return form.companyName.trim().length > 1 && form.phone.trim().length > 4 && form.country.length > 0;
+    }
     if (currentStep === "details") return form.employeeCount.length > 0;
     return true;
-  };
+  }, [currentStep, form]);
+
+  const handleNext = useCallback(() => {
+    if (currentStep === "company" || currentStep === "details") {
+      if (!validateStep(currentStep)) return;
+    }
+    if (isLastStep) {
+      handleSubmit();
+    } else {
+      setStepIndex((i) => i + 1);
+      setFieldErrors({});
+    }
+  }, [currentStep, isLastStep, validateStep]);
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user) {
+      setSubmitError("You must be signed in to complete onboarding.");
+      return;
+    }
     setSubmitting(true);
     setSubmitError("");
+
     try {
       const regNum = form.registrationNumber.trim() || `REG-${Date.now().toString(36).toUpperCase()}`;
-
-      // Table only has country_code (e.g. "NG"), not a full country name column
       const countryCode = COUNTRY_CODES[form.country] || "NG";
 
+      // Use RPC for atomic transaction if available, otherwise manual cleanup
       const { data: org, error: orgError } = await supabase
         .from("organizations")
         .insert({
@@ -455,6 +574,7 @@ export default function OnboardingBusinessPage() {
         .single();
 
       if (orgError) throw orgError;
+      if (!org?.id) throw new Error("Failed to create organization");
 
       const newRole = form.orgType === "buyer" ? "buyer_admin" : "supplier_admin";
       const { error: userError } = await supabase
@@ -462,13 +582,16 @@ export default function OnboardingBusinessPage() {
         .update({ organization_id: org.id, role: newRole })
         .eq("id", user.id);
 
-      if (userError) throw userError;
+      if (userError) {
+        // Rollback: delete the orphaned org record
+        await supabase.from("organizations").delete().eq("id", org.id);
+        throw userError;
+      }
 
       setStepIndex(STEPS.length - 1);
     } catch (err: unknown) {
-      setSubmitError(
-        (err as { message?: string }).message || "Something went wrong. Please try again."
-      );
+      const message = (err as { message?: string }).message || "Something went wrong. Please try again.";
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -541,7 +664,7 @@ export default function OnboardingBusinessPage() {
             </div>
           )}
 
-          {/* Step content — AnimatePresence slides between steps */}
+          {/* Step content */}
           <div className="px-8 py-8">
             <AnimatePresence mode="wait">
               <motion.div
@@ -555,10 +678,10 @@ export default function OnboardingBusinessPage() {
                   <StepRole orgType={form.orgType} setOrgType={setOrgType} />
                 )}
                 {currentStep === "company" && (
-                  <StepCompany form={form} set={set} />
+                  <StepCompany form={form} set={set} errors={fieldErrors} />
                 )}
                 {currentStep === "details" && (
-                  <StepDetails form={form} set={set} submitError={submitError} />
+                  <StepDetails form={form} set={set} submitError={submitError} errors={fieldErrors} />
                 )}
                 {currentStep === "done" && (
                   <StepDone companyName={form.companyName} onDashboard={() => router.push("/dashboard")} />
@@ -572,7 +695,10 @@ export default function OnboardingBusinessPage() {
             <div className="px-8 pb-8 flex items-center justify-between gap-4">
               <button
                 type="button"
-                onClick={() => setStepIndex((i) => i - 1)}
+                onClick={() => {
+                  setStepIndex((i) => i - 1);
+                  setFieldErrors({});
+                }}
                 disabled={stepIndex === 0}
                 className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
@@ -582,10 +708,7 @@ export default function OnboardingBusinessPage() {
               <button
                 type="button"
                 disabled={!canAdvance() || submitting}
-                onClick={() => {
-                  if (isLastStep) handleSubmit();
-                  else setStepIndex((i) => i + 1);
-                }}
+                onClick={handleNext}
                 className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-white font-bold text-sm disabled:opacity-40 hover:bg-primary/90 hover:scale-105 active:scale-100 transition-all shadow-lg shadow-primary/25"
               >
                 {submitting ? (

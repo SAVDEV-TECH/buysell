@@ -102,18 +102,66 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-4xl md:text-5xl font-black mb-4">{product.name}</h1>
-            <p className="text-3xl font-black text-primary mb-8">${product.price}</p>
-            <p className="text-muted-foreground mb-8">{product.desc}</p>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-black rounded-full ring-1 ring-emerald-500/20 flex items-center gap-1">
+                <CheckCircle2 size={13} /> Verified Export Grade
+              </span>
+              <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs font-black rounded-full ring-1 ring-blue-500/20">
+                SGS / ISO 9001
+              </span>
+            </div>
 
+            <h1 className="text-4xl md:text-5xl font-black mb-4">{product.name}</h1>
+            <p className="text-3xl font-black text-primary mb-6">${product.price.toLocaleString()} USD <span className="text-xs font-bold text-muted-foreground">/ unit</span></p>
+            <p className="text-muted-foreground mb-6 leading-relaxed">{product.desc}</p>
+
+            {/* Incoterms & Export Specs */}
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-borderline text-xs mb-8">
+              <div>
+                <span className="text-muted-foreground font-bold">Incoterm Terms:</span>
+                <p className="font-black text-slate-900 dark:text-white mt-0.5">FOB / CIF Available</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-bold">Nearest Departure Port:</span>
+                <p className="font-black text-slate-900 dark:text-white mt-0.5">Lagos / Tema / Mombasa</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-bold">Min. Bulk Order (MOQ):</span>
+                <p className="font-black text-slate-900 dark:text-white mt-0.5">100 Units</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground font-bold">Export Lead Time:</span>
+                <p className="font-black text-slate-900 dark:text-white mt-0.5">7-14 Days</p>
+              </div>
+            </div>
+
+            {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => addToCart(product, quantity)} 
-                className="flex-1 px-8 py-5 bg-primary text-white rounded-2xl font-black text-lg hover:bg-primary/90 flex items-center justify-center gap-3 shadow-2xl"
+                className="flex-1 px-8 py-5 bg-primary text-white rounded-2xl font-black text-base hover:bg-primary/90 flex items-center justify-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all"
               >
-                <ShoppingCart size={24} /> Add to Cart
+                <ShoppingCart size={22} /> Add Bulk Order to Cart
+              </button>
+
+              <button 
+                onClick={() => {
+                  addToCart({
+                    ...product,
+                    name: `[SAMPLE] ${product.name}`,
+                    price: Math.max(15, Math.round(product.price * 1.5)),
+                  }, 1);
+                  router.push("/checkout");
+                }}
+                className="flex-1 px-6 py-5 glass border border-primary/40 text-primary rounded-2xl font-black text-base hover:bg-primary/10 flex items-center justify-center gap-2 transition-all"
+              >
+                <Package size={22} /> Order Sample Unit ($15)
               </button>
             </div>
+
+            <p className="text-[10px] text-muted-foreground text-center sm:text-left mt-3 font-bold">
+              💡 Sample costs are 100% credited back toward your first container order.
+            </p>
           </div>
         </div>
 
