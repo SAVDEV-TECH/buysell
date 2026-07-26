@@ -25,7 +25,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for major browsers using installed system channels */
   projects: [
     {
       name: "Google Chrome",
@@ -34,10 +34,6 @@ export default defineConfig({
     {
       name: "Microsoft Edge",
       use: { ...devices["Desktop Edge"], channel: "msedge" },
-    },
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
     },
   ],
 
