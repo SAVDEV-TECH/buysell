@@ -22,6 +22,7 @@ import { createClient } from "@/lib/supabase/client";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useLanguage } from "@/context/LanguageContext";
+import { getProductImageUrl } from "@/lib/productUtils";
 
 const PayWithPaystack = dynamic(() => import("@/components/PaystackButton"), {
   ssr: false,
@@ -357,7 +358,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           sellerName: p.supplier_organizations?.company_name || "Verified Supplier",
           moq: p.min_order_quantity || 1,
           isSellerVerified: true,
-          imageUrl: (Array.isArray(p.image_urls) && p.image_urls.length > 0) ? p.image_urls[0] : (p.image_url || ""),
+          imageUrl: getProductImageUrl(p),
         }));
 
         setProducts(formatted);

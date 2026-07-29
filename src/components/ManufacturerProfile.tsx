@@ -8,6 +8,29 @@ import { useCart } from "@/context/CartContext";
 import FloatingChatBox from "@/components/FloatingChatBox";
 import RFQModal from "@/components/RFQModal";
 import { createClient } from "@/lib/supabase/client";
+import { getProductImageUrl } from "@/lib/productUtils";
+
+function ProductCardImage({ product }: { product: any }) {
+  const [imgError, setImgError] = useState(false);
+  const imgUrl = getProductImageUrl(product);
+
+  if (!imgUrl || imgError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+        <Package size={32} className="text-muted-foreground opacity-20" />
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={imgUrl} 
+      alt={product.title || "Product"} 
+      onError={() => setImgError(true)} 
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+    />
+  );
+}
 
 export default function ManufacturerProfile({ id }: { id: string }) {
   const { setIsCartOpen } = useCart();
@@ -149,19 +172,11 @@ export default function ManufacturerProfile({ id }: { id: string }) {
 
         {activeTab === "catalog" && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.length > 0 ? products.map(product => {
-              const img = (Array.isArray(product.image_urls) && product.image_urls.length > 0) 
-                ? product.image_urls[0] 
-                : (product.image_url || "");
-              return (
-                <div key={product.id} className="solid-card overflow-hidden group hover:shadow-md transition-all flex flex-col">
-                  <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
-                    {img ? (
-                      <img src={img} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                    ) : (
-                      <Package size={32} className="text-muted-foreground opacity-20" />
-                    )}
-                  </div>
+            {products.length > 0 ? products.map(product => (
+              <div key={product.id} className="solid-card overflow-hidden group hover:shadow-md transition-all flex flex-col">
+                <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
+                  <ProductCardImage product={product} />
+                </div>
                   <div className="p-4 flex flex-col flex-1">
                     <h3 className="font-bold text-sm mb-2 line-clamp-2">{product.title}</h3>
                     <p className="text-xs text-muted-foreground mb-2">HS Code: {product.hs_code || "N/A"}</p>
@@ -175,8 +190,7 @@ export default function ManufacturerProfile({ id }: { id: string }) {
                     </div>
                   </div>
                 </div>
-              );
-            }) : (
+            )) : (
               <div className="col-span-full py-20 text-center glass rounded-3xl border border-dashed border-borderline">
                 <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">This manufacturer hasn't uploaded a catalog yet.</p>
               </div>
