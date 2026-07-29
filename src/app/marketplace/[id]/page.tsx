@@ -27,6 +27,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReviewSection from "@/components/ReviewSection";
 import { getAllProductImages } from "@/lib/productUtils";
+import BuySellLoader from "@/components/BuySellLoader";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -234,12 +235,7 @@ export default function ProductDetailPage() {
   }, [id, supabase]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader2 size={48} className="text-primary animate-spin mb-4" />
-        <p className="text-muted-foreground font-medium animate-pulse">Loading product details...</p>
-      </div>
-    );
+    return <BuySellLoader message="Opening product details..." fullScreen />;
   }
 
   if (!product) {

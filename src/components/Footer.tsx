@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { BuySellLogo } from "@/components/BuySellLogo";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -15,7 +16,7 @@ export default function Footer() {
           {/* Brand & Contact */}
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-6">
-              <span className="font-bold text-2xl tracking-tight text-foreground">BuySell</span>
+              <BuySellLogo size="md" showTagline={true} />
             </Link>
             <p className="text-muted-foreground text-sm mb-6 max-w-sm leading-relaxed">
               {t("footer_tagline")}

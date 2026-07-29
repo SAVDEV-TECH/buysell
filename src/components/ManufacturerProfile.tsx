@@ -9,6 +9,7 @@ import FloatingChatBox from "@/components/FloatingChatBox";
 import RFQModal from "@/components/RFQModal";
 import { createClient } from "@/lib/supabase/client";
 import { getProductImageUrl } from "@/lib/productUtils";
+import BuySellLoader from "@/components/BuySellLoader";
 
 function ProductCardImage({ product }: { product: any }) {
   const [imgError, setImgError] = useState(false);
@@ -83,12 +84,7 @@ export default function ManufacturerProfile({ id }: { id: string }) {
   }, [id, supabase]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/10">
-        <Loader2 className="animate-spin text-primary mb-4" size={48} />
-        <p className="text-muted-foreground font-bold tracking-widest uppercase text-xs">Accessing Manufacturer Records...</p>
-      </div>
-    );
+    return <BuySellLoader message="Accessing Manufacturer Records..." fullScreen />;
   }
 
   if (!manufacturer) {

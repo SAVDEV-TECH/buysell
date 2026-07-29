@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { BuySellLogo } from "@/components/BuySellLogo";
 
 const Navbar = () => {
   const { user, profile } = useAuth();
@@ -19,11 +20,9 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full bg-background dark:bg-slate-900 border-b border-border dark:border-slate-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex h-20 lg:h-16 items-center justify-between">
-          
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M2 20h20"/><path d="M4 20V8l4-4 4 4v12"/><path d="M12 20v-8l4-4 4 4v8"/><path d="M8 12h8"/></svg>
-              <span className="font-black text-lg tracking-tight text-primary">BuySell</span>
+            <Link href="/" className="flex items-center">
+              <BuySellLogo size="sm" showTagline={false} />
             </Link>
           </div>
           
