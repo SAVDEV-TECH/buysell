@@ -36,3 +36,35 @@ export function getProductImageUrl(product: any): string {
 
   return "";
 }
+
+export function getAllProductImages(product: any): string[] {
+  if (!product) return [];
+
+  let list: string[] = [];
+
+  if (Array.isArray(product.image_urls) && product.image_urls.length > 0) {
+    list = product.image_urls.filter((url: any) => typeof url === "string" && url.trim());
+  } else if (typeof product.image_urls === "string" && product.image_urls.trim()) {
+    const raw = product.image_urls.trim();
+    if (raw.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          list = parsed.filter((url: any) => typeof url === "string" && url.trim());
+        }
+      } catch {
+        // Fallthrough
+      }
+    } else if (raw.startsWith("http")) {
+      list = [raw];
+    }
+  } else if (Array.isArray(product.images) && product.images.length > 0) {
+    list = product.images.filter((url: any) => typeof url === "string" && url.trim());
+  } else if (typeof product.image_url === "string" && product.image_url.trim()) {
+    list = [product.image_url.trim()];
+  } else if (typeof product.imageUrl === "string" && product.imageUrl.trim()) {
+    list = [product.imageUrl.trim()];
+  }
+
+  return list;
+}

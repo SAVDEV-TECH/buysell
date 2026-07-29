@@ -382,15 +382,36 @@ export default function NewProductPage() {
     setError("");
 
     try {
-      // 1. Ensure category exists
+      // 1. Ensure category exists and is valid
       let catId = categoryId;
-      if (!catId && categories.length === 0) {
-        const { data: newCat } = await supabase
-          .from("product_categories")
-          .insert({ name: "General B2B", slug: "general-b2b" })
-          .select()
-          .single();
-        catId = newCat?.id || "";
+      if (!catId) {
+        if (categories.length > 0) {
+          catId = categories[0].id;
+        } else {
+          // Check database for existing categories
+          const { data: dbCats } = await supabase
+            .from("product_categories")
+            .select("id")
+            .limit(1);
+
+          if (dbCats && dbCats.length > 0) {
+            catId = dbCats[0].id;
+          } else {
+            // Auto-create a default category if none exists
+            const { data: newCat } = await supabase
+              .from("product_categories")
+              .insert({ name: "General B2B", slug: `general-b2b-${Date.now()}` })
+              .select()
+              .single();
+            catId = newCat?.id || "";
+          }
+        }
+      }
+
+      if (!catId) {
+        setError("Please select a product category.");
+        setLoading(false);
+        return;
       }
 
       // 2. Upload new images
@@ -409,7 +430,7 @@ export default function NewProductPage() {
 
       const payload = {
         supplier_organization_id: organizationId,
-        category_id:        catId || null,
+        category_id:        catId,
         title:              title.trim(),
         description:        description.trim(),
         hs_code:            hsCode.trim() || null,

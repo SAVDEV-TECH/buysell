@@ -16,14 +16,172 @@ import {
   Minus,
   CheckCircle2,
   Building2,
-  DollarSign
+  DollarSign,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  X
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ReviewSection from "@/components/ReviewSection";
+import { getAllProductImages } from "@/lib/productUtils";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
+
+function ProductImageGallery({ images, title }: { images: string[]; title: string }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+
+  const activeImage = images[selectedIndex] || "";
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Main Image Stage */}
+      <div className="aspect-square glass rounded-[2.5rem] md:rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center relative bg-muted/20 group">
+        {activeImage && !imageErrors[selectedIndex] ? (
+          <img
+            src={activeImage}
+            alt={`${title} - View ${selectedIndex + 1}`}
+            onError={() => setImageErrors((prev) => ({ ...prev, [selectedIndex]: true }))}
+            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+            <Package size={72} className="text-muted-foreground opacity-20" />
+            <span className="text-xs text-muted-foreground font-medium">No Image Preview</span>
+          </div>
+        )}
+
+        {/* Navigation Arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              type="button"
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+              aria-label="Previous Image"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={handleNext}
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+              aria-label="Next Image"
+            >
+              <ChevronRight size={20} />
+            </button>
+
+            {/* Counter Pill */}
+            <div className="absolute bottom-4 right-4 px-3.5 py-1 rounded-full glass text-[11px] font-black text-slate-900 dark:text-white border border-white/20 shadow-md">
+              {selectedIndex + 1} / {images.length}
+            </div>
+          </>
+        )}
+
+        {/* Fullscreen Button */}
+        {activeImage && !imageErrors[selectedIndex] && (
+          <button
+            onClick={() => setIsFullscreen(true)}
+            type="button"
+            className="absolute top-4 right-4 w-9 h-9 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
+            title="View Fullscreen"
+          >
+            <Maximize2 size={15} />
+          </button>
+        )}
+      </div>
+
+      {/* Thumbnails Row */}
+      {images.length > 1 && (
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+          {images.map((img, idx) => {
+            const isSelected = idx === selectedIndex;
+            const hasError = imageErrors[idx];
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setSelectedIndex(idx)}
+                className={`relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all ${
+                  isSelected
+                    ? "border-primary ring-4 ring-primary/20 scale-105 shadow-md"
+                    : "border-borderline opacity-60 hover:opacity-100 hover:scale-100"
+                }`}
+              >
+                {!hasError ? (
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${idx + 1}`}
+                    onError={() => setImageErrors((prev) => ({ ...prev, [idx]: true }))}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Package size={20} className="opacity-30" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox Modal */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <button
+            onClick={() => setIsFullscreen(false)}
+            type="button"
+            className="absolute top-6 right-6 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all z-50"
+          >
+            <X size={24} />
+          </button>
+
+          <div className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center">
+            <img
+              src={activeImage}
+              alt={title}
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  type="button"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -50,9 +208,7 @@ export default function ProductDetailPage() {
           productData = fallback.data;
         }
         if (productData) {
-          const imgs = Array.isArray(productData.image_urls) && productData.image_urls.length > 0 
-            ? productData.image_urls 
-            : (productData.image_url ? [productData.image_url] : []);
+          const imgs = getAllProductImages(productData);
           setProduct({
             id: productData.id,
             name: productData.title,
@@ -112,13 +268,7 @@ export default function ProductDetailPage() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          <div className="aspect-square glass rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center relative bg-muted/20">
-            {product.imageUrl ? (
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-            ) : (
-              <Package size={80} className="text-muted-foreground opacity-20" />
-            )}
-          </div>
+          <ProductImageGallery images={product.images || []} title={product.name} />
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-3">
