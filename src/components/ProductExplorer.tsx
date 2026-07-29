@@ -331,21 +331,33 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-        if (error) throw error;
+        const { data, error } = await supabase
+          .from("products")
+          .select("*, supplier_organizations(company_name), product_categories(name)")
+          .order("created_at", { ascending: false });
+        
+        let rawData = data;
+        if (error) {
+          console.warn("Product join fetch notice:", error.message);
+          const fallback = await supabase.from("products").select("*").order("created_at", { ascending: false });
+          rawData = fallback.data;
+        }
 
-        const formatted: Product[] = (data || []).map((p: any) => ({
+        const formatted: Product[] = (rawData || []).map((p: any) => ({
           id: p.id,
-          name: p.title,
-          price: p.tiered_pricing?.[0]?.unit_price || 10,
-          category: "Industrial",
+          name: p.title || "Unnamed Product",
+          price: Array.isArray(p.tiered_pricing) && p.tiered_pricing.length > 0 
+            ? (p.tiered_pricing[0].unit_price || p.tiered_pricing[0].price || 10)
+            : 10,
+          category: p.product_categories?.name || "General B2B",
           desc: p.description || "",
           rating: 4.8,
           reviews: 12,
           sellerId: p.supplier_organization_id || "supplier",
-          sellerName: "Supplier Node",
+          sellerName: p.supplier_organizations?.company_name || "Verified Supplier",
           moq: p.min_order_quantity || 1,
           isSellerVerified: true,
+          imageUrl: (Array.isArray(p.image_urls) && p.image_urls.length > 0) ? p.image_urls[0] : (p.image_url || ""),
         }));
 
         setProducts(formatted);

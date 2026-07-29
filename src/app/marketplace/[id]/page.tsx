@@ -39,17 +39,32 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
-        if (error) throw error;
-        if (data) {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*, supplier_organizations(company_name), product_categories(name)")
+          .eq("id", id)
+          .single();
+        let productData = data;
+        if (error) {
+          const fallback = await supabase.from("products").select("*").eq("id", id).single();
+          productData = fallback.data;
+        }
+        if (productData) {
+          const imgs = Array.isArray(productData.image_urls) && productData.image_urls.length > 0 
+            ? productData.image_urls 
+            : (productData.image_url ? [productData.image_url] : []);
           setProduct({
-            id: data.id,
-            name: data.title,
-            price: data.tiered_pricing?.[0]?.unit_price || 10,
-            category: "Industrial",
-            desc: data.description || "",
-            sellerId: data.supplier_organization_id,
-            sellerName: "Supplier Node",
+            id: productData.id,
+            name: productData.title,
+            price: Array.isArray(productData.tiered_pricing) && productData.tiered_pricing.length > 0
+              ? (productData.tiered_pricing[0].unit_price || productData.tiered_pricing[0].price || 10)
+              : 10,
+            category: productData.product_categories?.name || "General B2B",
+            desc: productData.description || "",
+            sellerId: productData.supplier_organization_id,
+            sellerName: productData.supplier_organizations?.company_name || "Verified Supplier",
+            imageUrl: imgs[0] || "",
+            images: imgs,
           });
         }
       } catch (error) {
@@ -97,8 +112,12 @@ export default function ProductDetailPage() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          <div className="aspect-square glass rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center">
-            <Package size={80} className="text-muted-foreground opacity-20" />
+          <div className="aspect-square glass rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center relative bg-muted/20">
+            {product.imageUrl ? (
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+            ) : (
+              <Package size={80} className="text-muted-foreground opacity-20" />
+            )}
           </div>
 
           <div className="flex flex-col">

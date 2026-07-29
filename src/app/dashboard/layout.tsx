@@ -122,7 +122,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-4 pb-28 lg:p-8 lg:pb-8">
            {children}
         </main>
       </div>

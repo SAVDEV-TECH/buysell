@@ -358,7 +358,7 @@ export default function NewProductPage() {
       });
       if (uploadErr) {
         console.warn("[Images] upload error:", uploadErr.message);
-        continue;
+        throw new Error(`Image upload failed: ${uploadErr.message}. Ensure the 'product-images' bucket exists in Supabase Storage.`);
       }
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       if (pub?.publicUrl) urls.push(pub.publicUrl);
@@ -418,6 +418,7 @@ export default function NewProductPage() {
         tiered_pricing:     tiers,
         status,
         image_urls:         allImageUrls,
+        image_url:          allImageUrls[0] || null,
         currency,
         keywords:           keywordsArr,
         lead_time_days:     leadTime ? parseInt(leadTime) : null,

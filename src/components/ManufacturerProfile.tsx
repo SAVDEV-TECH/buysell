@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Calendar, Users, MessageSquare, ArrowLeft, Star, CheckCircle2, Video } from "lucide-react";
+import { MapPin, Calendar, Users, MessageSquare, ArrowLeft, Star, CheckCircle2, Video, Package, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useState, useEffect } from "react";
@@ -8,7 +8,6 @@ import { useCart } from "@/context/CartContext";
 import FloatingChatBox from "@/components/FloatingChatBox";
 import RFQModal from "@/components/RFQModal";
 import { createClient } from "@/lib/supabase/client";
-import { Loader2 } from "lucide-react";
 
 export default function ManufacturerProfile({ id }: { id: string }) {
   const { setIsCartOpen } = useCart();
@@ -150,22 +149,34 @@ export default function ManufacturerProfile({ id }: { id: string }) {
 
         {activeTab === "catalog" && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {products.length > 0 ? products.map(product => (
-              <div key={product.id} className="solid-card overflow-hidden group hover:shadow-md transition-all flex flex-col">
-                <div className="p-4 flex flex-col flex-1">
-                  <h3 className="font-bold text-sm mb-2 line-clamp-2">{product.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-2">HS Code: {product.hs_code}</p>
-                  <div className="mt-auto flex justify-between items-end pt-3 border-t border-border">
-                    <button 
-                      onClick={() => handleRequestQuote(product)}
-                      className="text-amber-600 hover:bg-amber-50 p-2 rounded-xl transition-all"
-                    >
-                      <MessageSquare size={16} />
-                    </button>
+            {products.length > 0 ? products.map(product => {
+              const img = (Array.isArray(product.image_urls) && product.image_urls.length > 0) 
+                ? product.image_urls[0] 
+                : (product.image_url || "");
+              return (
+                <div key={product.id} className="solid-card overflow-hidden group hover:shadow-md transition-all flex flex-col">
+                  <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
+                    {img ? (
+                      <img src={img} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    ) : (
+                      <Package size={32} className="text-muted-foreground opacity-20" />
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-bold text-sm mb-2 line-clamp-2">{product.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-2">HS Code: {product.hs_code || "N/A"}</p>
+                    <div className="mt-auto flex justify-between items-end pt-3 border-t border-border">
+                      <button 
+                        onClick={() => handleRequestQuote(product)}
+                        className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-2 rounded-xl transition-all font-bold text-xs flex items-center gap-1.5"
+                      >
+                        <MessageSquare size={16} /> Request Quote
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )) : (
+              );
+            }) : (
               <div className="col-span-full py-20 text-center glass rounded-3xl border border-dashed border-borderline">
                 <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">This manufacturer hasn't uploaded a catalog yet.</p>
               </div>

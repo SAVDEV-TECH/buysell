@@ -60,7 +60,7 @@ export default function FloatingChatBox({ manufacturerId, manufacturerName, isOp
         initial={{ opacity: 0, y: 50, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[350px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-borderline z-50 overflow-hidden flex flex-col transition-all duration-300 ${isMinimized ? 'h-[60px]' : 'h-[500px] max-h-[80vh]'}`}
+        className={`fixed bottom-20 right-4 sm:bottom-6 sm:right-6 w-[350px] max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-borderline z-50 overflow-hidden flex flex-col transition-all duration-300 ${isMinimized ? 'h-[60px]' : 'h-[500px] max-h-[80vh]'}`}
       >
         <div 
           className="bg-[#0f172a] text-white p-4 flex items-center justify-between cursor-pointer"

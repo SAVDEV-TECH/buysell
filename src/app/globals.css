@@ -46,30 +46,58 @@
     --destructive: #ef4444;
     --destructive-foreground: #f8fafc;
     --border: #e2e8f0;
+    --borderline: #e2e8f0;
     --input: #e2e8f0;
     --ring: #020817;
     --radius: 0.5rem;
     --success: #10b981;
   }
 
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      --background: #020817;
+      --foreground: #f8fafc;
+      --card: #0f172a;
+      --card-foreground: #f8fafc;
+      --popover: #0f172a;
+      --popover-foreground: #f8fafc;
+      --primary: #3b82f6;
+      --primary-foreground: #ffffff;
+      --secondary: #06b6d4;
+      --secondary-foreground: #ffffff;
+      --muted: #1e293b;
+      --muted-foreground: #cbd5e1;
+      --accent: #fbbf24;
+      --accent-foreground: #020817;
+      --destructive: #ef4444;
+      --destructive-foreground: #f8fafc;
+      --border: #1e293b;
+      --borderline: #1e293b;
+      --input: #1e293b;
+      --ring: #cbd5e1;
+      --success: #10b981;
+    }
+  }
+
   .dark {
     --background: #020817;
     --foreground: #f8fafc;
-    --card: #020817;
+    --card: #0f172a;
     --card-foreground: #f8fafc;
-    --popover: #020817;
+    --popover: #0f172a;
     --popover-foreground: #f8fafc;
-    --primary: #60a5fa;
-    --primary-foreground: #020817;
+    --primary: #3b82f6;
+    --primary-foreground: #ffffff;
     --secondary: #06b6d4;
-    --secondary-foreground: #020817;
+    --secondary-foreground: #ffffff;
     --muted: #1e293b;
     --muted-foreground: #cbd5e1;
     --accent: #fbbf24;
     --accent-foreground: #020817;
-    --destructive: #7f1d1d;
+    --destructive: #ef4444;
     --destructive-foreground: #f8fafc;
     --border: #1e293b;
+    --borderline: #1e293b;
     --input: #1e293b;
     --ring: #cbd5e1;
     --success: #10b981;
@@ -87,6 +115,22 @@
     color: var(--foreground);
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+.glass {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass {
+    background-color: rgba(15, 23, 42, 0.85);
+  }
+}
+
+.dark .glass {
+  background-color: rgba(15, 23, 42, 0.85);
 }
 
 .solid-card {
