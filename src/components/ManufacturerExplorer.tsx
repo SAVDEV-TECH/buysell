@@ -6,6 +6,7 @@ import Link from "next/link";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
+import BuySellLoader from "@/components/BuySellLoader";
 
 export interface Manufacturer {
   id: string;
@@ -82,7 +83,7 @@ export default function ManufacturerExplorer() {
             Manufacturer Directory
           </h1>
           <p className="text-lg text-muted-foreground">
-            Discover, verify, and connect directly with top-tier suppliers in PostgreSQL.
+            Discover, verify, and connect directly with top-tier verified suppliers on the BuySell network.
           </p>
         </div>
 
@@ -137,10 +138,7 @@ export default function ManufacturerExplorer() {
         </AnimatePresence>
 
         {loading ? (
-          <div className="py-32 flex flex-col items-center justify-center gap-4 text-muted-foreground">
-            <Loader2 className="animate-spin" size={48} />
-            <p className="font-medium animate-pulse">Scanning manufacturer telemetry...</p>
-          </div>
+          <BuySellLoader message="Searching BuySell verified manufacturers..." fullScreen={false} />
         ) : error ? (
           <div className="py-32 text-center bg-card rounded-lg border border-dashed border-red-200 px-6">
             <h3 className="text-2xl font-bold mb-2 text-red-600">Access Issue</h3>
@@ -157,17 +155,22 @@ export default function ManufacturerExplorer() {
                 className="solid-card p-6 flex flex-col group hover:shadow-md transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <Link href={`/manufacturers/${mfg.id}`} className="hover:text-primary transition-colors">
-                      <h3 className="text-xl font-bold flex items-center gap-2">
-                        {mfg.name}
-                        {mfg.isVerified && <VerifiedBadge />}
-                      </h3>
-                    </Link>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                       <span className="bg-secondary text-secondary-foreground text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded">
-                         {mfg.industry}
-                       </span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/10 to-orange-500/10 dark:from-blue-600/20 dark:to-orange-500/20 border border-borderline flex items-center justify-center font-black text-lg text-primary flex-shrink-0">
+                      {mfg.name ? mfg.name.charAt(0).toUpperCase() : "B"}
+                    </div>
+                    <div>
+                      <Link href={`/manufacturers/${mfg.id}`} className="hover:text-primary transition-colors">
+                        <h3 className="text-xl font-bold flex items-center gap-2">
+                          {mfg.name}
+                          {mfg.isVerified && <VerifiedBadge />}
+                        </h3>
+                      </Link>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                         <span className="bg-secondary text-secondary-foreground text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded">
+                           {mfg.industry}
+                         </span>
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">

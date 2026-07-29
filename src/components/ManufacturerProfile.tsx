@@ -91,7 +91,7 @@ export default function ManufacturerProfile({ id }: { id: string }) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/10 text-center p-6">
         <h2 className="text-3xl font-black mb-4">Manufacturer Not Found</h2>
-        <p className="text-muted-foreground mb-8">The requested manufacturer node does not exist.</p>
+        <p className="text-muted-foreground mb-8">The requested manufacturer profile could not be found on BuySell.</p>
         <Link href="/manufacturers" className="px-8 py-3 bg-primary text-white rounded-xl font-bold">Return to Directory</Link>
       </div>
     );
