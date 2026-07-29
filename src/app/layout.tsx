@@ -12,7 +12,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import PwaRegister from "@/components/PwaRegister";
 import GoogleOneTap from "@/components/GoogleOneTap";
-import NotificationToast from "@/components/NotificationToast";
+import LiveNotificationToast from "@/components/LiveNotificationToast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -61,7 +61,7 @@ export default function RootLayout({
                   <MobileBottomNav />
                   <PwaRegister />
                   <GoogleOneTap />
-                  <NotificationToast />
+                  <LiveNotificationToast />
                 </CartProvider>
               </NotificationProvider>
             </AuthProvider>
