@@ -346,24 +346,69 @@ export default function NewProductPage() {
     load();
   }, [editId, isEdit]);
 
-  // ── Upload images to Supabase Storage ─────────────────────────────────────────
+  // ── Fast Client-side Image Compressor ──────────────────────────────────────────
+  const compressImage = (file: File, maxWidth = 1600, quality = 0.82): Promise<Blob | File> => {
+    if (!file.type.startsWith("image/") || file.type.includes("svg")) return Promise.resolve(file);
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { resolve(file); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) resolve(blob);
+            else resolve(file);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      img.src = url;
+    });
+  };
+
+  // ── Ultra-fast Parallel Upload to Supabase Storage ────────────────────────────
   const uploadImages = async (files: File[]): Promise<string[]> => {
-    const urls: string[] = [];
-    for (const file of files) {
-      const ext = file.name.split(".").pop();
+    if (!files || files.length === 0) return [];
+    
+    const uploadPromises = files.map(async (file) => {
+      const compressed = await compressImage(file);
+      const ext = file.name.split(".").pop() || "jpg";
       const path = `products/${organizationId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("product-images").upload(path, file, {
-        cacheControl: "3600",
+      
+      const { error: uploadErr } = await supabase.storage.from("product-images").upload(path, compressed, {
+        cacheControl: "31536000",
+        contentType: compressed instanceof Blob ? "image/jpeg" : file.type,
         upsert: false,
       });
+
       if (uploadErr) {
         console.warn("[Images] upload error:", uploadErr.message);
         throw new Error(`Image upload failed: ${uploadErr.message}. Ensure the 'product-images' bucket exists in Supabase Storage.`);
       }
+
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
-      if (pub?.publicUrl) urls.push(pub.publicUrl);
-    }
-    return urls;
+      return pub?.publicUrl || "";
+    });
+
+    const results = await Promise.all(uploadPromises);
+    return results.filter(Boolean);
   };
 
   // ── Submit ────────────────────────────────────────────────────────────────────
