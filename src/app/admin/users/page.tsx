@@ -88,6 +88,45 @@ export default function AdminUsersPage() {
     }
   };
 
+  const verifyUserOrg = async (userRecord: UserRecord) => {
+    if (!userRecord.organization_id) {
+      alert("This user does not have an attached business organization to verify.");
+      return;
+    }
+
+    try {
+      await supabase
+        .from("organizations")
+        .update({
+          verification_level: "verified",
+          is_verified: true,
+          is_active: true,
+        })
+        .eq("id", userRecord.organization_id);
+
+      await supabase.from("notifications").insert({
+        user_id: userRecord.id,
+        title: "🎉 Business Verification Approved!",
+        message: "Your business profile has been approved by admin. You can now list products and receive orders.",
+        type: "VERIFICATION",
+        link: "/dashboard",
+        read: false,
+      });
+
+      await supabase.from("approval_actions").insert({
+        actor_id: adminUser?.id,
+        action: "approved",
+        notes: `Direct verification of user ${userRecord.email} / org ${userRecord.organization_id}`,
+      }).maybeSingle();
+
+      alert(`Successfully verified organization for ${userRecord.full_name || userRecord.email}!`);
+      fetchUsers();
+    } catch (err: any) {
+      console.error("Error verifying org:", err);
+      alert("Failed to verify organization: " + (err.message || err));
+    }
+  };
+
   const sendNotification = async () => {
     if (!notifModal || !notifTitle.trim() || !notifMessage.trim()) return;
     setSendingNotif(true);
@@ -268,12 +307,28 @@ export default function AdminUsersPage() {
                       </td>
 
                       <td className="px-5 py-4">
-                        <button
-                          onClick={() => setNotifModal(u)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[11px] font-bold transition-all border border-slate-700"
-                        >
-                          <Bell size={11} /> Notify
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {u.organization_id && (u.org as any)?.verification_level !== "verified" ? (
+                            <button
+                              onClick={() => verifyUserOrg(u)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-[11px] font-black transition-all border border-emerald-600/30"
+                              title="Approve & Verify Business"
+                            >
+                              <ShieldCheck size={12} /> Verify Business
+                            </button>
+                          ) : (u.org as any)?.verification_level === "verified" ? (
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                              <ShieldCheck size={12} /> Verified
+                            </span>
+                          ) : null}
+
+                          <button
+                            onClick={() => setNotifModal(u)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[11px] font-bold transition-all border border-slate-700"
+                          >
+                            <Bell size={11} /> Notify
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
