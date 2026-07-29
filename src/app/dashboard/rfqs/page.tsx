@@ -33,6 +33,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { generateQuotationPDF } from "@/lib/pdfQuotationGenerator";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface RFQ {
@@ -666,24 +667,34 @@ export default function RFQManagementPage() {
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-borderline/40 text-[10px] text-muted-foreground">
+                          <div className="flex items-center justify-between pt-2 border-t border-borderline/40 text-[10px] text-muted-foreground flex-wrap gap-2">
                             <span>⚡ Lead time: <strong>{quote.lead_time_days} days</strong></span>
 
-                            {/* Actions for Buyer */}
-                            {isBuyer && quote.status === "submitted" && (
+                            <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleAcceptQuote(quote)}
-                                disabled={acceptingQuoteId === quote.id}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                type="button"
+                                onClick={() => generateQuotationPDF({ rfq: selectedRFQ, quote })}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600/20 rounded-lg font-bold transition-all text-[11px]"
                               >
-                                {acceptingQuoteId === quote.id ? (
-                                  <Loader2 size={12} className="animate-spin" />
-                                ) : (
-                                  <Check size={12} />
-                                )}
-                                Accept & Generate Order
+                                <FileText size={12} /> Download PDF Quote
                               </button>
-                            )}
+
+                              {/* Actions for Buyer */}
+                              {isBuyer && quote.status === "submitted" && (
+                                <button
+                                  onClick={() => handleAcceptQuote(quote)}
+                                  disabled={acceptingQuoteId === quote.id}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                >
+                                  {acceptingQuoteId === quote.id ? (
+                                    <Loader2 size={12} className="animate-spin" />
+                                  ) : (
+                                    <Check size={12} />
+                                  )}
+                                  Accept & Generate Order
+                                </button>
+                              )}
+                            </div>
 
                             {quote.status === "accepted" && (
                               <span className="flex items-center gap-1 text-emerald-600 font-black uppercase tracking-wider">
