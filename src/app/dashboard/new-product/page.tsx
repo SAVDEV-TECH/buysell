@@ -418,7 +418,6 @@ export default function NewProductPage() {
         tiered_pricing:     tiers,
         status,
         image_urls:         allImageUrls,
-        image_url:          allImageUrls[0] || null,
         currency,
         keywords:           keywordsArr,
         lead_time_days:     leadTime ? parseInt(leadTime) : null,
