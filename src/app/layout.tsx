@@ -6,10 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { LanguageProvider } from "@/context/LanguageContext";
-import Navbar from "@/components/Navbar";
-import CartDrawer from "@/components/CartDrawer";
-import MobileBottomNav from "@/components/MobileBottomNav";
-import Footer from "@/components/Footer";
+import MainLayoutShell from "@/components/MainLayoutShell";
 import PwaRegister from "@/components/PwaRegister";
 import GoogleOneTap from "@/components/GoogleOneTap";
 import LiveNotificationToast from "@/components/LiveNotificationToast";
@@ -52,13 +49,7 @@ export default function RootLayout({
             <AuthProvider>
               <NotificationProvider>
                 <CartProvider>
-                  <Navbar />
-                  <CartDrawer />
-                  <main className="flex-1 pt-16 pb-24 md:pb-0">
-                    {children}
-                  </main>
-                  <Footer />
-                  <MobileBottomNav />
+                  <MainLayoutShell>{children}</MainLayoutShell>
                   <PwaRegister />
                   <GoogleOneTap />
                   <LiveNotificationToast />
