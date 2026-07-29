@@ -89,25 +89,47 @@ export default function AdminUsersPage() {
   };
 
   const verifyUserOrg = async (userRecord: UserRecord) => {
-    if (!userRecord.organization_id) {
-      alert("This user does not have an attached business organization to verify.");
-      return;
-    }
-
     try {
-      await supabase
-        .from("organizations")
-        .update({
-          verification_level: "verified",
-          is_verified: true,
-          is_active: true,
-        })
-        .eq("id", userRecord.organization_id);
+      let orgId = userRecord.organization_id;
+
+      // If user does not have an organization record yet, auto-create one for them
+      if (!orgId) {
+        const { data: newOrg, error: createErr } = await supabase
+          .from("organizations")
+          .insert({
+            company_name: userRecord.full_name ? `${userRecord.full_name}'s Enterprise` : `Enterprise (${userRecord.email})`,
+            verification_level: "verified",
+            is_verified: true,
+            is_active: true,
+            owner_id: userRecord.id,
+          })
+          .select("id")
+          .single();
+
+        if (createErr || !newOrg) throw (createErr || new Error("Failed to create organization"));
+        orgId = newOrg.id;
+
+        // Link user to new organization
+        await supabase
+          .from("users")
+          .update({ organization_id: orgId })
+          .eq("id", userRecord.id);
+      } else {
+        // Update existing organization
+        await supabase
+          .from("organizations")
+          .update({
+            verification_level: "verified",
+            is_verified: true,
+            is_active: true,
+          })
+          .eq("id", orgId);
+      }
 
       await supabase.from("notifications").insert({
         user_id: userRecord.id,
-        title: "🎉 Business Verification Approved!",
-        message: "Your business profile has been approved by admin. You can now list products and receive orders.",
+        title: "🎉 Account & Business Verification Approved!",
+        message: "Your account and business profile have been approved by admin. You can now list products, receive orders, and access payouts.",
         type: "VERIFICATION",
         link: "/dashboard",
         read: false,
@@ -116,14 +138,14 @@ export default function AdminUsersPage() {
       await supabase.from("approval_actions").insert({
         actor_id: adminUser?.id,
         action: "approved",
-        notes: `Direct verification of user ${userRecord.email} / org ${userRecord.organization_id}`,
+        notes: `Direct verification of user ${userRecord.email} / org ${orgId}`,
       }).maybeSingle();
 
-      alert(`Successfully verified organization for ${userRecord.full_name || userRecord.email}!`);
+      alert(`Successfully verified account for ${userRecord.full_name || userRecord.email}!`);
       fetchUsers();
     } catch (err: any) {
       console.error("Error verifying org:", err);
-      alert("Failed to verify organization: " + (err.message || err));
+      alert("Failed to verify user: " + (err.message || err));
     }
   };
 
@@ -308,19 +330,19 @@ export default function AdminUsersPage() {
 
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
-                          {u.organization_id && (u.org as any)?.verification_level !== "verified" ? (
-                            <button
-                              onClick={() => verifyUserOrg(u)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-[11px] font-black transition-all border border-emerald-600/30"
-                              title="Approve & Verify Business"
-                            >
-                              <ShieldCheck size={12} /> Verify Business
-                            </button>
-                          ) : (u.org as any)?.verification_level === "verified" ? (
+                          {(u.org as any)?.verification_level === "verified" ? (
                             <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400">
                               <ShieldCheck size={12} /> Verified
                             </span>
-                          ) : null}
+                          ) : (
+                            <button
+                              onClick={() => verifyUserOrg(u)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-[11px] font-black transition-all border border-emerald-600/30"
+                              title="Approve & Verify Account / Business"
+                            >
+                              <ShieldCheck size={12} /> Verify User
+                            </button>
+                          )}
 
                           <button
                             onClick={() => setNotifModal(u)}
