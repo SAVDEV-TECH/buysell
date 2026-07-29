@@ -74,15 +74,42 @@ export default function AdminVerificationsPage() {
   const fetchOrgs = useCallback(async () => {
     if (role !== "super_admin") return;
     try {
-      const { data, error } = await supabase
+      // 1. First attempt select with owner join
+      let { data, error } = await supabase
         .from("organizations")
         .select(`
           *,
-          owner:users!organizations_owner_id_fkey(full_name, email)
+          owner:users(full_name, email)
         `)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      // 2. If join fails or returns error, fallback to select * and manually associate owner
+      if (error || !data) {
+        console.warn("[AdminVerifications] Join fetch warning, attempting fallback query:", error?.message);
+        const { data: rawOrgs, error: rawErr } = await supabase
+          .from("organizations")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (rawErr) throw rawErr;
+        data = rawOrgs || [];
+
+        // Manually fetch owners for these orgs if owner_id exists
+        const ownerIds = Array.from(new Set((data as any[]).map((o) => o.owner_id).filter(Boolean)));
+        if (ownerIds.length > 0) {
+          const { data: owners } = await supabase
+            .from("users")
+            .select("id, full_name, email")
+            .in("id", ownerIds);
+
+          const ownerMap = new Map((owners || []).map((u) => [u.id, u]));
+          data = data.map((o) => ({
+            ...o,
+            owner: ownerMap.get(o.owner_id) || null,
+          }));
+        }
+      }
+
       setOrgs((data as Organization[]) || []);
     } catch (err) {
       console.error("Error fetching orgs:", err);
@@ -206,8 +233,18 @@ export default function AdminVerificationsPage() {
     }
   };
 
+  const isPending = (o: Organization) => {
+    return (
+      o.verification_level === "pending" ||
+      o.verification_level === "unverified" ||
+      (!o.is_verified && o.verification_level !== "verified" && o.verification_level !== "rejected")
+    );
+  };
+
   const filtered = orgs.filter((o) => {
-    if (activeTab !== "all" && o.verification_level !== activeTab) return false;
+    if (activeTab === "pending" && !isPending(o)) return false;
+    if (activeTab === "verified" && o.verification_level !== "verified" && !o.is_verified) return false;
+    if (activeTab === "rejected" && o.verification_level !== "rejected") return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -221,8 +258,8 @@ export default function AdminVerificationsPage() {
   });
 
   const counts = {
-    pending: orgs.filter((o) => o.verification_level === "pending").length,
-    verified: orgs.filter((o) => o.verification_level === "verified").length,
+    pending: orgs.filter(isPending).length,
+    verified: orgs.filter((o) => o.verification_level === "verified" || o.is_verified).length,
     rejected: orgs.filter((o) => o.verification_level === "rejected").length,
     all: orgs.length,
   };

@@ -69,21 +69,52 @@ export default function VerificationDetailPage() {
     const fetchOrgDetail = async () => {
       setLoading(true);
       try {
-        const { data: orgData } = await supabase
+        let { data: orgData, error: orgErr } = await supabase
           .from("organizations")
-          .select(`*, owner:users!organizations_owner_id_fkey(full_name, email, created_at)`)
+          .select(`*, owner:users(full_name, email, created_at)`)
           .eq("id", id as string)
-          .single();
+          .maybeSingle();
+
+        if (orgErr || !orgData) {
+          const { data: rawOrg } = await supabase
+            .from("organizations")
+            .select("*")
+            .eq("id", id as string)
+            .maybeSingle();
+
+          if (rawOrg) {
+            orgData = rawOrg;
+            if (rawOrg.owner_id) {
+              const { data: ownerUser } = await supabase
+                .from("users")
+                .select("full_name, email, created_at")
+                .eq("id", rawOrg.owner_id)
+                .maybeSingle();
+              if (ownerUser) {
+                orgData = { ...rawOrg, owner: ownerUser };
+              }
+            }
+          }
+        }
 
         setOrg(orgData as OrgDetail);
 
-        // Fetch audit trail entries for this org's users
+        // Fetch audit trail entries
         if (orgData) {
-          const { data: actions } = await supabase
+          let { data: actions } = await supabase
             .from("approval_actions")
-            .select(`*, actor:users!approval_actions_actor_id_fkey(full_name, email)`)
+            .select(`*, actor:users(full_name, email)`)
             .order("created_at", { ascending: false })
             .limit(20);
+
+          if (!actions) {
+            const { data: rawActions } = await supabase
+              .from("approval_actions")
+              .select("*")
+              .order("created_at", { ascending: false })
+              .limit(20);
+            actions = rawActions;
+          }
           setAuditLog((actions as AuditEntry[]) || []);
         }
       } catch (err) {
