@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import OrderEscrowTracker from "@/components/OrderEscrowTracker";
 
 interface OrderDetail {
   id: string;
@@ -277,30 +278,8 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         )}
       </div>
 
-      {/* ── Visual 4-Stage Pipeline ── */}
-      <div className="glass rounded-3xl border border-borderline p-6 md:p-8">
-        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-6">
-          Trade Fulfillment Pipeline
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-          {steps.map((step, idx) => (
-            <div key={idx} className="relative flex flex-col items-start space-y-2">
-              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm border transition-all ${
-                step.done
-                  ? "bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
-              }`}>
-                {step.done ? <CheckCircle2 size={20} /> : idx + 1}
-              </div>
-              <div>
-                <h4 className="font-bold text-sm text-slate-900 dark:text-white">{step.title}</h4>
-                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">{step.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── Visual 5-Stage B2B Escrow Timeline ── */}
+      <OrderEscrowTracker order={order} />
 
       {/* ── Details Grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -28,6 +28,7 @@ import dynamic from "next/dynamic";
 import ReviewSection from "@/components/ReviewSection";
 import { getAllProductImages } from "@/lib/productUtils";
 import BuySellLoader from "@/components/BuySellLoader";
+import FreightCalculator from "@/components/FreightCalculator";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -298,6 +299,16 @@ export default function ProductDetailPage() {
                 <span className="text-muted-foreground font-bold">Export Lead Time:</span>
                 <p className="font-black text-slate-900 dark:text-white mt-0.5">7-14 Days</p>
               </div>
+            </div>
+
+            {/* Freight & Bulk Calculator */}
+            <div className="mb-6">
+              <FreightCalculator
+                basePrice={product.price || 10}
+                moq={product.moq || 100}
+                unit="pcs"
+                tieredPricing={product.tiered_pricing || []}
+              />
             </div>
 
             {/* Actions */}
