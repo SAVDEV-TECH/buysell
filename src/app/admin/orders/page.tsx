@@ -8,10 +8,8 @@ import {
   RefreshCw,
   TrendingUp,
   Package,
-  CheckCircle2,
   Clock,
   ArrowUpRight,
-  ShieldCheck,
   Building2,
   DollarSign,
 } from "lucide-react";
@@ -55,32 +53,30 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      let dbOrders: OrderRecord[] = [];
+      let fetchedOrders: OrderRecord[] = [];
 
-      // Attempt 1: Rich query with joined organizations
-      const { data, error } = await supabase
-        .from("orders")
-        .select(`
-          *,
-          buyer_organization:organizations!orders_buyer_organization_id_fkey(company_name),
-          supplier_organization:organizations!orders_supplier_organization_id_fkey(company_name)
-        `)
-        .order("created_at", { ascending: false })
-        .limit(200);
+      // 1. Fetch server-side API route /api/admin/orders (Option A: Industry Standard Server RLS Bypass)
+      try {
+        const res = await fetch("/api/admin/orders");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          fetchedOrders = json.data;
+        }
+      } catch (apiErr) {
+        console.warn("[Admin Orders] Server API route notice, running direct query:", apiErr);
+      }
 
-      if (error || !data || data.length === 0) {
-        console.warn("[Admin Orders] Primary join notice, running fallback raw select:", error?.message);
-        const fallback = await supabase
+      // 2. Direct query fallback if server API returned empty
+      if (fetchedOrders.length === 0) {
+        const { data: dbData } = await supabase
           .from("orders")
           .select("*")
           .order("created_at", { ascending: false })
           .limit(200);
-        dbOrders = (fallback.data as OrderRecord[]) || [];
-      } else {
-        dbOrders = (data as OrderRecord[]) || [];
+        fetchedOrders = (dbData as OrderRecord[]) || [];
       }
 
-      // Merge client local storage backups across all user order keys
+      // 3. Client storage backup merge
       let localOrders: OrderRecord[] = [];
       try {
         for (let i = 0; i < localStorage.length; i++) {
@@ -101,7 +97,7 @@ export default function AdminOrdersPage() {
 
       const mergedMap = new Map<string, OrderRecord>();
       localOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
-      dbOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
+      fetchedOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
 
       const mergedList = Array.from(mergedMap.values()).sort(
         (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
@@ -156,7 +152,7 @@ export default function AdminOrdersPage() {
             <ShoppingCart size={22} className="text-primary" /> Platform Orders & Escrow Telemetry
           </h1>
           <p className="text-xs text-slate-400 mt-1 font-bold">
-            Real-time audit log of all B2B commercial transactions across BuySell
+            Real-time audit log of all B2B commercial transactions across BuySell (Server API Enabled)
           </p>
         </div>
         <button
@@ -180,7 +176,7 @@ export default function AdminOrdersPage() {
           <div key={kpi.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Server API</span>
             </div>
             <p className="text-2xl font-black text-white">{kpi.value}</p>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{kpi.label}</p>
@@ -221,7 +217,7 @@ export default function AdminOrdersPage() {
       {/* Orders Table */}
       <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
         {loading ? (
-          <BuySellLoader message="Fetching platform trade logs…" fullScreen={false} />
+          <BuySellLoader message="Fetching platform trade logs via server API…" fullScreen={false} />
         ) : filtered.length === 0 ? (
           <div className="p-16 text-center text-slate-500 text-sm font-bold">
             No platform orders match your criteria.

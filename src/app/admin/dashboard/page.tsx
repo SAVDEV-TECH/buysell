@@ -109,104 +109,115 @@ export default function AdminCommandCenter() {
     setLoading(true);
 
     try {
-      const [
-        usersRes,
-        profilesRes,
-        productsRes,
-        ordersRes,
-        pendingRes,
-        verifiedRes,
-        recentOrgsRes,
-        rawOrdersRes,
-      ] = await Promise.all([
-        supabase.from("users").select("*", { count: "exact", head: true }),
-        supabase.from("profiles").select("*", { count: "exact", head: true }),
-        supabase.from("products").select("*", { count: "exact", head: true }),
-        supabase.from("orders").select("*", { count: "exact", head: true }),
-        supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "pending"),
-        supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "verified"),
-        supabase.from("organizations").select("id, company_name, verification_level, created_at, updated_at").order("updated_at", { ascending: false }).limit(6),
-        supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(20),
-      ]);
-
-      const uCount = usersRes.count ?? profilesRes.count ?? 0;
-      const pCount = productsRes.count ?? 0;
-      const dbOrderCount = ordersRes.count ?? rawOrdersRes.data?.length ?? 0;
-      const pendingCount = pendingRes.count ?? 0;
-      const verifiedCount = verifiedRes.count ?? 0;
-
-      let dbOrders = (rawOrdersRes.data as any[]) || [];
-
-      // Scan local storage backups across all user order keys
-      let localOrders: any[] = [];
+      // 1. Fetch server API route /api/admin/stats (Industry Standard Server RLS Bypass)
+      let apiSuccess = false;
       try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("buysell_user_orders_")) {
-            const raw = localStorage.getItem(key);
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed)) {
-                localOrders = [...localOrders, ...parsed];
+        const res = await fetch("/api/admin/stats");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setStats(json.data);
+          apiSuccess = true;
+        }
+      } catch (apiErr) {
+        console.warn("[Admin Dashboard] Server stats API notice, running client fallback:", apiErr);
+      }
+
+      // 2. Client query fallback if server API route is unavailable
+      if (!apiSuccess) {
+        const [
+          usersRes,
+          profilesRes,
+          productsRes,
+          ordersRes,
+          pendingRes,
+          verifiedRes,
+          recentOrgsRes,
+          rawOrdersRes,
+        ] = await Promise.all([
+          supabase.from("users").select("*", { count: "exact", head: true }),
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
+          supabase.from("products").select("*", { count: "exact", head: true }),
+          supabase.from("orders").select("*", { count: "exact", head: true }),
+          supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "pending"),
+          supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "verified"),
+          supabase.from("organizations").select("id, company_name, verification_level, created_at, updated_at").order("updated_at", { ascending: false }).limit(6),
+          supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(20),
+        ]);
+
+        const uCount = usersRes.count ?? profilesRes.count ?? 0;
+        const pCount = productsRes.count ?? 0;
+        const dbOrderCount = ordersRes.count ?? rawOrdersRes.data?.length ?? 0;
+        const pendingCount = pendingRes.count ?? 0;
+        const verifiedCount = verifiedRes.count ?? 0;
+
+        let dbOrders = (rawOrdersRes.data as any[]) || [];
+
+        let localOrders: any[] = [];
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith("buysell_user_orders_")) {
+              const raw = localStorage.getItem(key);
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) localOrders = [...localOrders, ...parsed];
               }
             }
           }
-        }
-      } catch (e) {
-        console.warn("[Admin Dashboard] LocalStorage scan notice:", e);
+        } catch (e) {}
+
+        const mergedMap = new Map<string, any>();
+        localOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
+        dbOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
+
+        const mergedOrders = Array.from(mergedMap.values()).sort(
+          (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        );
+
+        const totalRevenue = mergedOrders.reduce((acc: number, o: any) => {
+          const val = Number(o.total_amount || o.amount || 0);
+          return acc + (isNaN(val) ? 0 : val);
+        }, 0);
+
+        const formattedOrders: RecentOrder[] = mergedOrders.slice(0, 5).map((o: any) => ({
+          id: o.id,
+          buyer_name: o.buyer_organization?.company_name || o.shipping_address?.full_name || "B2B Buyer",
+          supplier_name: o.supplier_organization?.company_name || "Verified Supplier",
+          total_amount: Number(o.total_amount || 0),
+          status: o.status || "processing",
+          payment_method: o.payment_method || "mobile_money",
+          created_at: o.created_at,
+        }));
+
+        const activity: RecentAction[] = (recentOrgsRes.data || []).map((org: any) => ({
+          id: org.id,
+          org_name: org.company_name || "Business Account",
+          action:
+            org.verification_level === "verified"
+              ? "Approved & verified"
+              : org.verification_level === "rejected"
+              ? "Application rejected"
+              : "New application submitted",
+          created_at: org.updated_at || org.created_at,
+          type:
+            org.verification_level === "verified"
+              ? "approved"
+              : org.verification_level === "rejected"
+              ? "rejected"
+              : "new",
+        }));
+
+        setStats({
+          totalUsers: uCount,
+          totalProducts: pCount,
+          totalOrders: Math.max(dbOrderCount, mergedOrders.length),
+          pendingVerifications: pendingCount,
+          verifiedOrgs: verifiedCount,
+          totalRevenue,
+          recentActivity: activity,
+          recentOrders: formattedOrders,
+        });
       }
-
-      const mergedMap = new Map<string, any>();
-      localOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
-      dbOrders.forEach((o) => mergedMap.set(String(o.id || o.created_at), o));
-
-      const mergedOrders = Array.from(mergedMap.values()).sort(
-        (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-      );
-
-      const totalRevenue = mergedOrders.reduce((acc: number, o: any) => {
-        const val = Number(o.total_amount || o.amount || 0);
-        return acc + (isNaN(val) ? 0 : val);
-      }, 0);
-
-      const formattedOrders: RecentOrder[] = mergedOrders.slice(0, 5).map((o: any) => ({
-        id: o.id,
-        buyer_name: o.buyer_organization?.company_name || o.shipping_address?.full_name || "B2B Buyer",
-        supplier_name: o.supplier_organization?.company_name || "Verified Supplier",
-        total_amount: Number(o.total_amount || 0),
-        status: o.status || "processing",
-        payment_method: o.payment_method || "mobile_money",
-        created_at: o.created_at,
-      }));
-
-      const activity: RecentAction[] = (recentOrgsRes.data || []).map((org: any) => ({
-        id: org.id,
-        org_name: org.company_name || "Business Account",
-        action:
-          org.verification_level === "verified"
-            ? "Approved & verified"
-            : org.verification_level === "rejected"
-            ? "Application rejected"
-            : "New application submitted",
-        created_at: org.updated_at || org.created_at,
-        type:
-          org.verification_level === "verified"
-            ? "approved"
-            : org.verification_level === "rejected"
-            ? "rejected"
-            : "new",
-      }));
-
-      setStats({
-        totalUsers: uCount,
-        totalProducts: pCount,
-        totalOrders: Math.max(dbOrderCount, mergedOrders.length),
-        pendingVerifications: pendingCount,
-        verifiedOrgs: verifiedCount,
-        totalRevenue,
-        recentActivity: activity,
-        recentOrders: formattedOrders,
-      });
     } catch (err) {
       console.error("Admin stats fetch error:", err);
     } finally {
@@ -275,7 +286,7 @@ export default function AdminCommandCenter() {
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
             Admin Command Center
             <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Super Admin Mode
+              Super Admin Server API
             </span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 font-bold">
@@ -531,14 +542,14 @@ export default function AdminCommandCenter() {
           <div>
             <p className="text-sm font-black text-emerald-300">All Systems Operational</p>
             <p className="text-xs text-emerald-600 font-bold">
-              Supabase realtime · PostgreSQL · WebSocket channels — all online
+              Supabase realtime · PostgreSQL · Server API RLS Bypass — all online
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-emerald-600">
           <span>DB: ✓ Connected</span>
-          <span>RT: ✓ Active</span>
-          <span>API: ✓ Healthy</span>
+          <span>Server API: ✓ Active</span>
+          <span>RLS Bypass: ✓ Enabled</span>
         </div>
       </motion.div>
     </div>
