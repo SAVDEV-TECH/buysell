@@ -1,150 +1,290 @@
 "use client";
 
 import { useState } from "react";
-import { Smartphone } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { getAuthHeaders } from "@/lib/clientAuth";
+import { Smartphone, Loader2, CheckCircle, ShieldCheck, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface Product {
-  id: number | string;
-  name: string;
-  price: number;
-  category: string;
-  image?: React.ReactNode;
-  imageUrl?: string;
-  desc: string;
-  rating: number;
-  reviews: number;
-}
-
-interface MobileMoneyButtonProps {
-  product: Product;
-  user: any;
-  currency?: string;
-}
-
-const MOBILE_MONEY_PROVIDERS = [
-  { id: "mtn", name: "MTN Mobile Money", code: "256", countries: ["UG", "GH", "CI", "CM"] },
-  { id: "airtel", name: "Airtel Money", code: "256", countries: ["UG", "TZ", "KE", "DRC"] },
-  { id: "vodafone", name: "Vodafone Cash", code: "233", countries: ["GH", "CI"] },
-  { id: "equity", name: "Equity Money", code: "254", countries: ["KE"] },
-  { id: "orange", name: "Orange Money", code: "256", countries: ["SN", "CM", "MA"] },
+const PROVIDERS = [
+  { id: "mtn", name: "MTN MoMo", icon: "🟡" },
+  { id: "mpesa", name: "M-Pesa", icon: "🟢" },
+  { id: "airtel", name: "Airtel Money", icon: "🔴" },
+  { id: "vodafone", name: "Vodafone Cash", icon: "🔵" },
+  { id: "tigo", name: "Tigo Pesa", icon: "🟣" },
+  { id: "orange", name: "Orange Money", icon: "🟠" },
 ];
 
-export default function MobileMoneyButton({
-  product,
-  user,
-  currency = "USD",
-}: MobileMoneyButtonProps) {
-  const [showProviders, setShowProviders] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+interface MobileMoneyButtonProps {
+  productId: string | number;
+  amount: number;
+  currency?: string;
+  onSuccess?: (reference: string) => void;
+  compact?: boolean;
+  user?: any;
+}
 
-  const handleMobileMoneyPayment = async (provider: string) => {
-    if (!phoneNumber || phoneNumber.length < 9) {
-      alert("Please enter a valid phone number");
+export default function MobileMoneyButton({
+  productId,
+  amount,
+  currency = "USD",
+  onSuccess,
+  compact = false,
+  user,
+}: MobileMoneyButtonProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    if (!user) {
+      alert("Please log in to continue with your purchase.");
       return;
     }
+    setOpen(true);
+  };
 
+  return (
+    <>
+      {compact ? (
+        <button
+          onClick={handleOpen}
+          className="w-full h-full py-1.5 px-2.5 bg-emerald-600 text-white rounded-lg text-[11px] font-extrabold uppercase tracking-wider hover:bg-emerald-700 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap"
+        >
+          <Smartphone size={12} /> Mobile Pay
+        </button>
+      ) : (
+        <button
+          onClick={handleOpen}
+          className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-base hover:bg-emerald-700 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-3"
+        >
+          <Smartphone size={20} /> Pay with Mobile Money
+        </button>
+      )}
+
+      <AnimatePresence>
+        {open && (
+          <MobileMoneyModal
+            productId={productId}
+            amount={amount}
+            currency={currency}
+            onSuccess={onSuccess}
+            onClose={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function MobileMoneyModal({
+  productId,
+  amount,
+  currency,
+  onSuccess,
+  onClose,
+}: {
+  productId: string | number;
+  amount: number;
+  currency: string;
+  onSuccess?: (ref: string) => void;
+  onClose: () => void;
+}) {
+  const [provider, setProvider] = useState(PROVIDERS[0]);
+  const [phone, setPhone] = useState("");
+  const [step, setStep] = useState<"select" | "success">("select");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [ussdCode, setUssdCode] = useState("");
+  const [reference, setReference] = useState("");
+
+  const handleSubmit = async () => {
+    if (!phone.trim() || phone.replace(/\D/g, "").length < 9) {
+      setError("Please enter a valid phone number (min 9 digits)");
+      return;
+    }
+    setError(null);
     setLoading(true);
-
     try {
-      const response = await fetch("/api/payments/mobile-money", {
+      const res = await fetch("/api/payments/mobile-money", {
         method: "POST",
-        headers: await getAuthHeaders(),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider,
-          phoneNumber,
-          amount: product.price,
+          provider: provider.id,
+          phoneNumber: phone,
+          amount,
           currency,
-          productId: product.id,
+          productId: String(productId),
         }),
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
-        alert(`${data.ussdCode}\n\nDial this code to complete payment`);
-        router.push(`/checkout/success?ref=${data.reference}`);
+        setUssdCode(data.ussdCode || "");
+        setReference(data.reference || "");
+        setStep("success");
+        if (onSuccess) onSuccess(data.reference);
       } else {
-        alert(`Error: ${data.message}`);
+        setError(data.message || "Payment initialization failed");
       }
-    } catch (error) {
-      console.error("Mobile Money error:", error);
-      alert("Failed to process mobile money payment");
+    } catch {
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
-      setShowProviders(false);
     }
   };
 
-  if (showProviders) {
-    return (
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
       >
-        <div className="bg-background rounded-2xl p-6 max-w-md w-full shadow-2xl">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Smartphone size={24} className="text-primary" />
-            Mobile Money Payment
-          </h2>
-
-          <div className="space-y-2 mb-6">
-            <label className="block text-sm font-medium mb-2">Phone Number</label>
-            <input
-              type="tel"
-              placeholder="Enter your phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full px-4 py-3 border border-borderline rounded-xl focus:ring-2 focus:ring-primary/50 outline-none"
-            />
-            <p className="text-xs text-muted-foreground">Include country code (e.g., +256700000000)</p>
-          </div>
-
-          <div className="space-y-2 mb-6">
-            <label className="block text-sm font-medium mb-2">Select Provider</label>
-            <div className="grid grid-cols-1 gap-2">
-              {MOBILE_MONEY_PROVIDERS.map((provider) => (
-                <button
-                  key={provider.id}
-                  onClick={() => handleMobileMoneyPayment(provider.id)}
-                  disabled={loading}
-                  className="p-3 border-2 border-borderline rounded-xl hover:border-primary hover:bg-primary/5 transition-all text-left font-medium disabled:opacity-50"
-                >
-                  {provider.name}
-                </button>
-              ))}
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-500 p-5 text-white relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-all"
+          >
+            <X size={18} />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+              <Smartphone size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-lg">Mobile Money</h3>
+              <p className="text-emerald-100 text-xs font-bold">Secure African B2B Payments</p>
             </div>
           </div>
+        </div>
 
-          <button
-            onClick={() => setShowProviders(false)}
-            className="w-full py-2 border border-borderline rounded-xl hover:bg-muted transition-all"
-          >
-            Cancel
-          </button>
+        <div className="p-5 space-y-4">
+          {step === "select" && (
+            <>
+              {/* Provider grid */}
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 block">
+                  Select Provider
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {PROVIDERS.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setProvider(p)}
+                      className={`p-2.5 rounded-2xl border-2 text-center transition-all ${
+                        provider.id === p.id
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+                          : "border-slate-200 dark:border-slate-700 hover:border-emerald-300"
+                      }`}
+                    >
+                      <div className="text-xl mb-1">{p.icon}</div>
+                      <p className="text-[10px] font-black text-slate-700 dark:text-slate-200 leading-tight">
+                        {p.name}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Phone input */}
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 block">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Smartphone
+                    size={16}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +233 55 123 4567"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:outline-none focus:border-emerald-500 bg-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Amount row */}
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 rounded-2xl px-4 py-3">
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Amount</span>
+                <span className="text-lg font-black text-slate-900 dark:text-white">
+                  {currency} {amount.toLocaleString()}
+                </span>
+              </div>
+
+              {error && <p className="text-xs text-red-500 font-bold">{error}</p>}
+
+              {/* Escrow badge */}
+              <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl p-3">
+                <ShieldCheck size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">
+                  Funds are held in BuySell Escrow until delivery is confirmed by the buyer.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {loading ? (
+                  <><Loader2 size={16} className="animate-spin" /> Processing…</>
+                ) : (
+                  <><Smartphone size={16} /> Initiate {provider.name} Payment</>
+                )}
+              </button>
+            </>
+          )}
+
+          {step === "success" && (
+            <div className="text-center py-2 space-y-4">
+              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950/40 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle size={32} className="text-emerald-600" />
+              </div>
+              <div>
+                <h4 className="font-black text-lg text-slate-900 dark:text-white">Payment Initiated!</h4>
+                <p className="text-sm text-slate-500 mt-1">Complete the payment prompt on your phone</p>
+              </div>
+
+              {ussdCode && (
+                <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                    USSD Code
+                  </p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white tracking-wider">
+                    {ussdCode}
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-2">
+                    Dial this on your {provider.name} line to complete
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-3 text-left">
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold">
+                  Reference: {reference}
+                </p>
+                <p className="text-[10px] text-amber-600/70 mt-0.5">
+                  Funds held in BuySell Escrow until delivery confirmed
+                </p>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-black text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+              >
+                Done
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => {
-        if (!user) {
-          alert("Please login to purchase");
-          return;
-        }
-        setShowProviders(true);
-      }}
-      className="p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-blue-500/30"
-      title="Pay with Mobile Money"
-    >
-      <Smartphone size={20} />
-    </button>
+    </motion.div>
   );
 }

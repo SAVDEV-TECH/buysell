@@ -300,6 +300,8 @@ export default function NewProductPage() {
   const [fetching, setFetching] = useState(isEdit);
   const [success, setSuccess]   = useState(false);
   const [error, setError]       = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingCount, setUploadingCount] = useState(0);
 
   // ── Load categories ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -386,12 +388,16 @@ export default function NewProductPage() {
   // ── Ultra-fast Parallel Upload to Supabase Storage ────────────────────────────
   const uploadImages = async (files: File[]): Promise<string[]> => {
     if (!files || files.length === 0) return [];
-    
+
+    setUploadingCount(files.length);
+    setUploadProgress(0);
+    let completed = 0;
+
     const uploadPromises = files.map(async (file) => {
       const compressed = await compressImage(file);
       const ext = file.name.split(".").pop() || "jpg";
       const path = `products/${organizationId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      
+
       const { error: uploadErr } = await supabase.storage.from("product-images").upload(path, compressed, {
         cacheControl: "31536000",
         contentType: compressed instanceof Blob ? "image/jpeg" : file.type,
@@ -402,6 +408,9 @@ export default function NewProductPage() {
         console.warn("[Images] upload error:", uploadErr.message);
         throw new Error(`Image upload failed: ${uploadErr.message}. Ensure the 'product-images' bucket exists in Supabase Storage.`);
       }
+
+      completed += 1;
+      setUploadProgress(Math.round((completed / files.length) * 100));
 
       const { data: pub } = supabase.storage.from("product-images").getPublicUrl(path);
       return pub?.publicUrl || "";
@@ -770,6 +779,29 @@ export default function NewProductPage() {
                     onSetPrimary={setPrimaryIndex}
                     primaryIndex={primaryIndex}
                   />
+
+                  {/* Upload Progress Bar */}
+                  {uploadingCount > 0 && uploadProgress < 100 && (
+                    <div className="space-y-1.5 mt-2">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs font-bold text-primary">
+                          Uploading {uploadingCount} image{uploadingCount > 1 ? "s" : ""}…
+                        </p>
+                        <p className="text-xs font-black text-primary">{uploadProgress}%</p>
+                      </div>
+                      <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {uploadProgress === 100 && uploadingCount > 0 && (
+                    <p className="text-xs font-bold text-emerald-500 flex items-center gap-1 mt-1">
+                      ✅ All images uploaded successfully!
+                    </p>
+                  )}
                 </section>
 
                 {/* B2B Tips */}

@@ -8,6 +8,7 @@ import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell
 import { createClient } from "@/lib/supabase/client";
 
 import NotificationPopover from "@/components/NotificationPopover";
+import BuySellLoader from "@/components/BuySellLoader";
 
 export default function DashboardLayout({
   children,
@@ -35,11 +36,7 @@ export default function DashboardLayout({
   }, [user, loading, verificationLevel, router]);
 
   if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+    return <BuySellLoader message="Loading your dashboard..." fullScreen />;
   }
 
   const handleLogout = async () => {

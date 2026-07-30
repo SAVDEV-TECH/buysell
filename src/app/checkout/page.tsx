@@ -345,9 +345,13 @@ export default function CheckoutPage() {
                           )}
                           {paymentMethod === "mobile-money" && (
                             <MobileMoneyButton
-                              product={checkoutProduct}
-                              user={user}
+                              productId={cartItems[0]?.id || "cart"}
+                              amount={cartTotal}
                               currency="USD"
+                              user={user}
+                              onSuccess={(ref) => {
+                                router.push(`/checkout/success?reference=${ref}&method=mobile_money`);
+                              }}
                             />
                           )}
                        </div>

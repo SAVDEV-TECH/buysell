@@ -21,6 +21,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import BuySellLogo from "@/components/BuySellLogo";
+import BuySellLoader from "@/components/BuySellLoader";
 import NotificationPopover from "@/components/NotificationPopover";
 
 const navItems = [
@@ -98,12 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (loading || !user || role !== "super_admin") {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 gap-4">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm font-bold">Verifying admin credentials…</p>
-      </div>
-    );
+    return <BuySellLoader message="Verifying admin credentials…" fullScreen />;
   }
 
   return (
