@@ -1,9 +1,20 @@
 import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { successResponse, handleApiError } from "@/lib/apiResponse";
+import { successResponse, errorResponse, handleApiError } from "@/lib/apiResponse";
+import { requireSuperAdmin, AuthError } from "@/lib/serverAuth";
 
 export async function GET(req: NextRequest) {
   try {
+    // 1. Authorization Gate: Verify super admin session
+    try {
+      await requireSuperAdmin(req);
+    } catch (authErr: any) {
+      if (authErr instanceof AuthError) {
+        return errorResponse(authErr.message, authErr.status);
+      }
+      return errorResponse("Forbidden: Super Admin access required", 403);
+    }
+
     const supabaseAdmin = createAdminClient();
 
     const [
