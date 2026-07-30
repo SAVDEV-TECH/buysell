@@ -1,6 +1,7 @@
 /**
  * Escrow Payment Gateway Integration Handler
- * Executes live transfer payouts via Paystack, Flutterwave, or Stripe Connect with strict idempotency protection.
+ * Executes live transfer payouts via Paystack, Flutterwave, or Stripe Connect.
+ * Uses strict 2-stage transfer lifecycle (processing -> completed/failed via webhook).
  */
 export interface EscrowTransferParams {
   orderId: string;
@@ -10,10 +11,13 @@ export interface EscrowTransferParams {
   paymentReference?: string;
   recipientAccount?: string;
   idempotencyKey: string;
+  targetCurrency?: string;
+  fxRate?: number;
 }
 
 export interface EscrowTransferResult {
   success: boolean;
+  status: "processing" | "completed" | "failed";
   providerTransferId?: string;
   provider: string;
   message: string;
@@ -23,9 +27,12 @@ export interface EscrowTransferResult {
 export async function executeEscrowDisbursement(
   params: EscrowTransferParams
 ): Promise<EscrowTransferResult> {
-  const { orderId, amount, currency, paymentMethod, paymentReference, idempotencyKey } = params;
+  const { orderId, amount, currency, paymentMethod, idempotencyKey, targetCurrency = "USD", fxRate = 1.0 } = params;
 
-  console.log(`[ESCROW GATEWAY] Initiating payout for Order #${orderId.slice(0, 8)} - Amount: $${amount} ${currency} - Key: ${idempotencyKey}`);
+  const now = new Date().toISOString();
+  const settledAmount = amount * fxRate;
+
+  console.log(`[ESCROW GATEWAY] Initiating payout for Order #${orderId.slice(0, 8)} - Amount: $${amount} ${currency} (FX: ${settledAmount} ${targetCurrency}) - Key: ${idempotencyKey}`);
 
   // 1. Paystack Transfer Dispatch
   const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
@@ -39,7 +46,7 @@ export async function executeEscrowDisbursement(
         },
         body: JSON.stringify({
           source: "balance",
-          amount: Math.round(amount * 100), // convert to kobo/cents
+          amount: Math.round(amount * 100), // kobo
           recipient: params.recipientAccount || "RCP_supplier_default",
           reason: `BuySell Escrow Disbursement #${orderId.slice(0, 8)}`,
           reference: idempotencyKey,
@@ -50,10 +57,17 @@ export async function executeEscrowDisbursement(
       if (json.status) {
         return {
           success: true,
+          status: "processing", // Asynchronous transfer: waits for transfer.success webhook
           provider: "paystack",
-          providerTransferId: json.data?.transfer_code || json.data?.reference,
-          message: "Paystack escrow transfer completed successfully.",
-          metadata: json.data,
+          providerTransferId: json.data?.transfer_code || json.data?.reference || idempotencyKey,
+          message: "Paystack transfer initiated. Awaiting webhook confirmation.",
+          metadata: {
+            ...json.data,
+            settled_amount: settledAmount,
+            settled_currency: targetCurrency,
+            fx_rate: fxRate,
+            fx_rate_locked_at: now,
+          },
         };
       }
     } catch (err: any) {
@@ -84,10 +98,17 @@ export async function executeEscrowDisbursement(
       if (json.id) {
         return {
           success: true,
+          status: "completed",
           provider: "stripe",
           providerTransferId: json.id,
           message: "Stripe Connect escrow transfer completed successfully.",
-          metadata: json,
+          metadata: {
+            ...json,
+            settled_amount: settledAmount,
+            settled_currency: targetCurrency,
+            fx_rate: fxRate,
+            fx_rate_locked_at: now,
+          },
         };
       }
     } catch (err: any) {
@@ -98,6 +119,7 @@ export async function executeEscrowDisbursement(
   // 3. Fallback/Mobile Money Direct Escrow Ledger Record
   return {
     success: true,
+    status: "completed",
     provider: paymentMethod || "buysell_escrow_ledger",
     providerTransferId: `TX_${idempotencyKey.slice(0, 16)}`,
     message: `Escrow transfer authorized and logged under key ${idempotencyKey}`,
@@ -105,6 +127,10 @@ export async function executeEscrowDisbursement(
       orderId,
       amount,
       currency,
+      settled_amount: settledAmount,
+      settled_currency: targetCurrency,
+      fx_rate: fxRate,
+      fx_rate_locked_at: now,
       idempotencyKey,
       settlementMode: "escrow_segregated_balance",
     },
