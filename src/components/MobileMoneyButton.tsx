@@ -5,13 +5,66 @@ import { Smartphone, Loader2, CheckCircle, ShieldCheck, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PROVIDERS = [
-  { id: "mtn", name: "MTN MoMo", icon: "🟡" },
-  { id: "mpesa", name: "M-Pesa", icon: "🟢" },
-  { id: "airtel", name: "Airtel Money", icon: "🔴" },
-  { id: "vodafone", name: "Vodafone Cash", icon: "🔵" },
-  { id: "tigo", name: "Tigo Pesa", icon: "🟣" },
-  { id: "orange", name: "Orange Money", icon: "🟠" },
+  { id: "mtn", name: "MTN MoMo" },
+  { id: "mpesa", name: "M-Pesa" },
+  { id: "airtel", name: "Airtel Money" },
+  { id: "vodafone", name: "Vodafone Cash" },
+  { id: "tigo", name: "Tigo Pesa" },
+  { id: "orange", name: "Orange Money" },
 ];
+
+function ProviderLogo({ id }: { id: string }) {
+  if (id === "mtn") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-amber-400 flex items-center justify-center p-1 text-black shadow-sm mx-auto mb-1.5 border border-amber-500/40">
+        <div className="border border-black rounded-full px-1.5 py-0.5 font-black text-[9px] tracking-tighter leading-none text-center">
+          MTN<br /><span className="text-[6px] font-black uppercase tracking-normal">MoMo</span>
+        </div>
+      </div>
+    );
+  }
+  if (id === "mpesa") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-emerald-600 flex flex-col items-center justify-center p-1 text-white shadow-sm mx-auto mb-1.5 border border-emerald-700">
+        <span className="text-[10px] font-black tracking-tight leading-none">m-pesa</span>
+        <span className="text-[6px] font-bold uppercase tracking-widest text-emerald-200 mt-0.5">Pay</span>
+      </div>
+    );
+  }
+  if (id === "airtel") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-red-600 flex flex-col items-center justify-center p-1 text-white shadow-sm mx-auto mb-1.5 border border-red-700">
+        <span className="text-[9px] font-black tracking-tight leading-none">airtel</span>
+        <span className="text-[6px] font-extrabold uppercase text-red-200 mt-0.5">money</span>
+      </div>
+    );
+  }
+  if (id === "vodafone") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-red-500 flex flex-col items-center justify-center p-1 text-white shadow-sm mx-auto mb-1.5 border border-red-600">
+        <span className="text-[8px] font-black tracking-tight leading-none">vodafone</span>
+        <span className="text-[6px] font-extrabold uppercase text-red-100 mt-0.5">cash</span>
+      </div>
+    );
+  }
+  if (id === "tigo") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-blue-900 flex flex-col items-center justify-center p-1 text-white shadow-sm mx-auto mb-1.5 border border-blue-950">
+        <span className="text-[9px] font-black tracking-tight text-amber-400 leading-none">tigo</span>
+        <span className="text-[6px] font-extrabold uppercase text-white mt-0.5">pesa</span>
+      </div>
+    );
+  }
+  if (id === "orange") {
+    return (
+      <div className="w-10 h-10 rounded-xl bg-orange-500 flex flex-col items-center justify-center p-1 text-white shadow-sm mx-auto mb-1.5 border border-orange-600">
+        <span className="text-[8px] font-black tracking-tight uppercase leading-none">orange</span>
+        <span className="text-[6px] font-extrabold uppercase text-orange-100 mt-0.5">money</span>
+      </div>
+    );
+  }
+  return <Smartphone size={20} className="mx-auto mb-1.5" />;
+}
 
 interface MobileMoneyButtonProps {
   productId: string | number;
@@ -177,11 +230,11 @@ function MobileMoneyModal({
                       onClick={() => setProvider(p)}
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all ${
                         provider.id === p.id
-                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 shadow-md scale-105"
                           : "border-slate-200 dark:border-slate-700 hover:border-emerald-300"
                       }`}
                     >
-                      <div className="text-xl mb-1">{p.icon}</div>
+                      <ProviderLogo id={p.id} />
                       <p className="text-[10px] font-black text-slate-700 dark:text-slate-200 leading-tight">
                         {p.name}
                       </p>

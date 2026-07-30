@@ -48,18 +48,20 @@ export default function DashboardOverview() {
         let totalRev = 0;
         let fetchedOrders: any[] = [];
         
-        if (organizationId) {
-          const { data: ordersData, count } = await supabase
-            .from("orders")
-            .select("*", { count: "exact" })
-            .or(`buyer_organization_id.eq.${organizationId},supplier_organization_id.eq.${organizationId}`)
-            .order("created_at", { ascending: false })
-            .limit(5);
+        const orFilter = organizationId
+          ? `buyer_organization_id.eq.${organizationId},supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`
+          : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`;
 
-          ordersCount = count || 0;
-          fetchedOrders = ordersData || [];
-          fetchedOrders.forEach((o: any) => totalRev += (Number(o.total_amount) || 0));
-        }
+        const { data: ordersData, count } = await supabase
+          .from("orders")
+          .select("*", { count: "exact" })
+          .or(orFilter)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        ordersCount = count || 0;
+        fetchedOrders = ordersData || [];
+        fetchedOrders.forEach((o: any) => totalRev += (Number(o.total_amount) || 0));
 
         let productsCount = 0;
         if (organizationId) {

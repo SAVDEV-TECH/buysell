@@ -69,21 +69,30 @@ export default function OrdersPage() {
     if (!user) return;
     setLoading(true);
     try {
-      let query = supabase
+      const orFilter = organizationId
+        ? `supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`
+        : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`;
+
+      let { data, error } = await supabase
         .from("orders")
         .select(`
           *,
           buyer_organization:organizations!orders_buyer_organization_id_fkey(company_name, is_verified),
           supplier_organization:organizations!orders_supplier_organization_id_fkey(company_name, is_verified)
         `)
+        .or(orFilter)
         .order("created_at", { ascending: false });
 
-      if (organizationId) {
-        query = query.or(`supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${organizationId}`);
+      if (error) {
+        console.warn("[Orders] join fetch error, falling back to raw select:", error.message);
+        const fallback = await supabase
+          .from("orders")
+          .select("*")
+          .or(orFilter)
+          .order("created_at", { ascending: false });
+        data = fallback.data;
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
       setOrders((data as Order[]) || []);
     } catch (err) {
       console.warn("[Orders] fetch error:", err);

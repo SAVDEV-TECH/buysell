@@ -19,8 +19,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BuySell | The Modern Marketplace",
-  description: "Connecting manufacturers and wholesalers in one seamless platform.",
+  title: "BuySell | Modern B2B Trading & Marketplace Exchange",
+  description: "Connecting manufacturers, suppliers, and wholesale buyers in one seamless platform.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

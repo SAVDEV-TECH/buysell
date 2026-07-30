@@ -75,7 +75,7 @@ export default function CheckoutPage() {
       const { data: orderData, error: orderErr } = await supabase
         .from("orders")
         .insert({
-          buyer_organization_id: organizationId || null,
+          buyer_organization_id: organizationId || user.id,
           supplier_organization_id: supplierOrgId,
           total_amount: finalTotal,
           currency: "USD",
