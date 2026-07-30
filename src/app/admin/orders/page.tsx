@@ -12,6 +12,11 @@ import {
   ArrowUpRight,
   Building2,
   DollarSign,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Lock,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import BuySellLoader from "@/components/BuySellLoader";
@@ -20,6 +25,7 @@ interface OrderRecord {
   id: string;
   status: string;
   payment_status?: string;
+  escrow_status?: string;
   payment_method?: string;
   total_amount: number;
   currency?: string;
@@ -40,6 +46,9 @@ const statusBadgeMap: Record<string, string> = {
   shipped: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
   delivered: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  escrow_released: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  refunded: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  disputed: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
 };
 
@@ -48,6 +57,7 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -55,7 +65,7 @@ export default function AdminOrdersPage() {
     try {
       let fetchedOrders: OrderRecord[] = [];
 
-      // 1. Fetch server-side API route /api/admin/orders (Option A: Industry Standard Server RLS Bypass)
+      // 1. Fetch server API route /api/admin/orders
       try {
         const res = await fetch("/api/admin/orders");
         const json = await res.json();
@@ -63,10 +73,10 @@ export default function AdminOrdersPage() {
           fetchedOrders = json.data;
         }
       } catch (apiErr) {
-        console.warn("[Admin Orders] Server API route notice, running direct query:", apiErr);
+        console.warn("[Admin Orders] Server API route notice:", apiErr);
       }
 
-      // 2. Direct query fallback if server API returned empty
+      // 2. Direct query fallback if server API route returned empty
       if (fetchedOrders.length === 0) {
         const { data: dbData } = await supabase
           .from("orders")
@@ -85,9 +95,7 @@ export default function AdminOrdersPage() {
             const raw = localStorage.getItem(key);
             if (raw) {
               const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed)) {
-                localOrders = [...localOrders, ...parsed];
-              }
+              if (Array.isArray(parsed)) localOrders = [...localOrders, ...parsed];
             }
           }
         }
@@ -124,13 +132,40 @@ export default function AdminOrdersPage() {
     setRefreshing(false);
   };
 
+  // Execute Escrow Control Action (Release, Refund, Dispute Hold)
+  const handleEscrowAction = async (orderId: string, action: "release" | "refund" | "dispute_hold") => {
+    if (!confirm(`Are you sure you want to execute '${action.toUpperCase()}' for Order #${orderId.slice(0, 8).toUpperCase()}?`)) {
+      return;
+    }
+    setActionLoadingId(orderId);
+    try {
+      const res = await fetch("/api/admin/escrow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, action, notes: `Executed via Super Admin Panel` }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert(`Success: ${json.message}`);
+        await fetchOrders();
+      } else {
+        alert(`Error: ${json.message || json.error}`);
+      }
+    } catch (err) {
+      alert("Failed to execute escrow action. Check network connection.");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   const gmv = orders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
   const avgOrderValue = orders.length > 0 ? gmv / orders.length : 0;
 
-  const statuses = ["all", "pending", "processing", "shipped", "delivered", "completed", "cancelled"];
+  const statuses = ["all", "pending", "processing", "shipped", "delivered", "completed", "escrow_released", "refunded", "cancelled"];
 
   const filtered = orders.filter((o) => {
-    if (statusFilter !== "all" && o.status?.toLowerCase() !== statusFilter.toLowerCase()) return false;
+    const st = (o.payment_status || o.status || "").toLowerCase();
+    if (statusFilter !== "all" && st !== statusFilter.toLowerCase()) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -144,15 +179,15 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black text-white flex items-center gap-3">
-            <ShoppingCart size={22} className="text-primary" /> Platform Orders & Escrow Telemetry
+            <ShoppingCart size={22} className="text-primary" /> Platform Orders & Escrow Control Center
           </h1>
           <p className="text-xs text-slate-400 mt-1 font-bold">
-            Real-time audit log of all B2B commercial transactions across BuySell (Server API Enabled)
+            Real-time audit log and Super Admin escrow disbursement controls across BuySell
           </p>
         </div>
         <button
@@ -176,7 +211,7 @@ export default function AdminOrdersPage() {
           <div key={kpi.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Server API</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Escrow</span>
             </div>
             <p className="text-2xl font-black text-white">{kpi.value}</p>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{kpi.label}</p>
@@ -197,7 +232,7 @@ export default function AdminOrdersPage() {
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
-              {st}
+              {st.replace("_", " ")}
             </button>
           ))}
         </div>
@@ -229,52 +264,84 @@ export default function AdminOrdersPage() {
                 <tr className="border-b border-slate-800 bg-slate-950/50 text-[10px] font-black uppercase tracking-widest text-slate-400">
                   <th className="px-6 py-4">Order ID</th>
                   <th className="px-6 py-4">Buyer / Supplier</th>
-                  <th className="px-6 py-4">Total Amount</th>
-                  <th className="px-6 py-4">Payment Method</th>
-                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Amount</th>
+                  <th className="px-6 py-4">Escrow Status</th>
                   <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right">Admin Escrow Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-xs">
-                {filtered.map((o) => (
-                  <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-mono font-bold text-white">
-                      #{o.id.slice(0, 8).toUpperCase()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-white flex items-center gap-1">
-                        <Building2 size={12} className="text-slate-400" />
-                        {o.buyer_organization?.company_name || o.buyer?.full_name || "B2B Buyer"}
-                      </p>
-                      <p className="text-[10px] text-slate-500 font-medium">
-                        Supplier: {o.supplier_organization?.company_name || "Verified Supplier"}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 font-black text-white">
-                      ${Number(o.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 font-bold uppercase text-[10px]">
-                      {o.payment_method || "escrow"}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadgeMap[o.status?.toLowerCase()] || statusBadgeMap.pending}`}>
-                        {o.status || "Processing"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-500 font-bold">
-                      {new Date(o.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/dashboard/orders/${o.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg font-bold text-[11px] transition-all"
-                      >
-                        Details <ArrowUpRight size={12} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {filtered.map((o) => {
+                  const currentPaymentSt = (o.payment_status || o.status || "pending").toLowerCase();
+                  const isReleased = currentPaymentSt === "escrow_released" || o.escrow_status === "released";
+                  const isRefunded = currentPaymentSt === "refunded" || o.escrow_status === "refunded";
+
+                  return (
+                    <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="px-6 py-4 font-mono font-bold text-white">
+                        #{o.id.slice(0, 8).toUpperCase()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-white flex items-center gap-1">
+                          <Building2 size={12} className="text-slate-400" />
+                          {o.buyer_organization?.company_name || o.buyer?.full_name || "B2B Buyer"}
+                        </p>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          Supplier: {o.supplier_organization?.company_name || "Verified Supplier"}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 font-black text-white">
+                        ${Number(o.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadgeMap[currentPaymentSt] || statusBadgeMap.pending}`}>
+                          {isReleased ? "Escrow Released" : isRefunded ? "Refunded to Buyer" : currentPaymentSt}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 font-bold">
+                        {new Date(o.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {actionLoadingId === o.id ? (
+                            <span className="text-xs font-bold text-primary flex items-center gap-1">
+                              <Loader2 size={14} className="animate-spin" /> Processing…
+                            </span>
+                          ) : isReleased ? (
+                            <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                              ✓ Payout Complete
+                            </span>
+                          ) : isRefunded ? (
+                            <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
+                              ✓ Buyer Refunded
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleEscrowAction(o.id, "release")}
+                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1"
+                              >
+                                <CheckCircle2 size={12} /> Release to Supplier
+                              </button>
+                              <button
+                                onClick={() => handleEscrowAction(o.id, "refund")}
+                                className="px-2.5 py-1.5 bg-rose-600/80 hover:bg-rose-600 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1"
+                              >
+                                <XCircle size={12} /> Refund Buyer
+                              </button>
+                            </>
+                          )}
+                          <Link
+                            href={`/dashboard/orders/${o.id}`}
+                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-bold text-[10px] transition-all flex items-center gap-0.5"
+                          >
+                            Inspect <ArrowUpRight size={12} />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

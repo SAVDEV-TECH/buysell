@@ -168,16 +168,49 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
     setUpdating(true);
 
     try {
+      const now = new Date().toISOString();
       const { error } = await supabase
         .from("orders")
         .update({
           status: "delivered",
           payment_status: "escrow_released",
-          updated_at: new Date().toISOString(),
+          escrow_status: "released",
+          updated_at: now,
         })
         .eq("id", order.id);
 
       if (error) throw error;
+
+      // Insert ledger entry into escrow_transactions
+      try {
+        await supabase.from("escrow_transactions").insert({
+          order_id: order.id,
+          amount: Number(order.total_amount || 0),
+          currency: order.currency || "USD",
+          type: "release",
+          status: "completed",
+          metadata: {
+            triggered_by: "buyer_delivery_confirmation",
+            buyer_id: user?.id,
+            executed_at: now,
+          },
+          created_at: now,
+          processed_at: now,
+        });
+      } catch (ledgerErr) {
+        console.warn("[Order Detail] Ledger insert notice:", ledgerErr);
+      }
+
+      // Notify supplier
+      if (order.supplier_organization_id) {
+        await sendNotification(
+          order.supplier_organization_id,
+          `🎉 Escrow Funds Released for Order #${order.id.slice(0, 8).toUpperCase()}`,
+          `The buyer confirmed delivery. Escrow funds of $${Number(order.total_amount || 0).toLocaleString()} have been released to your account!`,
+          "ORDER",
+          `/dashboard/orders/${order.id}`
+        );
+      }
 
       fetchOrderDetail();
     } catch (err: any) {
