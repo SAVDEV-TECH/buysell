@@ -19,6 +19,7 @@ interface Product {
 interface PaystackButtonProps {
   product: Product;
   user: any;
+  compact?: boolean;
   onBeforePayment?: (reference: string) => Promise<void>;
   onPaymentSuccess?: (reference: string) => void;
 }
@@ -26,6 +27,7 @@ interface PaystackButtonProps {
 export default function PaystackButton({
   product,
   user,
+  compact = false,
   onBeforePayment,
   onPaymentSuccess,
 }: PaystackButtonProps) {
@@ -90,6 +92,28 @@ export default function PaystackButton({
       handleSuccess({ reference });
     }
   };
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleClick}
+        disabled={preparing}
+        className="w-full h-full py-1.5 px-2.5 bg-slate-900 dark:bg-primary text-white rounded-lg text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-60 whitespace-nowrap"
+      >
+        {preparing ? (
+          <>
+            <Loader2 size={12} className="animate-spin" />
+            Securing…
+          </>
+        ) : (
+          <>
+            <ShieldCheck size={12} />
+            Escrow Pay
+          </>
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="w-full space-y-2">
