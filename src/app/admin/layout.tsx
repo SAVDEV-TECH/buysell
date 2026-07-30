@@ -19,12 +19,25 @@ import {
   ChevronRight,
   Bell,
   AlertCircle,
+  Lock,
 } from "lucide-react";
 import BuySellLogo from "@/components/BuySellLogo";
 import BuySellLoader from "@/components/BuySellLoader";
 import NotificationPopover from "@/components/NotificationPopover";
 
-const navItems = [
+interface NavItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  badge?: string;
+}
+
+interface NavGroup {
+  section: string;
+  items: NavItem[];
+}
+
+const navItems: NavGroup[] = [
   {
     section: "OVERVIEW",
     items: [
@@ -43,6 +56,7 @@ const navItems = [
     section: "COMMERCE",
     items: [
       { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+      { name: "Escrow Ledger", href: "/admin/escrow-ledger", icon: Lock },
       { name: "Payouts", href: "/admin/payouts", icon: Wallet },
     ],
   },
