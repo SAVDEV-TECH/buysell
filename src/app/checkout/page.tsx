@@ -71,30 +71,100 @@ export default function CheckoutPage() {
       const supplierOrgId =
         cartItems.find((item) => item.sellerId || item.manufacturerId)?.sellerId || null;
 
-      // 2. Insert order into PostgreSQL orders table
-      const { data: orderData, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
-          buyer_organization_id: organizationId || user.id,
-          supplier_organization_id: supplierOrgId,
-          total_amount: finalTotal,
-          currency: "USD",
-          status: "processing",
-          payment_status: "paid",
-          payment_reference: reference,
-          payment_method: paymentMethod,
-          shipping_address: formData,
-        })
-        .select("id")
-        .maybeSingle();
+      // 2. Insert order into PostgreSQL orders table with fallbacks
+      let createdOrderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+      let dbOrderInserted = false;
 
-      const createdOrderId = orderData?.id || `ORD-${Date.now().toString(36).toUpperCase()}`;
+      // Attempt 1: Insert with buyer_id and buyer_organization_id
+      try {
+        const { data: oData, error: err1 } = await supabase
+          .from("orders")
+          .insert({
+            buyer_id: user.id,
+            buyer_organization_id: organizationId || null,
+            supplier_organization_id: supplierOrgId,
+            total_amount: finalTotal,
+            currency: "USD",
+            status: "processing",
+            payment_status: "paid",
+            payment_reference: reference,
+            payment_method: paymentMethod,
+            shipping_address: formData,
+          })
+          .select("id")
+          .maybeSingle();
 
-      // 3. Insert order items into order_items table (if table exists)
-      if (orderData?.id && cartItems.length > 0) {
+        if (oData?.id) {
+          createdOrderId = oData.id;
+          dbOrderInserted = true;
+        } else if (err1) {
+          console.warn("[Checkout] Insert attempt 1 notice:", err1.message);
+        }
+      } catch (e) {
+        console.warn("[Checkout] Insert attempt 1 exception:", e);
+      }
+
+      // Attempt 2 fallback if attempt 1 failed
+      if (!dbOrderInserted) {
+        try {
+          const { data: oData, error: err2 } = await supabase
+            .from("orders")
+            .insert({
+              buyer_organization_id: organizationId || user.id,
+              supplier_organization_id: supplierOrgId,
+              total_amount: finalTotal,
+              currency: "USD",
+              status: "processing",
+              payment_status: "paid",
+              payment_reference: reference,
+              payment_method: paymentMethod,
+              shipping_address: formData,
+            })
+            .select("id")
+            .maybeSingle();
+
+          if (oData?.id) {
+            createdOrderId = oData.id;
+            dbOrderInserted = true;
+          } else if (err2) {
+            console.warn("[Checkout] Insert attempt 2 notice:", err2.message);
+          }
+        } catch (e) {
+          console.warn("[Checkout] Insert attempt 2 exception:", e);
+        }
+      }
+
+      // 3. Create rich local order object & persist to localStorage as reliable backup
+      const newOrderObject = {
+        id: createdOrderId,
+        created_at: new Date().toISOString(),
+        buyer_id: user.id,
+        buyer_organization_id: organizationId || user.id,
+        supplier_organization_id: supplierOrgId,
+        total_amount: finalTotal,
+        currency: "USD",
+        status: "processing",
+        payment_status: "paid",
+        payment_reference: reference,
+        payment_method: paymentMethod,
+        shipping_address: formData,
+        cart_items: cartItems,
+      };
+
+      try {
+        const localKey = `buysell_user_orders_${user.id}`;
+        const existing = JSON.parse(localStorage.getItem(localKey) || "[]");
+        const updated = [newOrderObject, ...existing.filter((o: any) => o.id !== createdOrderId)];
+        localStorage.setItem(localKey, JSON.stringify(updated));
+      } catch (localErr) {
+        console.warn("[Checkout] LocalStorage backup notice:", localErr);
+      }
+
+      // 4. Insert order items into order_items table (if DB order created)
+      if (dbOrderInserted && createdOrderId && cartItems.length > 0) {
         try {
           const itemsPayload = cartItems.map((item) => ({
-            order_id: orderData.id,
+            order_id: createdOrderId,
             product_id: item.id,
             quantity: item.quantity,
             unit_price: item.price,

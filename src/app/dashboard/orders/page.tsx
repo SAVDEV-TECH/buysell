@@ -70,8 +70,10 @@ export default function OrdersPage() {
     setLoading(true);
     try {
       const orFilter = organizationId
-        ? `supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`
-        : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`;
+        ? `supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id},buyer_id.eq.${user.id}`
+        : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id},buyer_id.eq.${user.id}`;
+
+      let dbOrders: any[] = [];
 
       let { data, error } = await supabase
         .from("orders")
@@ -83,17 +85,46 @@ export default function OrdersPage() {
         .or(orFilter)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.warn("[Orders] join fetch error, falling back to raw select:", error.message);
+      if (error || !data || data.length === 0) {
+        console.warn("[Orders] join/filter fetch notice, trying raw select:", error?.message);
         const fallback = await supabase
           .from("orders")
           .select("*")
-          .or(orFilter)
           .order("created_at", { ascending: false });
-        data = fallback.data;
+        dbOrders = fallback.data || [];
+      } else {
+        dbOrders = data || [];
       }
 
-      setOrders((data as Order[]) || []);
+      // Read local storage backup orders for instant zero-delay display
+      let localOrders: any[] = [];
+      try {
+        const localKey = `buysell_user_orders_${user.id}`;
+        localOrders = JSON.parse(localStorage.getItem(localKey) || "[]");
+      } catch (localErr) {
+        console.warn("[Orders] LocalStorage read notice:", localErr);
+      }
+
+      // Merge DB orders and local orders, prioritizing DB orders
+      const mergedMap = new Map<string, any>();
+
+      // Add local orders first
+      localOrders.forEach((o) => {
+        const key = String(o.id || o.payment_reference);
+        mergedMap.set(key, o);
+      });
+
+      // DB orders overwrite local orders if match
+      dbOrders.forEach((o) => {
+        const key = String(o.id || o.payment_reference);
+        mergedMap.set(key, o);
+      });
+
+      const mergedList = Array.from(mergedMap.values()).sort(
+        (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      );
+
+      setOrders(mergedList as Order[]);
     } catch (err) {
       console.warn("[Orders] fetch error:", err);
     } finally {

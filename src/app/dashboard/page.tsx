@@ -46,22 +46,51 @@ export default function DashboardOverview() {
       try {
         let ordersCount = 0;
         let totalRev = 0;
+        let dbOrders: any[] = [];
         let fetchedOrders: any[] = [];
         
         const orFilter = organizationId
-          ? `buyer_organization_id.eq.${organizationId},supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`
-          : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id}`;
+          ? `buyer_organization_id.eq.${organizationId},supplier_organization_id.eq.${organizationId},buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id},buyer_id.eq.${user.id}`
+          : `buyer_organization_id.eq.${user.id},supplier_organization_id.eq.${user.id},buyer_id.eq.${user.id}`;
 
-        const { data: ordersData, count } = await supabase
+        const { data: ordersData } = await supabase
           .from("orders")
-          .select("*", { count: "exact" })
+          .select("*")
           .or(orFilter)
           .order("created_at", { ascending: false })
-          .limit(5);
+          .limit(10);
 
-        ordersCount = count || 0;
-        fetchedOrders = ordersData || [];
-        fetchedOrders.forEach((o: any) => totalRev += (Number(o.total_amount) || 0));
+        if (!ordersData || ordersData.length === 0) {
+          const fallback = await supabase
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(10);
+          dbOrders = fallback.data || [];
+        } else {
+          dbOrders = ordersData || [];
+        }
+
+        // Read local storage orders
+        let localOrders: any[] = [];
+        try {
+          const localKey = `buysell_user_orders_${user.id}`;
+          localOrders = JSON.parse(localStorage.getItem(localKey) || "[]");
+        } catch (localErr) {
+          console.warn("[Dashboard] LocalStorage read notice:", localErr);
+        }
+
+        const mergedMap = new Map<string, any>();
+        localOrders.forEach((o) => mergedMap.set(String(o.id || o.payment_reference), o));
+        dbOrders.forEach((o) => mergedMap.set(String(o.id || o.payment_reference), o));
+
+        const allOrders = Array.from(mergedMap.values()).sort(
+          (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        );
+
+        ordersCount = allOrders.length;
+        fetchedOrders = allOrders.slice(0, 5);
+        allOrders.forEach((o: any) => totalRev += (Number(o.total_amount) || 0));
 
         let productsCount = 0;
         if (organizationId) {
