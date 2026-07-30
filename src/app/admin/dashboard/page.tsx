@@ -22,6 +22,7 @@ import {
   Building2,
   Zap,
 } from "lucide-react";
+import BuySellLoader from "@/components/BuySellLoader";
 
 interface PlatformStats {
   totalUsers: number;
@@ -101,34 +102,39 @@ export default function AdminCommandCenter() {
       setLoading(true);
       try {
         const [
-          { count: usersCount },
-          { count: productsCount },
-          { count: ordersCount },
-          { count: pendingCount },
-          { count: verifiedCount },
-          { data: recentOrgs },
+          usersRes,
+          profilesRes,
+          productsRes,
+          ordersRes,
+          pendingRes,
+          verifiedRes,
+          recentOrgsRes,
+          orderDataRes,
         ] = await Promise.all([
           supabase.from("users").select("*", { count: "exact", head: true }),
+          supabase.from("profiles").select("*", { count: "exact", head: true }),
           supabase.from("products").select("*", { count: "exact", head: true }),
           supabase.from("orders").select("*", { count: "exact", head: true }),
-          supabase
-            .from("organizations")
-            .select("*", { count: "exact", head: true })
-            .eq("verification_level", "pending"),
-          supabase
-            .from("organizations")
-            .select("*", { count: "exact", head: true })
-            .eq("verification_level", "verified"),
-          supabase
-            .from("organizations")
-            .select("id, company_name, verification_level, created_at, updated_at")
-            .order("updated_at", { ascending: false })
-            .limit(6),
+          supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "pending"),
+          supabase.from("organizations").select("*", { count: "exact", head: true }).eq("verification_level", "verified"),
+          supabase.from("organizations").select("id, company_name, verification_level, created_at, updated_at").order("updated_at", { ascending: false }).limit(6),
+          supabase.from("orders").select("total_amount, amount, total_price"),
         ]);
 
-        const activity: RecentAction[] = (recentOrgs || []).map((org: any) => ({
+        const uCount = usersRes.count ?? profilesRes.count ?? 0;
+        const pCount = productsRes.count ?? 0;
+        const oCount = ordersRes.count ?? 0;
+        const pendingCount = pendingRes.count ?? 0;
+        const verifiedCount = verifiedRes.count ?? 0;
+
+        const rev = (orderDataRes.data || []).reduce((acc: number, o: any) => {
+          const val = Number(o.total_amount || o.amount || o.total_price || 0);
+          return acc + (isNaN(val) ? 0 : val);
+        }, 0);
+
+        const activity: RecentAction[] = (recentOrgsRes.data || []).map((org: any) => ({
           id: org.id,
-          org_name: org.company_name,
+          org_name: org.company_name || "Business Account",
           action:
             org.verification_level === "verified"
               ? "Approved & verified"
@@ -145,12 +151,12 @@ export default function AdminCommandCenter() {
         }));
 
         setStats({
-          totalUsers: usersCount || 0,
-          totalProducts: productsCount || 0,
-          totalOrders: ordersCount || 0,
-          pendingVerifications: pendingCount || 0,
-          verifiedOrgs: verifiedCount || 0,
-          totalRevenue: 0,
+          totalUsers: uCount,
+          totalProducts: pCount,
+          totalOrders: oCount,
+          pendingVerifications: pendingCount,
+          verifiedOrgs: verifiedCount,
+          totalRevenue: rev,
           recentActivity: activity,
         });
       } catch (err) {
@@ -164,12 +170,7 @@ export default function AdminCommandCenter() {
   }, [role, supabase]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Loader2 size={36} className="text-primary animate-spin" />
-        <p className="text-slate-400 text-sm font-bold">Loading platform telemetry…</p>
-      </div>
-    );
+    return <BuySellLoader message="Loading platform telemetry…" fullScreen={false} />;
   }
 
   const statCards = [

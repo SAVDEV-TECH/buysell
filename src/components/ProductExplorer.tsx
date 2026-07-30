@@ -320,10 +320,13 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All Products", "Industrial", "Electronics", "Fashion", "Agriculture", "Chemicals", "Packaging"]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All Products");
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(1000000);
+  const [maxMoq, setMaxMoq] = useState<number>(100000);
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
@@ -362,6 +365,12 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         }));
 
         setProducts(formatted);
+
+        // Fetch categories dynamically
+        const { data: catData } = await supabase.from("product_categories").select("name").order("name");
+        if (catData && catData.length > 0) {
+          setCategories(["All Products", ...catData.map((c: any) => c.name)]);
+        }
       } catch (error) {
         console.error("Failed to fetch products:", error);
         setProducts([]);
@@ -394,7 +403,9 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         p.category.toLowerCase().includes(search.toLowerCase());
       const matchCat = activeCategory === "All Products" || p.category === activeCategory;
       const matchPrice = p.price >= minPrice && p.price <= maxPrice;
-      return matchSearch && matchCat && matchPrice;
+      const matchMoq = (p.moq || 1) <= maxMoq;
+      const matchVerified = !verifiedOnly || p.isSellerVerified;
+      return matchSearch && matchCat && matchPrice && matchMoq && matchVerified;
     })
     .sort((a, b) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;
@@ -403,11 +414,20 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
       return 0;
     });
 
+  const activeFilterCount =
+    (minPrice > 0 ? 1 : 0) +
+    (maxPrice < 1000000 ? 1 : 0) +
+    (maxMoq < 100000 ? 1 : 0) +
+    (verifiedOnly ? 1 : 0) +
+    (activeCategory !== "All Products" ? 1 : 0);
+
   const displayed = limit ? filtered.slice(0, limit) : filtered;
 
   const resetFilters = () => {
     setMinPrice(0);
     setMaxPrice(1000000);
+    setMaxMoq(100000);
+    setVerifiedOnly(false);
     setActiveCategory("All Products");
     setSearch("");
   };
@@ -432,7 +452,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-              showFilters
+              showFilters || activeFilterCount > 0
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background border-input hover:bg-accent text-muted-foreground"
             }`}
@@ -440,6 +460,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             <Filter size={14} className="sm:hidden" />
             <Filter size={16} className="hidden sm:block" />
             <span className="hidden sm:inline">{t("market_filters")}</span>
+            {activeFilterCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-extrabold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
           </button>
           <div className="flex-1 sm:flex-none lg:flex-none relative flex-shrink-0 min-w-0">
             <select
@@ -468,18 +493,19 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="bg-card p-3 sm:p-5 md:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
+            <div className="bg-card p-4 sm:p-6 md:p-8 rounded-2xl border border-border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-end shadow-sm">
+              {/* Price range */}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
                   Price Range ($)
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <input
                     type="number"
                     placeholder="Min"
                     value={minPrice || ""}
                     onChange={(e) => setMinPrice(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
+                    className="w-full px-3 py-2 bg-background rounded-lg border border-input outline-none text-xs font-bold"
                   />
                   <span className="opacity-30 font-black">—</span>
                   <input
@@ -487,14 +513,53 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                     placeholder="Max"
                     value={maxPrice === 1000000 ? "" : maxPrice}
                     onChange={(e) => setMaxPrice(Number(e.target.value) || 1000000)}
-                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
+                    className="w-full px-3 py-2 bg-background rounded-lg border border-input outline-none text-xs font-bold"
                   />
                 </div>
               </div>
-              <div className="flex justify-end">
+
+              {/* Max MOQ Filter */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
+                  Max Order Quantity (MOQ)
+                </p>
+                <div className="flex items-center gap-1.5">
+                  {[
+                    { label: "Any", val: 100000 },
+                    { label: "≤50", val: 50 },
+                    { label: "≤100", val: 100 },
+                    { label: "≤500", val: 500 },
+                  ].map((btn) => (
+                    <button
+                      key={btn.label}
+                      onClick={() => setMaxMoq(btn.val)}
+                      className={`px-2.5 py-2 rounded-lg text-xs font-bold border transition-all ${
+                        maxMoq === btn.val
+                          ? "bg-primary text-white border-primary"
+                          : "bg-background border-input hover:bg-accent"
+                      }`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Verified Supplier & Reset */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:col-span-2 md:col-span-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={verifiedOnly}
+                    onChange={(e) => setVerifiedOnly(e.target.checked)}
+                    className="w-4 h-4 rounded border-input text-primary focus:ring-primary accent-primary"
+                  />
+                  <span className="text-xs font-bold text-foreground">Verified Sellers Only</span>
+                </label>
+
                 <button
                   onClick={resetFilters}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                  className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all whitespace-nowrap"
                 >
                   Reset Filters
                 </button>
@@ -505,7 +570,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
       </AnimatePresence>
 
       <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 mb-4 sm:mb-6 lg:mb-10 scrollbar-hide snap-x w-full">
-        {["All Products", "Industrial", "Electronics", "Fashion"].map((cat) => (
+        {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
