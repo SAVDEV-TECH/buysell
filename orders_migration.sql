@@ -29,14 +29,34 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS total_amount NUMERIC(12, 2) N
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'USD';
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending';
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_status TEXT DEFAULT 'funded';
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_reference TEXT;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'bank_transfer';
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_address JSONB DEFAULT '{}'::jsonb;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_number TEXT;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS courier_name TEXT;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS notes TEXT;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+-- Add escrow_status with safe default 'not_funded'
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_status TEXT DEFAULT 'not_funded';
+
+-- Add CHECK constraint for valid state machine values
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'orders_escrow_status_check'
+  ) THEN
+    ALTER TABLE public.orders 
+    ADD CONSTRAINT orders_escrow_status_check 
+    CHECK (escrow_status IN (
+      'not_funded',
+      'funding_pending',
+      'funded',
+      'partially_released',
+      'released',
+      'refunded',
+      'disputed',
+      'cancelled'
+    ));
+  END IF;
+END $$;
+
+-- Update existing orders based on real payment status
+UPDATE public.orders SET escrow_status = 'funded' WHERE payment_status IN ('paid', 'escrow_held');
+UPDATE public.orders SET escrow_status = 'released' WHERE payment_status = 'escrow_released';
+UPDATE public.orders SET escrow_status = 'cancelled' WHERE status = 'cancelled';
 
 -- Reload PostgREST schema cache immediately
 NOTIFY pgrst, 'reload schema';

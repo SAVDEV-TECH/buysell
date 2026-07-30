@@ -86,9 +86,36 @@ ALTER TABLE public.escrow_milestones ADD COLUMN IF NOT EXISTS released_at TIMEST
 
 CREATE INDEX IF NOT EXISTS idx_escrow_milestone_order ON public.escrow_milestones(order_id);
 
--- 4. Extend Orders Table with Escrow Tracking
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_transaction_id UUID REFERENCES public.escrow_transactions(id) ON DELETE SET NULL;
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_status TEXT DEFAULT 'funded';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS escrow_status TEXT DEFAULT 'not_funded';
+
+-- Add CHECK constraint for valid state machine values
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'orders_escrow_status_check'
+  ) THEN
+    ALTER TABLE public.orders 
+    ADD CONSTRAINT orders_escrow_status_check 
+    CHECK (escrow_status IN (
+      'not_funded',
+      'funding_pending',
+      'funded',
+      'partially_released',
+      'released',
+      'refunded',
+      'disputed',
+      'cancelled'
+    ));
+  END IF;
+END $$;
+
+-- Update existing orders based on real payment status
+UPDATE public.orders SET escrow_status = 'funded' WHERE payment_status IN ('paid', 'escrow_held');
+UPDATE public.orders SET escrow_status = 'released' WHERE payment_status = 'escrow_released';
+UPDATE public.orders SET escrow_status = 'cancelled' WHERE status = 'cancelled';
+
+-- Reload PostgREST schema cache immediately
+NOTIFY pgrst, 'reload schema';
 
 -- Enable RLS & set default public policies
 ALTER TABLE public.escrow_accounts ENABLE ROW LEVEL SECURITY;
