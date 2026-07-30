@@ -176,7 +176,37 @@ export default function CheckoutPage() {
         }
       }
 
-      // 4. Trigger Real-Time Notification for Buyer
+      // 4. Resolve supplier user ID for live real-time notification & supplier local persistence
+      let supplierUserId: string | null = null;
+      if (cartItems.length > 0) {
+        const firstProduct = cartItems[0];
+        try {
+          const { data: prodInfo } = await supabase
+            .from("products")
+            .select("user_id, supplier_organization_id")
+            .eq("id", firstProduct.id)
+            .maybeSingle();
+
+          if (prodInfo?.user_id) {
+            supplierUserId = prodInfo.user_id;
+          }
+
+          if (!supplierUserId && prodInfo?.supplier_organization_id && prodInfo.supplier_organization_id !== "supplier") {
+            const { data: orgInfo } = await supabase
+              .from("organizations")
+              .select("user_id")
+              .eq("id", prodInfo.supplier_organization_id)
+              .maybeSingle();
+            if (orgInfo?.user_id) {
+              supplierUserId = orgInfo.user_id;
+            }
+          }
+        } catch (sErr) {
+          console.warn("[Checkout] Supplier resolution notice:", sErr);
+        }
+      }
+
+      // 5. Trigger Real-Time Notification for Buyer
       await sendNotification(
         user.id,
         `🛒 Order #${createdOrderId.slice(0, 8).toUpperCase()} Placed!`,
@@ -184,6 +214,25 @@ export default function CheckoutPage() {
         "ORDER",
         `/dashboard/orders`
       );
+
+      // 6. Trigger Real-Time Notification for Supplier/Manufacturer
+      if (supplierUserId && supplierUserId !== user.id) {
+        try {
+          await sendNotification(
+            supplierUserId,
+            `📦 New Order #${createdOrderId.slice(0, 8).toUpperCase()} Received!`,
+            `A buyer placed a wholesale order of $${finalTotal.toLocaleString()}. Payment is secured in escrow.`,
+            "ORDER",
+            `/dashboard/orders`
+          );
+          const suppKey = `buysell_user_orders_${supplierUserId}`;
+          const suppExisting = JSON.parse(localStorage.getItem(suppKey) || "[]");
+          const suppUpdated = [newOrderObject, ...suppExisting.filter((o: any) => o.id !== createdOrderId)];
+          localStorage.setItem(suppKey, JSON.stringify(suppUpdated));
+        } catch (notifErr) {
+          console.warn("[Checkout] Supplier notification notice:", notifErr);
+        }
+      }
 
       // 5. Clear cart state & localStorage
       clearCart();

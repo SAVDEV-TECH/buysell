@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { LayoutDashboard, ShoppingBag, PieChart, Settings, LogOut, Menu, X, Bell, User, Package, ShieldCheck, Layers, CheckSquare } from "lucide-react";
@@ -17,6 +17,7 @@ export default function DashboardLayout({
 }) {
   const { user, profile, role, verificationLevel, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const supabase = createClient();
 
@@ -62,23 +63,37 @@ export default function DashboardLayout({
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-borderline transition-transform lg:translate-x-0 lg:static ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="h-full flex flex-col">
           <div className="p-6">
-            <Link href="/" className="text-2xl font-bold gradient-text">BuySell</Link>
+            <Link href="/" className="text-2xl font-black gradient-text">BuySell</Link>
             <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground font-bold bg-primary/10 w-fit px-2 py-0.5 rounded-full ring-1 ring-primary/20">
               {role || "USER"}
             </div>
           </div>
 
-          <nav className="flex-1 px-4 py-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary transition-all rounded-xl font-medium"
-              >
-                <item.icon size={20} />
-                {item.name}
-              </Link>
-            ))}
+          <nav className="flex-1 px-4 py-2 space-y-1.5 overflow-y-auto">
+            {navItems.map((item) => {
+              const isActive = item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-xs sm:text-sm transition-all relative ${
+                    isActive
+                      ? "bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02]"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white font-semibold"
+                  }`}
+                >
+                  <item.icon size={18} className={isActive ? "text-white" : "text-slate-400"} />
+                  <span>{item.name}</span>
+                  {isActive && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-white shadow-sm animate-pulse" />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="p-4 border-t border-borderline">

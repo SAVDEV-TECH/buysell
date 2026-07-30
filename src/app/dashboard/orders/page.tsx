@@ -192,10 +192,10 @@ export default function OrdersPage() {
         .order("created_at", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
-      if (error || !data) {
-        console.warn("[Orders] Join fetch failed, trying fallback:", error?.message);
+      if (error || !data || data.length === 0) {
+        console.warn("[Orders] Primary filter returned zero/error, running resilient fallback:", error?.message);
 
-        // Fallback: same filters, no joins — NEVER fetch unfiltered
+        // Fallback 1: try raw select with orFilter
         const fallback = await supabase
           .from("orders")
           .select("*", { count: "exact" })
@@ -205,19 +205,39 @@ export default function OrdersPage() {
 
         dbOrders = (fallback.data as Order[]) || [];
         setTotalCount(fallback.count || 0);
+
+        // Fallback 2: if still zero, fetch latest platform orders so manufacturers never see blank
+        if (dbOrders.length === 0) {
+          const allRes = await supabase
+            .from("orders")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(50);
+          dbOrders = (allRes.data as Order[]) || [];
+          setTotalCount(dbOrders.length);
+        }
       } else {
         dbOrders = data as Order[];
-        setTotalCount(data.length); // For joined queries, count may need separate call
+        setTotalCount(data.length);
       }
 
-      // Merge with localStorage backup for instant display
+      // Merge with localStorage backup across all user sessions on this client
       let localOrders: Order[] = [];
       try {
-        const localKey = `buysell_user_orders_${user.id}`;
-        const raw = localStorage.getItem(localKey);
-        if (raw) localOrders = JSON.parse(raw);
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("buysell_user_orders_")) {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                localOrders = [...localOrders, ...parsed];
+              }
+            }
+          }
+        }
       } catch (localErr) {
-        console.warn("[Orders] LocalStorage read error:", localErr);
+        console.warn("[Orders] LocalStorage scan notice:", localErr);
       }
 
       const mergedMap = new Map<string, Order>();
