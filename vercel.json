@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/escrow-auto-release",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/escrow-reconciliation",
+      "schedule": "0 0 * * *"
     }
   ]
 }

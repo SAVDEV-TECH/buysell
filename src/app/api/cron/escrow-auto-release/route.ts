@@ -6,12 +6,13 @@ import { successResponse, handleApiError } from "@/lib/apiResponse";
  * Automated Escrow Auto-Release Cron Job
  * Auto-releases escrow funds to the supplier if an order has been marked 'delivered'
  * for more than 72 hours and no dispute has been filed by the buyer.
- * Triggered hourly by Vercel Cron or external scheduler.
+ * Includes High-Value Safety Guard ($5,000 threshold requirement for manual admin signoff).
  */
 export async function GET(req: NextRequest) {
   try {
     const supabaseAdmin = createAdminClient();
     const cutoffTime = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
+    const HIGH_VALUE_THRESHOLD = 5000; // $5,000 USD limit for automated cron release
 
     // 1. Find all delivered orders past the 72-hour inspection window still in 'funded' state
     const { data: eligibleOrders, error: queryErr } = await supabaseAdmin
@@ -25,15 +26,31 @@ export async function GET(req: NextRequest) {
       console.warn("[Auto-Release Cron] Query notice:", queryErr.message);
     }
 
-    const ordersToRelease = eligibleOrders || [];
+    const ordersToProcess = eligibleOrders || [];
     const releasedIds: string[] = [];
+    const flaggedHighValueIds: string[] = [];
 
-    // 2. Process auto-release for each eligible order
-    for (const order of ordersToRelease) {
+    // 2. Process release for each eligible order
+    for (const order of ordersToProcess) {
       const now = new Date().toISOString();
       const amount = Number(order.total_amount || 0);
 
-      // Update order state
+      // SAFETY GUARD: High-Value Trades (>$5,000) require manual admin signoff
+      if (amount >= HIGH_VALUE_THRESHOLD) {
+        await supabaseAdmin
+          .from("orders")
+          .update({
+            escrow_status: "pending_admin_review",
+            updated_at: now,
+          })
+          .eq("id", order.id);
+
+        flaggedHighValueIds.push(order.id);
+        console.log(`[ESCROW CRON GUARD] Order #${order.id.slice(0, 8)} ($${amount}) flagged for manual Super Admin review.`);
+        continue;
+      }
+
+      // Standard Auto-Release
       await supabaseAdmin
         .from("orders")
         .update({
@@ -65,8 +82,10 @@ export async function GET(req: NextRequest) {
     return successResponse({
       processedCount: releasedIds.length,
       releasedOrderIds: releasedIds,
+      flaggedHighValueCount: flaggedHighValueIds.length,
+      flaggedHighValueIds,
       inspectionCutoff: cutoffTime,
-    }, `Auto-released ${releasedIds.length} orders after 72-hour inspection window.`);
+    }, `Auto-released ${releasedIds.length} orders after 72h window. ${flaggedHighValueIds.length} high-value orders (≥$5,000) flagged for admin signoff.`);
   } catch (error) {
     return handleApiError(error, "Failed to run escrow auto-release cron job");
   }
