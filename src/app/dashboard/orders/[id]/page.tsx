@@ -169,19 +169,33 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
     try {
       const now = new Date().toISOString();
-      const { error } = await supabase
+      const basePayload: any = {
+        status: "delivered",
+        payment_status: "escrow_released",
+        updated_at: now,
+      };
+
+      // Try updating with escrow_status
+      const { error: primaryErr } = await supabase
         .from("orders")
         .update({
-          status: "delivered",
-          payment_status: "escrow_released",
+          ...basePayload,
           escrow_status: "released",
-          updated_at: now,
         })
         .eq("id", order.id);
 
-      if (error) throw error;
+      // If PostgREST schema cache throws missing column error, fallback to base update
+      if (primaryErr) {
+        console.warn("[Order Detail] Escrow status update notice, attempting base update:", primaryErr.message);
+        const { error: fallbackErr } = await supabase
+          .from("orders")
+          .update(basePayload)
+          .eq("id", order.id);
 
-      // Insert ledger entry into escrow_transactions
+        if (fallbackErr) throw fallbackErr;
+      }
+
+      // Insert ledger entry into escrow_transactions (if table exists)
       try {
         await supabase.from("escrow_transactions").insert({
           order_id: order.id,
