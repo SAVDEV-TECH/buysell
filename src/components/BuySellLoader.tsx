@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShieldCheck, Lock, Globe, Sparkles } from "lucide-react";
 
 interface BuySellLoaderProps {
   message?: string;
@@ -9,118 +10,136 @@ interface BuySellLoaderProps {
   size?: "sm" | "md" | "lg";
 }
 
+const TELEMETRY_STEPS = [
+  "Initializing B2B Gateway...",
+  "Securing Escrow Protection...",
+  "Verifying Merchant Ledger...",
+  "Connecting Wholesale Exchange...",
+];
+
 export function BuySellLoader({
-  message = "Loading...",
+  message,
   fullScreen = true,
   size = "md",
 }: BuySellLoaderProps) {
-  const containerClasses = fullScreen
-    ? "fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md"
-    : "flex flex-col items-center justify-center p-8 w-full min-h-[300px]";
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
-  const dimensions = {
-    sm: "w-16 h-16",
-    md: "w-24 h-24",
-    lg: "w-36 h-36",
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentStepIndex((prev) => (prev + 1) % TELEMETRY_STEPS.length);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
+  const displayMessage = message || TELEMETRY_STEPS[currentStepIndex];
+
+  const containerClasses = fullScreen
+    ? "fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-xl transition-all"
+    : "flex flex-col items-center justify-center p-8 w-full min-h-[320px] bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-800/80";
 
   return (
     <div className={containerClasses}>
-      <div className="relative flex flex-col items-center justify-center select-none">
+      <div className="relative flex flex-col items-center justify-center max-w-sm w-full p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl shadow-blue-950/40 overflow-hidden select-none">
         
-        {/* Animated Glow Rings Background */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        {/* Ambient Radial Backdrop Glow */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
+
+        {/* ── Central Interlocking Orbit Animation ── */}
+        <div className="relative w-28 h-28 flex items-center justify-center mb-6">
+          
+          {/* Outer Orbital Ring */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 rounded-full border-2 border-dashed border-blue-500/30"
+          />
+
+          {/* Glowing Counter-rotating Pulsing Ring */}
+          <motion.div
+            animate={{ rotate: -360, scale: [0.95, 1.05, 0.95] }}
+            transition={{
+              rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+              scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            }}
+            className="absolute inset-2 rounded-full border border-slate-700/60 bg-gradient-to-tr from-blue-500/10 via-transparent to-amber-500/10 shadow-[0_0_20px_rgba(37,99,235,0.15)]"
+          />
+
+          {/* Center Brand Icon Badge */}
+          <motion.div
+            animate={{ scale: [0.92, 1.04, 0.92] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="relative z-10 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-amber-500 p-0.5 shadow-lg shadow-blue-500/30 flex items-center justify-center"
+          >
+            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center relative overflow-hidden">
+              {/* Interlocking BuySell Symbol */}
+              <div className="flex items-center justify-center gap-0.5">
+                <span className="text-xl font-black text-white tracking-tighter">B</span>
+                <span className="text-xl font-black text-amber-400 tracking-tighter -ml-1">S</span>
+              </div>
+
+              {/* Sparkle Dot */}
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"
+              />
+            </div>
+          </motion.div>
+
+          {/* Orbital Satellite Dot */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 flex items-start justify-center"
+          >
+            <div className="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_12px_#f59e0b] -mt-1.5" />
+          </motion.div>
+        </div>
+
+        {/* ── Brand Title ── */}
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="text-xl font-black text-white tracking-tight">BuySell</span>
+          <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+            Escrow B2B
+          </span>
+        </div>
+
+        {/* ── Live Telemetry Message ── */}
+        <div className="h-6 flex items-center justify-center mb-4">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={displayMessage}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+              className="text-xs font-bold text-slate-400 tracking-wide flex items-center gap-1.5"
+            >
+              <ShieldCheck size={14} className="text-emerald-400 shrink-0 animate-pulse" />
+              <span>{displayMessage}</span>
+            </motion.p>
+          </AnimatePresence>
+        </div>
+
+        {/* ── High-Tech Shimmering Progress Bar ── */}
+        <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden relative border border-slate-700/50">
           <motion.div
             animate={{
-              scale: [0.8, 1.2, 0.8],
-              opacity: [0.2, 0.5, 0.2],
+              x: ["-100%", "100%"],
             }}
             transition={{
-              duration: 2.5,
+              duration: 1.5,
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="w-32 h-32 rounded-full bg-gradient-to-r from-blue-500/20 via-sky-500/20 to-orange-500/20 blur-xl"
+            className="w-full h-full bg-gradient-to-r from-transparent via-blue-500 to-amber-400 rounded-full"
           />
         </div>
 
-        {/* Logo Container with 3D Animated S */}
-        <div className={`relative ${dimensions[size]} flex items-center justify-center mb-6`}>
-          <svg
-            viewBox="0 0 100 100"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full drop-shadow-xl"
-          >
-            <defs>
-              {/* Blue Gradient for 'B' */}
-              <linearGradient id="loaderBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1e3a8a" />
-                <stop offset="50%" stopColor="#2563eb" />
-                <stop offset="100%" stopColor="#0284c7" />
-              </linearGradient>
-
-              {/* Terracotta/Orange Gradient for 'S' */}
-              <linearGradient id="loaderOrangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f97316" />
-                <stop offset="60%" stopColor="#ea580c" />
-                <stop offset="100%" stopColor="#c2410c" />
-              </linearGradient>
-            </defs>
-
-            {/* Letter 'B' (Anchored & Pulsing) */}
-            <motion.path
-              animate={{ opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              d="M 18 12 H 42 C 54 12 62 18 62 28 C 62 35 56 40 48 43 C 58 46 65 52 65 64 C 65 76 55 84 40 84 H 18 V 12 Z M 32 24 V 40 H 40 C 46 40 50 36 50 32 C 50 28 46 24 40 24 H 32 Z M 32 50 V 72 H 42 C 48 72 53 67 53 61 C 53 55 48 50 42 50 H 32 Z"
-              fill="url(#loaderBlueGrad)"
-            />
-
-            {/* Letter 'S' (Smoothly Rotating as requested!) */}
-            <g className="origin-[60px_45px]">
-              <motion.g
-                animate={{ rotate: 360 }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{ transformOrigin: "60px 45px" }}
-              >
-                <path
-                  d="M 78 26 C 72 18 62 16 52 19 C 48 20 44 23 44 28 C 44 34 50 37 57 39 L 65 42 C 77 45 84 52 84 63 C 84 76 71 85 54 84 C 41 83 32 75 28 66 L 38 59 C 41 66 48 72 57 72 C 64 72 70 68 70 62 C 70 56 64 53 56 50 L 48 48 C 36 44 30 38 30 27 C 30 15 44 6 60 7 C 71 8 80 15 84 22 L 78 26 Z"
-                  fill="url(#loaderOrangeGrad)"
-                />
-              </motion.g>
-            </g>
-          </svg>
-        </div>
-
-        {/* Text 'buysell' & Tagline */}
-        <div className="flex flex-col items-center">
-          <div className="text-2xl md:text-3xl font-black tracking-tight mb-1">
-            <span className="text-slate-900 dark:text-white">buy</span>
-            <span className="text-amber-600 dark:text-amber-500 font-semibold">sell</span>
-          </div>
-
-          <p className="text-xs font-bold text-muted-foreground animate-pulse tracking-wide mb-3">
-            {message}
-          </p>
-
-          {/* Animated Loading Bar */}
-          <div className="w-36 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden relative">
-            <motion.div
-              animate={{
-                x: ["-100%", "100%"],
-              }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="w-full h-full bg-gradient-to-r from-blue-600 to-orange-500 rounded-full"
-            />
-          </div>
+        {/* Security Subtext */}
+        <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-slate-500">
+          <Lock size={10} className="text-slate-400" /> 256-Bit Encrypted Trade Layer
         </div>
 
       </div>
