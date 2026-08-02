@@ -54,23 +54,8 @@ function resolveAllowedOrigin(request: NextRequest): string | null {
   const allowed = getAllowedOrigins();
   if (allowed.includes(incomingOrigin)) return incomingOrigin;
 
-  // 3. Automatically trust Vercel deployment URL (exact origin or *.vercel.app domain)
+  // 3. Exact Vercel deployment URL match (without wildcard subdomains)
   if (process.env.VERCEL_URL && incomingOrigin === `https://${process.env.VERCEL_URL}`) {
-    return incomingOrigin;
-  }
-
-  try {
-    const originUrl = new URL(incomingOrigin);
-    if (originUrl.hostname.endsWith(".vercel.app")) {
-      return incomingOrigin;
-    }
-  } catch {
-    // Ignore invalid URL
-  }
-
-  // 4. Safe fallback: If no explicit ALLOWED_ORIGINS env var is defined,
-  // permit the request origin to prevent blocking API calls in fresh deployments
-  if (allowed.length === 0) {
     return incomingOrigin;
   }
 
@@ -101,9 +86,6 @@ function applyCors(request: NextRequest, response: NextResponse): NextResponse {
       "Access-Control-Allow-Headers",
       "Content-Type, Authorization, X-Requested-With"
     );
-    // Vary: Origin is REQUIRED when the value is dynamic (not the literal string *)
-    // Without it, CDNs and Vercel Edge may cache the response for one origin
-    // and serve it to a different origin — defeating the per-origin check.
     response.headers.append("Vary", "Origin");
   }
 
@@ -114,15 +96,15 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Handle CORS Preflights (OPTIONS) at middleware level ────────────────
-  // Must be handled before auth checks — browsers send preflights without
-  // cookies, so they would otherwise fail auth and return 401/302.
   if (request.method === "OPTIONS") {
-    // Webhooks never need preflight handling.
     if (pathname.startsWith("/api/webhooks/")) {
       return new NextResponse(null, { status: 204 });
     }
 
-    const allowedOrigin = resolveAllowedOrigin(request) || request.headers.get("origin") || "*";
+    const allowedOrigin = resolveAllowedOrigin(request);
+    if (!allowedOrigin) {
+      return new NextResponse(null, { status: 403 });
+    }
 
     return new NextResponse(null, {
       status: 204,
@@ -187,7 +169,6 @@ export async function proxy(request: NextRequest) {
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains; preload"
   );
-  supabaseResponse.headers.set("X-XSS-Protection", "1; mode=block");
   supabaseResponse.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
 
   // ── CORS Headers (applied last so they take precedence over any edge defaults) ──

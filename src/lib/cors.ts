@@ -17,12 +17,12 @@ function getAllowedOrigins(): string[] {
 
 /**
  * Resolves the effective Access-Control-Allow-Origin header value.
+ * Strictly verifies against:
+ *  1. Same-origin requests (Origin host matches Request Host header or nextUrl.origin)
+ *  2. Exact process.env.VERCEL_URL matching
+ *  3. Explicit ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL allowlist
  *
- * Guaranteed to permit:
- *  1. Same-origin requests (Origin host matches Request Host header)
- *  2. Vercel deployment URLs (*.vercel.app)
- *  3. Origins listed in ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL
- *  4. Fallback to request origin when no explicit allowlist is configured
+ * Never returns "*" or reflects unverified wildcards.
  */
 export function resolveAllowedOrigin(request: NextRequest): string | null {
   const requestOrigin = request.headers.get("origin");
@@ -37,7 +37,7 @@ export function resolveAllowedOrigin(request: NextRequest): string | null {
         return requestOrigin;
       }
     } catch {
-      // Invalid URL string — fallback
+      // Invalid URL string
     }
   }
 
@@ -49,23 +49,8 @@ export function resolveAllowedOrigin(request: NextRequest): string | null {
   const allowed = getAllowedOrigins();
   if (allowed.includes(requestOrigin)) return requestOrigin;
 
-  // 3. Automatically trust Vercel deployment URL (exact origin or *.vercel.app domain)
+  // 3. Exact Vercel deployment URL match (without wildcard subdomains)
   if (process.env.VERCEL_URL && requestOrigin === `https://${process.env.VERCEL_URL}`) {
-    return requestOrigin;
-  }
-
-  try {
-    const originUrl = new URL(requestOrigin);
-    if (originUrl.hostname.endsWith(".vercel.app")) {
-      return requestOrigin;
-    }
-  } catch {
-    // Ignore invalid URL
-  }
-
-  // 4. Safe fallback: If no explicit ALLOWED_ORIGINS env var is defined,
-  // permit the request origin to prevent blocking API calls in fresh deployments
-  if (allowed.length === 0) {
     return requestOrigin;
   }
 
@@ -98,10 +83,13 @@ export function applyCorsHeaders(
 
 /**
  * Handles an OPTIONS preflight request.
- * Returns a 204 No Content response with CORS headers.
+ * Returns a 204 No Content response with CORS headers if permitted, or 403 Forbidden.
  */
 export function handleCorsPrelight(request: NextRequest): NextResponse {
-  const origin = resolveAllowedOrigin(request) || request.headers.get("origin") || "*";
+  const origin = resolveAllowedOrigin(request);
+  if (!origin) {
+    return new NextResponse(null, { status: 403 });
+  }
 
   return new NextResponse(null, {
     status: 204,
