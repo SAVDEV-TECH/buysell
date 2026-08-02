@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Package,
   ArrowRight,
@@ -330,39 +330,76 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
-  const supabase = createClient();
+  // Fix: create client outside useEffect to avoid infinite re-render loop
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        // Expanded select: pull verification_level from organizations join
         const { data, error } = await supabase
           .from("products")
-          .select("*, supplier_organizations(company_name), product_categories(name)")
+          .select(`
+            *,
+            supplier_organizations:organizations!products_supplier_organization_id_fkey(
+              company_name,
+              verification_level
+            ),
+            product_categories(name)
+          `)
           .order("created_at", { ascending: false });
         
         let rawData = data;
         if (error) {
           console.warn("Product join fetch notice:", error.message);
+          // Fallback: basic select without joins
           const fallback = await supabase.from("products").select("*").order("created_at", { ascending: false });
           rawData = fallback.data;
         }
 
-        const formatted: Product[] = (rawData || []).map((p: any) => ({
-          id: p.id,
-          name: p.title || "Unnamed Product",
-          price: Array.isArray(p.tiered_pricing) && p.tiered_pricing.length > 0 
-            ? (p.tiered_pricing[0].unit_price || p.tiered_pricing[0].price || 10)
-            : 10,
-          category: p.product_categories?.name || "General B2B",
-          desc: p.description || "",
-          rating: 4.8,
-          reviews: 12,
-          sellerId: p.supplier_organization_id || "supplier",
-          sellerName: p.supplier_organizations?.company_name || "Verified Supplier",
-          moq: p.min_order_quantity || 1,
-          isSellerVerified: true,
-          imageUrl: getProductImageUrl(p),
-        }));
+        // Fetch aggregated review stats per product
+        const { data: reviewStats } = await supabase
+          .from("reviews")
+          .select("product_id, rating")
+          .in("product_id", (rawData || []).map((p: any) => p.id));
+
+        // Build per-product rating map from real review data
+        const ratingMap: Record<string, { avg: number; count: number }> = {};
+        if (reviewStats) {
+          for (const r of reviewStats) {
+            if (!ratingMap[r.product_id]) ratingMap[r.product_id] = { avg: 0, count: 0 };
+            ratingMap[r.product_id].count++;
+            ratingMap[r.product_id].avg += r.rating;
+          }
+          for (const pid of Object.keys(ratingMap)) {
+            ratingMap[pid].avg = Math.round((ratingMap[pid].avg / ratingMap[pid].count) * 10) / 10;
+          }
+        }
+
+        const formatted: Product[] = (rawData || []).map((p: any) => {
+          const orgVerification = p.supplier_organizations?.verification_level;
+          const isVerified = orgVerification === "verified";
+          const productRating = ratingMap[p.id];
+
+          return {
+            id: p.id,
+            name: p.title || "Unnamed Product",
+            price: Array.isArray(p.tiered_pricing) && p.tiered_pricing.length > 0
+              ? (p.tiered_pricing[0].unit_price || p.tiered_pricing[0].price || 10)
+              : 10,
+            category: p.product_categories?.name || "General B2B",
+            desc: p.description || "",
+            // Real rating from reviews table — null means no reviews yet
+            rating: productRating ? productRating.avg : 0,
+            reviews: productRating ? productRating.count : 0,
+            sellerId: p.supplier_organization_id || "supplier",
+            sellerName: p.supplier_organizations?.company_name || "Supplier",
+            moq: p.min_order_quantity || 1,
+            // Real verification status from organizations table
+            isSellerVerified: isVerified,
+            imageUrl: getProductImageUrl(p),
+          };
+        });
 
         setProducts(formatted);
 

@@ -1,74 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, CreditCard, Smartphone } from "lucide-react";
-
-interface CountryInfo {
-  country: string;
-  currency: string;
-  currencySymbol: string;
-  preferredMethod: "paystack" | "flutterwave" | "mobile-money";
-}
-
-const COUNTRY_CONFIG: Record<string, CountryInfo> = {
-  NG: { country: "Nigeria", currency: "NGN", currencySymbol: "₦", preferredMethod: "paystack" },
-  KE: { country: "Kenya", currency: "KES", currencySymbol: "Ksh", preferredMethod: "flutterwave" },
-  GH: { country: "Ghana", currency: "GHS", currencySymbol: "GH₵", preferredMethod: "flutterwave" },
-  UG: { country: "Uganda", currency: "UGX", currencySymbol: "USh", preferredMethod: "mobile-money" },
-  TZ: { country: "Tanzania", currency: "TZS", currencySymbol: "TSh", preferredMethod: "flutterwave" },
-  RW: { country: "Rwanda", currency: "RWF", currencySymbol: "FRw", preferredMethod: "flutterwave" },
-  CM: { country: "Cameroon", currency: "XAF", currencySymbol: "FCFA", preferredMethod: "flutterwave" },
-  CI: { country: "Côte d'Ivoire", currency: "XOF", currencySymbol: "CFA", preferredMethod: "flutterwave" },
-  SN: { country: "Senegal", currency: "XOF", currencySymbol: "CFA", preferredMethod: "flutterwave" },
-  MA: { country: "Morocco", currency: "MAD", currencySymbol: "د.م.", preferredMethod: "flutterwave" },
-  EG: { country: "Egypt", currency: "EGP", currencySymbol: "£", preferredMethod: "flutterwave" },
-  ZA: { country: "South Africa", currency: "ZAR", currencySymbol: "R", preferredMethod: "paystack" },
-  ET: { country: "Ethiopia", currency: "ETB", currencySymbol: "Br", preferredMethod: "mobile-money" },
-  MW: { country: "Malawi", currency: "MWK", currencySymbol: "MK", preferredMethod: "mobile-money" },
-  ZM: { country: "Zambia", currency: "ZMW", currencySymbol: "ZK", preferredMethod: "mobile-money" },
-  BW: { country: "Botswana", currency: "BWP", currencySymbol: "P", preferredMethod: "flutterwave" },
-};
-
-export async function detectCountry(): Promise<CountryInfo> {
-  try {
-    // Try to get country from geolocation API
-    const response = await fetch("https://ipapi.co/json/");
-    const data = await response.json();
-    const countryCode = data.country_code;
-
-    return (
-      COUNTRY_CONFIG[countryCode] || {
-        country: data.country_name || "Unknown",
-        currency: "USD",
-        currencySymbol: "$",
-        preferredMethod: "flutterwave",
-      }
-    );
-  } catch {
-    // Fallback to default
-    return {
-      country: "Unknown",
-      currency: "USD",
-      currencySymbol: "$",
-      preferredMethod: "flutterwave",
-    };
-  }
-}
+import { Zap, CreditCard, Smartphone, Globe, Landmark } from "lucide-react";
+import { getPaymentRoute, GlobalPaymentMethod } from "@/lib/globalPaymentRouter";
+import { COUNTRY_CONFIG, getCountryFromIP } from "@/lib/geolocation";
 
 interface PaymentMethodSelectorProps {
-  onMethodChange: (method: "paystack" | "flutterwave" | "mobile-money") => void;
-  selectedMethod: "paystack" | "flutterwave" | "mobile-money";
+  onMethodChange: (method: GlobalPaymentMethod) => void;
+  selectedMethod: GlobalPaymentMethod;
 }
 
 export default function PaymentMethodSelector({ onMethodChange, selectedMethod }: PaymentMethodSelectorProps) {
-  const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
+  const [countryCode, setCountryCode] = useState<string>("NG");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    detectCountry().then((info) => {
-      setCountryInfo(info);
-      // Always default to paystack for escrow — it works globally with cards
-      onMethodChange("paystack");
+    getCountryFromIP().then((code) => {
+      setCountryCode(code);
+      const route = getPaymentRoute(code);
+      onMethodChange(route.method);
       setLoading(false);
     });
   }, [onMethodChange]);
@@ -82,30 +32,54 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
     );
   }
 
-  const methods = [
+  const countryInfo = COUNTRY_CONFIG[countryCode] || {
+    name: countryCode,
+    currencyCode: "USD",
+    currencySymbol: "$",
+  };
+  const route = getPaymentRoute(countryCode);
+
+  const methods: Array<{
+    id: GlobalPaymentMethod;
+    name: string;
+    description: string;
+    icon: React.ReactNode;
+    recommended: boolean;
+  }> = [
+    {
+      id: "stripe",
+      name: "Stripe International",
+      description: "Escrow-protected · Card, ACH, SEPA & international wire",
+      icon: <Globe size={20} className="text-blue-500" />,
+      recommended: route.method === "stripe",
+    },
+    {
+      id: "verto_fx",
+      name: "VertoFX Wholesale Wire",
+      description: "Pay with CNY, EUR, GBP or USD SWIFT transfer. Direct wholesale FX conversion.",
+      icon: <Landmark size={20} className="text-emerald-500" />,
+      recommended: route.method === "verto_fx",
+    },
     {
       id: "paystack",
       name: "Paystack",
-      description: "Escrow-protected · Pay with card, bank transfer or USSD",
-      icon: <CreditCard size={20} />,
-      available: true, // always available — supports cards globally
-      recommended: true,
+      description: "Escrow-protected · Card, bank transfer or USSD (African markets)",
+      icon: <CreditCard size={20} className="text-indigo-500" />,
+      recommended: route.method === "paystack",
     },
     {
       id: "flutterwave",
       name: "Flutterwave",
-      description: `Available in ${countryInfo?.country || "your country"}. Works with cards & wallets.`,
-      icon: <Zap size={20} />,
-      available: true,
-      recommended: false,
+      description: `Available in ${countryInfo.name}. Works with cards & local wallets.`,
+      icon: <Zap size={20} className="text-amber-500" />,
+      recommended: route.method === "flutterwave",
     },
     {
       id: "mobile-money",
       name: "Mobile Money",
-      description: "Pay with MTN, Airtel, Vodafone - Works on any phone",
-      icon: <Smartphone size={20} />,
-      available: true,
-      recommended: false,
+      description: "Pay with MTN, Airtel, Vodafone - Works on any mobile phone",
+      icon: <Smartphone size={20} className="text-rose-500" />,
+      recommended: route.method === "mobile-money",
     },
   ];
 
@@ -113,11 +87,9 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold">Payment Method</h3>
-        {countryInfo && (
-          <span className="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
-            {countryInfo.country} • {countryInfo.currency}
-          </span>
-        )}
+        <span className="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
+          {countryInfo.name} • {countryInfo.currencyCode} ({countryInfo.currencySymbol})
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -126,8 +98,8 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
             key={method.id}
             className={`flex items-start gap-4 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
               selectedMethod === method.id
-                ? "border-primary bg-primary/5"
-                : "border-borderline hover:border-primary/50 bg-background"
+                ? "border-primary bg-primary/5 shadow-sm"
+                : "border-borderline hover:border-primary/50 bg-background opacity-80 hover:opacity-100"
             }`}
           >
             <input
@@ -135,7 +107,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
               name="payment-method"
               value={method.id}
               checked={selectedMethod === method.id}
-              onChange={() => onMethodChange(method.id as "paystack" | "flutterwave" | "mobile-money")}
+              onChange={() => onMethodChange(method.id)}
               className="mt-1 accent-primary"
             />
             <div className="flex-1">
@@ -144,7 +116,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
                 <span className="font-bold">{method.name}</span>
                 {method.recommended && (
                   <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-primary text-white rounded-full">
-                    Recommended
+                    Recommended for {countryInfo.name}
                   </span>
                 )}
               </div>
@@ -154,10 +126,13 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
         ))}
       </div>
 
-      <div className="p-4 bg-accent/50 rounded-xl border border-borderline text-sm text-muted-foreground">
-        <p className="font-medium mb-1">💡 Pro Tip:</p>
-        <p>Mobile Money is fastest for amounts under ₦500,000. Cards work for larger purchases.</p>
+      <div className="p-4 bg-accent/10 rounded-xl border border-accent/20 text-sm text-muted-foreground">
+        <p className="font-medium mb-1 text-accent-foreground">💡 Escrow Protection Active:</p>
+        <p className="text-xs">
+          All payments on BuySell are held in secure escrow. Funds are released to African suppliers only after inspection &amp; milestone approval.
+        </p>
       </div>
     </div>
   );
 }
+

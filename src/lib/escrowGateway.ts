@@ -116,23 +116,56 @@ export async function executeEscrowDisbursement(
     }
   }
 
-  // 3. Fallback/Mobile Money Direct Escrow Ledger Record
+  // 3. Both live providers failed or were not configured.
+  // If no real payment method was set, this is an internal ledger record (e.g., demo/test mode).
+  // Otherwise, treat it as a genuine failure — never silently succeed.
+  const isInternalLedger = !paymentMethod || paymentMethod === "buysell_escrow_ledger";
+
+  if (isInternalLedger) {
+    // Internal demo/test mode: log and return success for non-live environments
+    console.warn(
+      `[ESCROW GATEWAY] No live provider matched for Order #${orderId.slice(0, 8)}. ` +
+      `Recording as internal ledger entry. THIS MUST NOT HAPPEN IN PRODUCTION.`
+    );
+    return {
+      success: true,
+      status: "completed",
+      provider: "buysell_escrow_ledger",
+      providerTransferId: `TX_${idempotencyKey.slice(0, 16)}`,
+      message: `[INTERNAL LEDGER] Escrow logged under key ${idempotencyKey}. No real money moved.`,
+      metadata: {
+        orderId,
+        amount,
+        currency,
+        settled_amount: settledAmount,
+        settled_currency: targetCurrency,
+        fx_rate: fxRate,
+        fx_rate_locked_at: now,
+        idempotencyKey,
+        settlementMode: "escrow_internal_ledger",
+        warning: "NO_LIVE_PROVIDER_MATCHED",
+      },
+    };
+  }
+
+  // Real provider was specified (paystack/stripe/flutterwave) but failed.
+  // Return failure so the order is NOT marked as paid and no disbursement occurs.
+  console.error(
+    `[ESCROW GATEWAY] All live providers failed for Order #${orderId.slice(0, 8)} ` +
+    `using method "${paymentMethod}". Returning failure. No funds disbursed.`
+  );
   return {
-    success: true,
-    status: "completed",
-    provider: paymentMethod || "buysell_escrow_ledger",
-    providerTransferId: `TX_${idempotencyKey.slice(0, 16)}`,
-    message: `Escrow transfer authorized and logged under key ${idempotencyKey}`,
+    success: false,
+    status: "failed",
+    provider: paymentMethod,
+    message: `Escrow disbursement failed: payment provider "${paymentMethod}" did not complete the transfer. ` +
+      `Please retry or contact support. Order #${orderId.slice(0, 8)}.`,
     metadata: {
       orderId,
       amount,
       currency,
-      settled_amount: settledAmount,
-      settled_currency: targetCurrency,
-      fx_rate: fxRate,
-      fx_rate_locked_at: now,
       idempotencyKey,
-      settlementMode: "escrow_segregated_balance",
+      failure_reason: "ALL_PROVIDERS_FAILED",
     },
   };
 }

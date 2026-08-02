@@ -7,157 +7,154 @@ export interface CountryData {
   currencySymbol: string;
   currencyCode: string;
   region: string;
-  preferredPaymentMethod: "paystack" | "flutterwave" | "mobile-money";
+  /** Payment method preferred for this country. Global buyers use 'stripe' or 'verto_fx'. */
+  preferredPaymentMethod: "paystack" | "flutterwave" | "mobile-money" | "stripe" | "verto_fx";
+  /** True for African supplier countries, false for international buyer countries */
+  isAfricanMarket?: boolean;
 }
 
 export const COUNTRY_CONFIG: Record<string, CountryData> = {
+  // ─── African Supplier Markets ────────────────────────────────────────────────
   NG: {
-    code: "NG",
-    name: "Nigeria",
-    currency: "Nigerian Naira",
-    currencySymbol: "₦",
-    currencyCode: "NGN",
-    region: "West Africa",
-    preferredPaymentMethod: "paystack",
+    code: "NG", name: "Nigeria", currency: "Nigerian Naira", currencySymbol: "₦",
+    currencyCode: "NGN", region: "West Africa", preferredPaymentMethod: "paystack", isAfricanMarket: true,
   },
   KE: {
-    code: "KE",
-    name: "Kenya",
-    currency: "Kenyan Shilling",
-    currencySymbol: "Ksh",
-    currencyCode: "KES",
-    region: "East Africa",
-    preferredPaymentMethod: "paystack",
+    code: "KE", name: "Kenya", currency: "Kenyan Shilling", currencySymbol: "Ksh",
+    currencyCode: "KES", region: "East Africa", preferredPaymentMethod: "paystack", isAfricanMarket: true,
   },
   GH: {
-    code: "GH",
-    name: "Ghana",
-    currency: "Ghanaian Cedi",
-    currencySymbol: "GH₵",
-    currencyCode: "GHS",
-    region: "West Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "GH", name: "Ghana", currency: "Ghanaian Cedi", currencySymbol: "GH₵",
+    currencyCode: "GHS", region: "West Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
+  },
+  // Togo — West African CFA, key cashew/cotton export corridor via Port of Lomé
+  TG: {
+    code: "TG", name: "Togo", currency: "West African Franc", currencySymbol: "CFA",
+    currencyCode: "XOF", region: "West Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
+  },
+  // Guinea-Bissau — 90%+ of exports are Raw Cashew Nuts (March-July season)
+  GW: {
+    code: "GW", name: "Guinea-Bissau", currency: "West African Franc", currencySymbol: "CFA",
+    currencyCode: "XOF", region: "West Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   UG: {
-    code: "UG",
-    name: "Uganda",
-    currency: "Ugandan Shilling",
-    currencySymbol: "USh",
-    currencyCode: "UGX",
-    region: "East Africa",
-    preferredPaymentMethod: "mobile-money",
+    code: "UG", name: "Uganda", currency: "Ugandan Shilling", currencySymbol: "USh",
+    currencyCode: "UGX", region: "East Africa", preferredPaymentMethod: "mobile-money", isAfricanMarket: true,
   },
   TZ: {
-    code: "TZ",
-    name: "Tanzania",
-    currency: "Tanzanian Shilling",
-    currencySymbol: "TSh",
-    currencyCode: "TZS",
-    region: "East Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "TZ", name: "Tanzania", currency: "Tanzanian Shilling", currencySymbol: "TSh",
+    currencyCode: "TZS", region: "East Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   RW: {
-    code: "RW",
-    name: "Rwanda",
-    currency: "Rwandan Franc",
-    currencySymbol: "FRw",
-    currencyCode: "RWF",
-    region: "East Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "RW", name: "Rwanda", currency: "Rwandan Franc", currencySymbol: "FRw",
+    currencyCode: "RWF", region: "East Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   CM: {
-    code: "CM",
-    name: "Cameroon",
-    currency: "CFA Franc",
-    currencySymbol: "FCFA",
-    currencyCode: "XAF",
-    region: "Central Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "CM", name: "Cameroon", currency: "CFA Franc", currencySymbol: "FCFA",
+    currencyCode: "XAF", region: "Central Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   CI: {
-    code: "CI",
-    name: "Côte d'Ivoire",
-    currency: "West African Franc",
-    currencySymbol: "CFA",
-    currencyCode: "XOF",
-    region: "West Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "CI", name: "Côte d'Ivoire", currency: "West African Franc", currencySymbol: "CFA",
+    currencyCode: "XOF", region: "West Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   SN: {
-    code: "SN",
-    name: "Senegal",
-    currency: "West African Franc",
-    currencySymbol: "CFA",
-    currencyCode: "XOF",
-    region: "West Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "SN", name: "Senegal", currency: "West African Franc", currencySymbol: "CFA",
+    currencyCode: "XOF", region: "West Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   MA: {
-    code: "MA",
-    name: "Morocco",
-    currency: "Moroccan Dirham",
-    currencySymbol: "د.م.",
-    currencyCode: "MAD",
-    region: "North Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "MA", name: "Morocco", currency: "Moroccan Dirham", currencySymbol: "د.م.",
+    currencyCode: "MAD", region: "North Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   EG: {
-    code: "EG",
-    name: "Egypt",
-    currency: "Egyptian Pound",
-    currencySymbol: "£",
-    currencyCode: "EGP",
-    region: "North Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "EG", name: "Egypt", currency: "Egyptian Pound", currencySymbol: "£",
+    currencyCode: "EGP", region: "North Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
   },
   ZA: {
-    code: "ZA",
-    name: "South Africa",
-    currency: "South African Rand",
-    currencySymbol: "R",
-    currencyCode: "ZAR",
-    region: "Southern Africa",
-    preferredPaymentMethod: "paystack",
+    code: "ZA", name: "South Africa", currency: "South African Rand", currencySymbol: "R",
+    currencyCode: "ZAR", region: "Southern Africa", preferredPaymentMethod: "paystack", isAfricanMarket: true,
   },
   ET: {
-    code: "ET",
-    name: "Ethiopia",
-    currency: "Ethiopian Birr",
-    currencySymbol: "Br",
-    currencyCode: "ETB",
-    region: "East Africa",
-    preferredPaymentMethod: "mobile-money",
+    code: "ET", name: "Ethiopia", currency: "Ethiopian Birr", currencySymbol: "Br",
+    currencyCode: "ETB", region: "East Africa", preferredPaymentMethod: "mobile-money", isAfricanMarket: true,
   },
   MW: {
-    code: "MW",
-    name: "Malawi",
-    currency: "Malawian Kwacha",
-    currencySymbol: "MK",
-    currencyCode: "MWK",
-    region: "Southern Africa",
-    preferredPaymentMethod: "mobile-money",
+    code: "MW", name: "Malawi", currency: "Malawian Kwacha", currencySymbol: "MK",
+    currencyCode: "MWK", region: "Southern Africa", preferredPaymentMethod: "mobile-money", isAfricanMarket: true,
   },
   ZM: {
-    code: "ZM",
-    name: "Zambia",
-    currency: "Zambian Kwacha",
-    currencySymbol: "ZK",
-    currencyCode: "ZMW",
-    region: "Southern Africa",
-    preferredPaymentMethod: "mobile-money",
+    code: "ZM", name: "Zambia", currency: "Zambian Kwacha", currencySymbol: "ZK",
+    currencyCode: "ZMW", region: "Southern Africa", preferredPaymentMethod: "mobile-money", isAfricanMarket: true,
   },
   BW: {
-    code: "BW",
-    name: "Botswana",
-    currency: "Botswana Pula",
-    currencySymbol: "P",
-    currencyCode: "BWP",
-    region: "Southern Africa",
-    preferredPaymentMethod: "flutterwave",
+    code: "BW", name: "Botswana", currency: "Botswana Pula", currencySymbol: "P",
+    currencyCode: "BWP", region: "Southern Africa", preferredPaymentMethod: "flutterwave", isAfricanMarket: true,
+  },
+
+  // ─── Global Buyer Markets (International) ────────────────────────────────────
+  // Europe — Stripe / SEPA
+  DE: {
+    code: "DE", name: "Germany", currency: "Euro", currencySymbol: "€",
+    currencyCode: "EUR", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  FR: {
+    code: "FR", name: "France", currency: "Euro", currencySymbol: "€",
+    currencyCode: "EUR", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  GB: {
+    code: "GB", name: "United Kingdom", currency: "British Pound", currencySymbol: "£",
+    currencyCode: "GBP", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  NL: {
+    code: "NL", name: "Netherlands", currency: "Euro", currencySymbol: "€",
+    currencyCode: "EUR", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  IT: {
+    code: "IT", name: "Italy", currency: "Euro", currencySymbol: "€",
+    currencyCode: "EUR", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  ES: {
+    code: "ES", name: "Spain", currency: "Euro", currencySymbol: "€",
+    currencyCode: "EUR", region: "Europe", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  // Asia — VertoFX for China (CNY), Stripe for others
+  CN: {
+    code: "CN", name: "China", currency: "Chinese Yuan", currencySymbol: "¥",
+    currencyCode: "CNY", region: "Asia", preferredPaymentMethod: "verto_fx", isAfricanMarket: false,
+  },
+  IN: {
+    code: "IN", name: "India", currency: "Indian Rupee", currencySymbol: "₹",
+    currencyCode: "INR", region: "Asia", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  JP: {
+    code: "JP", name: "Japan", currency: "Japanese Yen", currencySymbol: "¥",
+    currencyCode: "JPY", region: "Asia", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  SG: {
+    code: "SG", name: "Singapore", currency: "Singapore Dollar", currencySymbol: "S$",
+    currencyCode: "SGD", region: "Asia", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  AE: {
+    code: "AE", name: "United Arab Emirates", currency: "UAE Dirham", currencySymbol: "د.إ",
+    currencyCode: "AED", region: "Middle East", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  // Americas — Stripe
+  US: {
+    code: "US", name: "United States", currency: "US Dollar", currencySymbol: "$",
+    currencyCode: "USD", region: "Americas", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  CA: {
+    code: "CA", name: "Canada", currency: "Canadian Dollar", currencySymbol: "CA$",
+    currencyCode: "CAD", region: "Americas", preferredPaymentMethod: "stripe", isAfricanMarket: false,
+  },
+  BR: {
+    code: "BR", name: "Brazil", currency: "Brazilian Real", currencySymbol: "R$",
+    currencyCode: "BRL", region: "Americas", preferredPaymentMethod: "stripe", isAfricanMarket: false,
   },
 };
 
-// Real-time exchange rates (in production, fetch from API like Xe.com or Alpha Vantage)
+// ⚠️  PLACEHOLDER ONLY — These rates are hardcoded and WILL become stale.
+// TODO: Replace with live rates from the fx_rates Supabase table (updated by cron/fx-rates).
+// All B2B contract values are pegged to USD. These are display-only conversions.
 export const EXCHANGE_RATES: Record<string, number> = {
   NGN: 1,
   GHS: 50,
@@ -176,6 +173,13 @@ export const EXCHANGE_RATES: Record<string, number> = {
   BWP: 120,
   USD: 1650,
   EUR: 1800,
+  GBP: 2100,
+  CNY: 230,
+  INR: 20,
+  JPY: 11,
+  SGD: 1220,
+  AED: 450,
+  CAD: 1220,
 };
 
 export async function detectCountry(): Promise<CountryData> {

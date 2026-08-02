@@ -1,21 +1,61 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, ShieldCheck, FileCheck, Building2, Award, X, Lock } from "lucide-react";
+import { CheckCircle2, ShieldCheck, FileCheck, Building2, Award, X, Lock, Clock, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+interface KybData {
+  cac_verified?: boolean;
+  factory_inspected?: boolean;
+  iso_certified?: boolean;
+  verification_date?: string;
+  registration_number?: string;
+}
 
 interface VerifiedBadgeProps {
   className?: string;
   showText?: boolean;
   supplierName?: string;
+  /** Real verification status from organizations.verification_level */
+  isVerified?: boolean;
+  /** Real KYB checklist data from organizations.kyb_data */
+  kybData?: KybData;
 }
 
 export const VerifiedBadge = ({
   className = "",
   showText = false,
-  supplierName = "Verified Supplier",
+  supplierName = "Supplier",
+  isVerified = false,
+  kybData = {},
 }: VerifiedBadgeProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Do not render the badge at all if supplier is not verified
+  if (!isVerified) return null;
+
+  const checks = [
+    {
+      label: "CAC / RGD Corporate Registration Verified",
+      passed: !!kybData.cac_verified,
+      icon: FileCheck,
+    },
+    {
+      label: "Physical Factory / Warehouse Inspection",
+      passed: !!kybData.factory_inspected,
+      icon: Building2,
+    },
+    {
+      label: "ISO 9001 / SGS Quality Export License",
+      passed: !!kybData.iso_certified,
+      icon: Award,
+    },
+    {
+      label: "100% Escrow Payment Guarantee Eligible",
+      passed: true, // Always true for verified suppliers
+      icon: Lock,
+    },
+  ];
 
   return (
     <>
@@ -78,8 +118,13 @@ export const VerifiedBadge = ({
                   <p className="text-base font-black text-slate-900 dark:text-white mt-0.5">
                     {supplierName}
                   </p>
+                  {kybData.registration_number && (
+                    <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                      Reg. #{kybData.registration_number}
+                    </p>
+                  )}
                   <span className="inline-block mt-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black rounded-full border border-emerald-500/20 uppercase tracking-wider">
-                    ★ Gold Level Export Supplier
+                    ★ Verified Export Supplier
                   </span>
                 </div>
 
@@ -89,27 +134,39 @@ export const VerifiedBadge = ({
                   </p>
 
                   <div className="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40">
-                      <FileCheck size={16} className="text-blue-600 flex-shrink-0" />
-                      <span>CAC / RGD Corporate Registration Verified</span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40">
-                      <Building2 size={16} className="text-blue-600 flex-shrink-0" />
-                      <span>Physical Factory Inspection Passed</span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40">
-                      <Award size={16} className="text-blue-600 flex-shrink-0" />
-                      <span>ISO 9001 / SGS Quality Export License</span>
-                    </div>
-
-                    <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300">
-                      <Lock size={16} className="text-emerald-600 flex-shrink-0" />
-                      <span>100% Escrow Payment Guarantee Eligible</span>
-                    </div>
+                    {checks.map((check) => {
+                      const Icon = check.icon;
+                      return (
+                        <div
+                          key={check.label}
+                          className={`flex items-center gap-2.5 p-2.5 rounded-xl border ${
+                            check.passed
+                              ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40"
+                              : "bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700"
+                          }`}
+                        >
+                          {check.passed ? (
+                            <Icon size={16} className="text-blue-600 flex-shrink-0" />
+                          ) : (
+                            <Clock size={16} className="text-slate-400 flex-shrink-0" />
+                          )}
+                          <span className={check.passed ? "" : "text-slate-400"}>
+                            {check.label}
+                          </span>
+                          {!check.passed && (
+                            <span className="ml-auto text-[9px] uppercase tracking-wider text-amber-500 font-black">Pending</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {kybData.verification_date && (
+                  <p className="text-[10px] text-muted-foreground text-center pt-1">
+                    Verified on {new Date(kybData.verification_date).toLocaleDateString()}
+                  </p>
+                )}
 
                 <button
                   onClick={() => setIsOpen(false)}
@@ -127,3 +184,4 @@ export const VerifiedBadge = ({
 };
 
 export default VerifiedBadge;
+

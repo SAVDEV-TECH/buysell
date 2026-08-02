@@ -28,6 +28,8 @@ const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ss
 const FlutterwaveButton = dynamic(() => import('@/components/FlutterwaveButton'), { ssr: false });
 const MobileMoneyButton = dynamic(() => import('@/components/MobileMoneyButton'), { ssr: false });
 
+import { GlobalPaymentMethod } from "@/lib/globalPaymentRouter";
+
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user, profile, organizationId } = useAuth();
@@ -38,7 +40,7 @@ export default function CheckoutPage() {
   const supabase = supabaseRef.current;
 
   const [step, setStep] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<"paystack" | "flutterwave" | "mobile-money">("paystack");
+  const [paymentMethod, setPaymentMethod] = useState<GlobalPaymentMethod>("paystack");
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
   const [orderError, setOrderError] = useState("");
 

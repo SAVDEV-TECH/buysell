@@ -1,10 +1,12 @@
-export type Locale = "en" | "pidgin" | "ar" | "zh";
+export type Locale = "en" | "fr" | "pt" | "pidgin" | "ar" | "zh";
 
 export const LOCALES: { code: Locale; label: string; flag: string; dir: "ltr" | "rtl" }[] = [
-  { code: "en",     label: "English",  flag: "🇬🇧", dir: "ltr" },
-  { code: "pidgin", label: "Pidgin",   flag: "🇳🇬", dir: "ltr" },
-  { code: "ar",     label: "العربية",  flag: "🇸🇦", dir: "rtl" },
-  { code: "zh",     label: "中文",      flag: "🇨🇳", dir: "ltr" },
+  { code: "en",     label: "English",    flag: "🇬🇧", dir: "ltr" },
+  { code: "fr",     label: "Français",   flag: "🇫🇷", dir: "ltr" },
+  { code: "pt",     label: "Português",  flag: "🇵🇹", dir: "ltr" },
+  { code: "pidgin", label: "Pidgin",     flag: "🇳🇬", dir: "ltr" },
+  { code: "ar",     label: "العربية",    flag: "🇸🇦", dir: "rtl" },
+  { code: "zh",     label: "中文",        flag: "🇨🇳", dir: "ltr" },
 ];
 
 export type TranslationKey = keyof typeof translations["en"];
@@ -453,4 +455,147 @@ export const translations = {
     home_cta_open: "开设账户",
     home_cta_demo: "预约演示",
   },
+
+  fr: {
+    // Navbar
+    nav_browse: "Parcourir",
+    nav_messages: "Messages",
+    nav_login: "Connexion",
+    nav_signup: "S'inscrire",
+    nav_dashboard: "Tableau de bord",
+
+    // Hero
+    hero_badge: "Approvisionnement B2B Vérifié",
+    hero_headline: "Connectez les grossistes avec des fabricants vérifiés.",
+    hero_subtitle: "BuySell est la première plateforme B2B d'Afrique où les grossistes découvrent des usines certifiées, évaluent leurs capacités et négocient directement — sécurisé et transparent.",
+    hero_cta_explore: "Explorer les Usines →",
+    hero_cta_list: "Inscrire votre Usine",
+
+    // Footer
+    footer_tagline: "Plateforme B2B de premier plan reliant les fabricants africains vérifiés aux acheteurs mondiaux.",
+    footer_sourcing: "Solutions de Sourcing",
+    footer_rfq: "Soumettre une Demande de Devis",
+    footer_verified: "Fournisseurs Vérifiés",
+    footer_wholesale: "Marché de Gros",
+    footer_regional: "Canaux Régionaux",
+    footer_trade: "Services Commerciaux",
+    footer_assurance: "Garantie Commerciale",
+    footer_logistics: "Services Logistiques",
+    footer_monitoring: "Suivi de Production",
+    footer_payment: "Paiement Sécurisé",
+    footer_care: "Service Client",
+    footer_help: "Centre d'Aide",
+    footer_dispute: "Soumettre un Litige",
+    footer_policies: "Politiques & Règles",
+    footer_ip: "Signaler une Infraction",
+    footer_terms: "Conditions d'Utilisation",
+    footer_privacy: "Politique de Confidentialité",
+    footer_cookie: "Gestion des Cookies",
+    footer_copyright: "Plateforme BuySell. Tous droits réservés.",
+
+    // Marketplace
+    market_search: "Rechercher des produits, catégories ou usines...",
+    market_filters: "Filtres",
+    market_sort_newest: "Plus récents",
+    market_sort_low: "Prix ↑",
+    market_sort_high: "Prix ↓",
+    market_sort_rated: "Mieux notés",
+    market_moq: "Commande Min.",
+    market_lead: "Délai de livraison",
+    market_contact: "Contacter",
+    market_explore: "Explorer le Marché Complet",
+
+    // Home Features
+    feat_title: "Fonctionnalités Clés",
+    feat_subtitle: "Tout ce dont vous avez besoin pour moderniser vos opérations de commerce de gros.",
+    feat_visibility_title: "Visibilité Numérique",
+    feat_visibility_desc: "Chaque fabricant bénéficie d'une vitrine numérique dédiée pour présenter ses produits aux acheteurs internationaux.",
+    feat_secure_title: "Transactions Sécurisées par Escrow",
+    feat_secure_desc: "Les paiements sont bloqués jusqu'à la livraison et l'inspection de la marchandise.",
+    feat_bulk_title: "Gestion des Commandes en Gros",
+    feat_bulk_desc: "Grilles tarifaires dégressives et MOQ automatisés pour des ventes plus efficaces.",
+    home_solution_title: "Simplifier le commerce,",
+    home_solution_highlight: "connecter",
+    home_solution_rest: "les opportunités",
+    home_solution_p1: "Notre plateforme sert de hub centralisé où les fabricants publient leurs offres et les grossistes s'approvisionnent aux meilleurs prix du marché.",
+    home_solution_p2: "Pour les acheteurs internationaux, nous garantissons un processus transparent avec paiement sécurisé et suivi logistique en temps réel.",
+    home_stat1: "Visibilité Mondiale",
+    home_stat2: "Escrow Sécurisé",
+    home_cta_title: "Prêt à Développer vos Exportations ?",
+    home_cta_subtitle: "Rejoignez dès aujourd'hui les meilleurs fabricants et acheteurs mondiaux.",
+    home_cta_open: "Créer un Compte",
+    home_cta_demo: "Réserver une Démo",
+  },
+
+  pt: {
+    // Navbar
+    nav_browse: "Navegar",
+    nav_messages: "Mensagens",
+    nav_login: "Entrar",
+    nav_signup: "Cadastrar",
+    nav_dashboard: "Painel de Controle",
+
+    // Hero
+    hero_badge: "Fornecimento B2B Verificado",
+    hero_headline: "Conecte atacadistas com fabricantes verificados.",
+    hero_subtitle: "O BuySell é a principal plataforma B2B da África onde compradores encontram fábricas verificadas (Caju, Gengibre, Sésamo) e negociam diretamente com segurança.",
+    hero_cta_explore: "Explorar Fábricas →",
+    hero_cta_list: "Cadastrar sua Fábrica",
+
+    // Footer
+    footer_tagline: "Plataforma de comércio internacional B2B conectando produtores africanos a compradores globais.",
+    footer_sourcing: "Soluções de Compra",
+    footer_rfq: "Enviar Cotação (RFQ)",
+    footer_verified: "Fornecedores Verificados",
+    footer_wholesale: "Mercado Atacadista",
+    footer_regional: "Canais Regionais",
+    footer_trade: "Serviços Comerciais",
+    footer_assurance: "Garantia de Comércio",
+    footer_logistics: "Serviços de Logística",
+    footer_monitoring: "Inspeção de Carga",
+    footer_payment: "Pagamento Seguro em Escrow",
+    footer_care: "Atendimento ao Cliente",
+    footer_help: "Central de Ajuda",
+    footer_dispute: "Abrir Disputa",
+    footer_policies: "Termos & Regras",
+    footer_ip: "Direitos Autorais",
+    footer_terms: "Termos de Uso",
+    footer_privacy: "Privacidade",
+    footer_cookie: "Política de Cookies",
+    footer_copyright: "Plataforma BuySell. Todos os direitos reservados.",
+
+    // Marketplace
+    market_search: "Buscar produtos, categorias ou fabricantes...",
+    market_filters: "Filtros",
+    market_sort_newest: "Mais Recentes",
+    market_sort_low: "Preço ↑",
+    market_sort_high: "Preço ↓",
+    market_sort_rated: "Mais Avaliados",
+    market_moq: "Pedido Mínimo",
+    market_lead: "Prazo de Entrega",
+    market_contact: "Contatar",
+    market_explore: "Ver Mercado Completo",
+
+    // Home Features
+    feat_title: "Recursos Principais",
+    feat_subtitle: "Tudo o que você precisa para expandir suas exportações e importações.",
+    feat_visibility_title: "Visibilidade Digital Global",
+    feat_visibility_desc: "Vitrine digital dedicada para exportadores apresentarem seus produtos ao mercado internacional.",
+    feat_secure_title: "Garantia Escrow Multimoeda",
+    feat_secure_desc: "Pagamentos bloqueados com segurança até a entrega e vistoria da mercadoria no porto de destino.",
+    feat_bulk_title: "Gestão de Pedidos em Grande Escala",
+    feat_bulk_desc: "Preços escalonados e contratos FOB/CIF automatizados para grandes volumes.",
+    home_solution_title: "Simplificando o comércio,",
+    home_solution_highlight: "conectando",
+    home_solution_rest: "oportunidades",
+    home_solution_p1: "Nossa plataforma funciona como um centro integrado onde exportadores listam safras e mercadorias e compradores internacionais fecham contratos com total transparência.",
+    home_solution_p2: "Garantimos segurança de pagamento via Escrow e acompanhamento logístico em tempo real do embarque até o destino final.",
+    home_stat1: "Visibilidade Global",
+    home_stat2: "Garantia Escrow",
+    home_cta_title: "Pronto para Expandir seus Negócios?",
+    home_cta_subtitle: "Junte-se à maior rede de exportadores e compradores globais.",
+    home_cta_open: "Criar Conta Grátis",
+    home_cta_demo: "Agendar Demonstração",
+  },
 } as const;
+
