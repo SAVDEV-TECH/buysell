@@ -6,6 +6,8 @@ import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
+import AISourcingAssistant from "@/components/AISourcingAssistant";
+
 export default function MainLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
@@ -22,6 +24,7 @@ export default function MainLayoutShell({ children }: { children: React.ReactNod
       <main className="flex-1 pt-16 pb-24 md:pb-0">{children}</main>
       <Footer />
       <MobileBottomNav />
+      <AISourcingAssistant />
     </>
   );
 }

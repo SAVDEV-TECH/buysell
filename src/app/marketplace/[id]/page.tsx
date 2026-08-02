@@ -28,6 +28,7 @@ import dynamic from "next/dynamic";
 import ReviewSection from "@/components/ReviewSection";
 import { getAllProductImages } from "@/lib/productUtils";
 import BuySellLoader from "@/components/BuySellLoader";
+import AITranslationButton from "@/components/AITranslationButton";
 import FreightCalculator from "@/components/FreightCalculator";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
@@ -194,6 +195,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [translatedDesc, setTranslatedDesc] = useState<string | null>(null);
+  const [translatedLang, setTranslatedLang] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -279,7 +282,35 @@ export default function ProductDetailPage() {
 
             <h1 className="text-4xl md:text-5xl font-black mb-4">{product.name}</h1>
             <p className="text-3xl font-black text-primary mb-6">${product.price.toLocaleString()} USD <span className="text-xs font-bold text-muted-foreground">/ unit</span></p>
-            <p className="text-muted-foreground mb-6 leading-relaxed">{product.desc}</p>
+            
+            {/* AI Translation Toolbar */}
+            <div className="mb-3">
+              <AITranslationButton
+                originalText={product.desc}
+                onTranslated={(text, lang) => {
+                  setTranslatedDesc(text);
+                  setTranslatedLang(lang);
+                }}
+                onReset={() => {
+                  setTranslatedDesc(null);
+                  setTranslatedLang(null);
+                }}
+              />
+            </div>
+
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              {translatedDesc ? (
+                <>
+                  <span className="inline-block px-2 py-0.5 mb-2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[11px] font-bold">
+                    Translated to {translatedLang}
+                  </span>
+                  <br />
+                  {translatedDesc}
+                </>
+              ) : (
+                product.desc
+              )}
+            </p>
 
             {/* Incoterms & Export Specs */}
             <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-borderline text-xs mb-8">

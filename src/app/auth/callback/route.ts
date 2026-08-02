@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { safeRedirectPath } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  // Validate the next param to prevent open redirect attacks.
+  // e.g. ?next=//evil.com or ?next=javascript:... are rejected → fallback to /dashboard
+  const next = safeRedirectPath(searchParams.get("next"), "/dashboard");
 
   if (!code) {
     // No code — redirect to login with an error hint

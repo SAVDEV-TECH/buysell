@@ -3,36 +3,132 @@ import { createServerClient } from "@supabase/ssr";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/admin", "/checkout", "/onboarding"];
 
+/**
+ * Allowed origins for cross-origin browser requests.
+ *
+ * Reads from ALLOWED_ORIGINS (comma-separated) or NEXT_PUBLIC_APP_URL.
+ * An empty list means NO cross-origin requests are permitted (strictest mode).
+ *
+ * Example .env.local:
+ *   ALLOWED_ORIGINS=https://yourdomain.com,https://staging.yourdomain.com
+ *   # or simply:
+ *   NEXT_PUBLIC_APP_URL=https://yourdomain.com
+ */
+function getAllowedOrigins(): string[] {
+  const raw = process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Resolves the effective ACAO header value for the incoming Origin.
+ * Returns the origin string if it is in the allowlist, null otherwise.
+ *
+ * Never returns "*" — the wildcard is the root cause of the A01 finding.
+ */
+function resolveAllowedOrigin(request: NextRequest): string | null {
+  const incomingOrigin = request.headers.get("origin");
+  if (!incomingOrigin) return null;
+
+  const allowed = getAllowedOrigins();
+  if (allowed.length === 0) return null;
+
+  return allowed.includes(incomingOrigin) ? incomingOrigin : null;
+}
+
+/**
+ * Injects CORS response headers onto the NextResponse.
+ * If the origin is permitted, sets the full set of CORS headers.
+ * If the origin is not permitted, sets nothing (browser enforces block).
+ */
+function applyCors(request: NextRequest, response: NextResponse): NextResponse {
+  // Webhooks are server-to-server — they must never have CORS headers.
+  if (request.nextUrl.pathname.startsWith("/api/webhooks/")) {
+    return response;
+  }
+
+  const allowedOrigin = resolveAllowedOrigin(request);
+
+  if (allowedOrigin) {
+    response.headers.set("Access-Control-Allow-Origin", allowedOrigin);
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    response.headers.set(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    );
+    response.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With"
+    );
+    // Vary: Origin is REQUIRED when the value is dynamic (not the literal string *)
+    // Without it, CDNs and Vercel Edge may cache the response for one origin
+    // and serve it to a different origin — defeating the per-origin check.
+    response.headers.append("Vary", "Origin");
+  }
+  // If no allowedOrigin: we deliberately set no ACAO header.
+  // The browser will block the cross-origin read automatically.
+  // This overrides any default Vercel edge behavior that might add *.
+
+  return response;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+
+  // ── Handle CORS Preflights (OPTIONS) at middleware level ────────────────
+  // Must be handled before auth checks — browsers send preflights without
+  // cookies, so they would otherwise fail auth and return 401/302.
+  if (request.method === "OPTIONS") {
+    // Webhooks never need preflight handling.
+    if (pathname.startsWith("/api/webhooks/")) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    const allowedOrigin = resolveAllowedOrigin(request);
+    if (!allowedOrigin) {
+      // Unrecognised origin — deny the preflight.
+      return new NextResponse(null, { status: 403 });
+    }
+
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Credentials": "true",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers":
+          "Content-Type, Authorization, X-Requested-With",
+        "Access-Control-Max-Age": "86400",
+        Vary: "Origin",
+      },
+    });
+  }
+
+  // ── Auth Middleware ────────────────────────────────────────────────────
+  let supabaseResponse = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
-  const supabase = createServerClient(
-    url,
-    key,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
   const {
     data: { user },
@@ -48,6 +144,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // ── Security Headers ────────────────────────────────────────────────────
   supabaseResponse.headers.set("X-Frame-Options", "DENY");
   supabaseResponse.headers.set("X-Content-Type-Options", "nosniff");
   supabaseResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -61,6 +158,9 @@ export async function proxy(request: NextRequest) {
   );
   supabaseResponse.headers.set("X-XSS-Protection", "1; mode=block");
   supabaseResponse.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+
+  // ── CORS Headers (applied last so they take precedence over any edge defaults) ──
+  applyCors(request, supabaseResponse);
 
   return supabaseResponse;
 }

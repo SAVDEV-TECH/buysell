@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { safeRedirectPath } from "@/lib/security";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -72,7 +73,9 @@ export default function LoginPage() {
   const getRedirectPath = () => {
     if (typeof window === "undefined") return "/dashboard";
     const params = new URLSearchParams(window.location.search);
-    return params.get("redirect") || "/dashboard";
+    // Validate the redirect param to prevent open redirect attacks.
+    // e.g. ?redirect=//evil.com or ?redirect=https://phishing.com are rejected.
+    return safeRedirectPath(params.get("redirect"), "/dashboard");
   };
 
   /** Routes the user based on account status and role. */

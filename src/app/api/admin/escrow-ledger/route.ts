@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { successResponse, errorResponse, handleApiError } from "@/lib/apiResponse";
 import { requireSuperAdmin, AuthError } from "@/lib/serverAuth";
+import { applyCorsHeaders, handleCorsPrelight } from "@/lib/cors";
+
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPrelight(request);
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -47,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     const totalCount = count || txList.length;
 
-    return NextResponse.json({
+    return applyCorsHeaders(req, NextResponse.json({
       success: true,
       data: txList,
       pagination: {
@@ -57,7 +62,7 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(totalCount / limit),
       },
       message: `Retrieved ${txList.length} escrow transactions from financial ledger.`,
-    });
+    }));
   } catch (error) {
     return handleApiError(error, "Failed to retrieve escrow financial ledger");
   }

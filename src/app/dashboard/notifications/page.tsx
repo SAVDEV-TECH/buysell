@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNotifications, NotificationType, NotificationItem } from "@/context/NotificationContext";
 import { getTypeBadge } from "@/components/NotificationPopover";
+import { safeHref } from "@/lib/security";
 import {
   Bell,
   CheckCheck,
@@ -300,7 +301,7 @@ export default function NotificationsPage() {
 
                           {notif.link && (
                             <Link
-                              href={notif.link}
+                              href={safeHref(notif.link)}
                               onClick={() => markAsRead(notif.id)}
                               className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1"
                             >

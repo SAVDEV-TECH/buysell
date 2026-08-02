@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
+import { safeHref } from "@/lib/security";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -275,7 +276,7 @@ export default function VerificationDetailPage() {
                   </div>
                   <p className="font-bold text-slate-200 text-xs">
                     {field.label === "Website" && org.website ? (
-                      <a href={org.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
+                      <a href={safeHref(org.website)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
                         {org.website} <ExternalLink size={10} />
                       </a>
                     ) : (

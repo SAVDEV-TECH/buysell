@@ -25,9 +25,12 @@ import {
   ChevronDown,
   ImagePlus,
   Star,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import AIDescriptionModal from "@/components/AIDescriptionModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TierPrice { min_qty: number; unit_price: number; }
@@ -302,6 +305,56 @@ export default function NewProductPage() {
   const [error, setError]       = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingCount, setUploadingCount] = useState(0);
+
+  // AI Modal state
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [analyzingImage, setAnalyzingImage] = useState(false);
+  const [visionNotice, setVisionNotice] = useState("");
+
+  const handleAnalyzeImage = async () => {
+    let imgUrl = existingImageUrls[0];
+    if (!imgUrl && newImageFiles.length > 0) {
+      imgUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(newImageFiles[0]);
+      });
+    }
+
+    if (!imgUrl) {
+      setError("Please upload at least one product image to analyze.");
+      return;
+    }
+
+    setAnalyzingImage(true);
+    setVisionNotice("");
+
+    try {
+      const res = await fetch("/api/ai/analyze-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: imgUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to analyze image.");
+      }
+
+      const info = data.data;
+      if (info.suggestedTitle && !title) setTitle(info.suggestedTitle);
+      if (info.tags?.length) {
+        setKeywords((prev) => {
+          const existing = prev ? prev.split(",").map((k) => k.trim()) : [];
+          return Array.from(new Set([...existing, ...info.tags])).join(", ");
+        });
+      }
+      setVisionNotice(`AI Vision detected: ${info.category || "Product"} (${info.material || ""}, ${info.primaryColor || ""})`);
+    } catch (err: any) {
+      setError(err.message || "Vision analysis failed.");
+    } finally {
+      setAnalyzingImage(false);
+    }
+  };
 
   // ── Load categories ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -594,7 +647,16 @@ export default function NewProductPage() {
 
                   {/* Description */}
                   <div>
-                    <FieldLabel label="Description *" hint="Include specifications, material grade, packing info, and what makes your product unique." />
+                    <div className="flex items-center justify-between mb-2">
+                      <FieldLabel label="Description *" hint="Include specifications, material grade, packing info, and what makes your product unique." />
+                      <button
+                        type="button"
+                        onClick={() => setIsAiModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r from-primary/10 via-purple-500/10 to-indigo-500/10 text-primary border border-primary/20 hover:bg-primary/20 text-xs font-bold transition-all shadow-sm"
+                      >
+                        <Sparkles size={13} className="text-primary animate-pulse" /> Generate with AI
+                      </button>
+                    </div>
                     <textarea
                       required
                       rows={5}
@@ -802,6 +864,28 @@ export default function NewProductPage() {
                       ✅ All images uploaded successfully!
                     </p>
                   )}
+                  {/* AI Vision Image Analysis Button */}
+                  {(existingImageUrls.length > 0 || newImageFiles.length > 0) && (
+                    <div className="pt-2 border-t border-borderline">
+                      <button
+                        type="button"
+                        onClick={handleAnalyzeImage}
+                        disabled={analyzingImage}
+                        className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-primary/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 font-bold text-xs hover:bg-purple-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {analyzingImage ? (
+                          <><Loader2 size={14} className="animate-spin" /> Analyzing Image with Vision AI…</>
+                        ) : (
+                          <><Sparkles size={14} /> ⚡ Auto-Tag Image with Vision AI</>
+                        )}
+                      </button>
+                      {visionNotice && (
+                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5 text-center">
+                          {visionNotice}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </section>
 
                 {/* B2B Tips */}
@@ -846,6 +930,23 @@ export default function NewProductPage() {
           </motion.form>
         )}
       </AnimatePresence>
+
+      <AIDescriptionModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        initialTitle={title}
+        categoryName={categories.find((c) => c.id === categoryId)?.name}
+        onApply={(res) => {
+          if (res.description) setDescription(res.description);
+          if (res.metaKeywords?.length) {
+            setKeywords((prev) => {
+              const existing = prev ? prev.split(",").map((k) => k.trim()) : [];
+              const combined = Array.from(new Set([...existing, ...res.metaKeywords]));
+              return combined.join(", ");
+            });
+          }
+        }}
+      />
     </div>
   );
 }

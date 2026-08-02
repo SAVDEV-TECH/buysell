@@ -31,5 +31,14 @@ export function errorResponse(message: string, status = 400, errorDetails?: stri
 export function handleApiError(error: unknown, fallbackMessage = "An unexpected error occurred") {
   const errorMessage = error instanceof Error ? error.message : String(error);
   console.error(`[API Error] ${fallbackMessage}:`, errorMessage);
+
+  if (errorMessage.includes("429") || errorMessage.toLowerCase().includes("quota")) {
+    return errorResponse(
+      "OpenAI API quota exceeded. Please check your OpenAI billing balance at https://platform.openai.com/account/billing to top up credits.",
+      429,
+      errorMessage
+    );
+  }
+
   return errorResponse(fallbackMessage, 500, errorMessage);
 }

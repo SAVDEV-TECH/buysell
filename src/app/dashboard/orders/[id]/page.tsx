@@ -30,6 +30,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import OrderEscrowTracker from "@/components/OrderEscrowTracker";
+import AIQuotationInsightsCard from "@/components/AIQuotationInsightsCard";
 
 interface OrderDetail {
   id: string;
@@ -324,6 +325,14 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </button>
         )}
       </div>
+
+      {/* ── AI Quotation & Deal Insights ── */}
+      <AIQuotationInsightsCard
+        orderId={order.id}
+        totalAmount={order.total_amount}
+        currency={order.currency}
+        status={order.status}
+      />
 
       {/* ── Visual 5-Stage B2B Escrow Timeline ── */}
       <OrderEscrowTracker order={order} />

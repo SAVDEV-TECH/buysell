@@ -3,6 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { successResponse, errorResponse, handleApiError } from "@/lib/apiResponse";
 import { requireSuperAdmin, AuthError } from "@/lib/serverAuth";
 import { executeEscrowDisbursement } from "@/lib/escrowGateway";
+import { applyCorsHeaders, handleCorsPrelight } from "@/lib/cors";
+
+/** Block cross-origin preflight for this sensitive endpoint */
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPrelight(request);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -116,14 +122,14 @@ export async function POST(req: NextRequest) {
     // 7. Audit Log Entry
     console.log(`[ESCROW AUDIT LOG] Order ${orderId} -> Action: ${action.toUpperCase()} by Super Admin at ${now} (Key: ${idempotencyKey})`);
 
-    return successResponse({
+    return applyCorsHeaders(req, successResponse({
       orderId,
       escrowStatus: newEscrowStatus,
       paymentStatus: newPaymentStatus,
       amount,
       actionExecuted: action,
       providerTransferId: transferResult.providerTransferId,
-    }, `Escrow action '${action}' executed successfully on Order #${orderId.slice(0, 8).toUpperCase()}`);
+    }, `Escrow action '${action}' executed successfully on Order #${orderId.slice(0, 8).toUpperCase()}`));
   } catch (error) {
     return handleApiError(error, "Failed to execute escrow action");
   }

@@ -2,6 +2,11 @@ import { NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { successResponse, errorResponse, handleApiError } from "@/lib/apiResponse";
 import { requireSuperAdmin, AuthError } from "@/lib/serverAuth";
+import { applyCorsHeaders, handleCorsPrelight } from "@/lib/cors";
+
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsPrelight(request);
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -86,7 +91,7 @@ export async function GET(req: NextRequest) {
           : "new",
     }));
 
-    return successResponse({
+    return applyCorsHeaders(req, successResponse({
       totalUsers: uCount,
       totalProducts: pCount,
       totalOrders: Math.max(oCount, ordersList.length),
@@ -95,7 +100,7 @@ export async function GET(req: NextRequest) {
       totalRevenue,
       recentActivity: activity,
       recentOrders: formattedOrders,
-    }, "Super admin telemetry retrieved successfully.");
+    }, "Super admin telemetry retrieved successfully."));
   } catch (error) {
     return handleApiError(error, "Failed to retrieve super admin telemetry");
   }

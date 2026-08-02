@@ -34,6 +34,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { generateQuotationPDF } from "@/lib/pdfQuotationGenerator";
+import AISupplierMatchmaker from "@/components/AISupplierMatchmaker";
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 interface RFQ {
@@ -48,6 +49,7 @@ interface RFQ {
   currency: string;
   destination_country: string;
   incoterms?: string;
+  specifications?: string;
   requirements_spec?: any;
   status: "published" | "closed" | "fulfilled" | "draft";
   expiry_date?: string;
@@ -446,6 +448,12 @@ export default function RFQManagementPage() {
           />
         </div>
       </div>
+
+      {/* ── AI Matchmaker Widget ── */}
+      <AISupplierMatchmaker
+        rfqTitle={selectedRFQ?.title || searchQuery || "Industrial Manufacturing Supply"}
+        description={selectedRFQ?.specifications || searchQuery}
+      />
 
       {/* ── Main Layout: RFQ Stream + Detailed Inspector ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
