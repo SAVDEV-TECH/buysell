@@ -33,10 +33,20 @@ function resolveAllowedOrigin(request: NextRequest): string | null {
   const incomingOrigin = request.headers.get("origin");
   if (!incomingOrigin) return null;
 
-  const allowed = getAllowedOrigins();
-  if (allowed.length === 0) return null;
+  // Same-origin requests (the app calling its own API) are always permitted
+  if (incomingOrigin === request.nextUrl.origin) {
+    return incomingOrigin;
+  }
 
-  return allowed.includes(incomingOrigin) ? incomingOrigin : null;
+  const allowed = getAllowedOrigins();
+  if (allowed.includes(incomingOrigin)) return incomingOrigin;
+
+  // Automatically trust Vercel deployment URL if present
+  if (process.env.VERCEL_URL && incomingOrigin.includes(process.env.VERCEL_URL)) {
+    return incomingOrigin;
+  }
+
+  return null;
 }
 
 /**
