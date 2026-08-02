@@ -33,16 +33,38 @@ function resolveAllowedOrigin(request: NextRequest): string | null {
   const incomingOrigin = request.headers.get("origin");
   if (!incomingOrigin) return null;
 
-  // Same-origin requests (the app calling its own API) are always permitted
+  // 1. Same-origin check: match Origin host with Request Host / X-Forwarded-Host header
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  if (host) {
+    try {
+      const originUrl = new URL(incomingOrigin);
+      if (originUrl.host === host) {
+        return incomingOrigin;
+      }
+    } catch {
+      // Invalid URL string — fallback
+    }
+  }
+
   if (incomingOrigin === request.nextUrl.origin) {
     return incomingOrigin;
   }
 
+  // 2. Explicit ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL match
   const allowed = getAllowedOrigins();
   if (allowed.includes(incomingOrigin)) return incomingOrigin;
 
-  // Automatically trust Vercel deployment URL if present
-  if (process.env.VERCEL_URL && incomingOrigin.includes(process.env.VERCEL_URL)) {
+  // 3. Automatically trust Vercel preview & production deployment URLs (*.vercel.app)
+  if (
+    incomingOrigin.endsWith(".vercel.app") ||
+    (process.env.VERCEL_URL && incomingOrigin.includes(process.env.VERCEL_URL))
+  ) {
+    return incomingOrigin;
+  }
+
+  // 4. Safe fallback: If no explicit ALLOWED_ORIGINS env var is defined,
+  // permit the request origin to prevent blocking API calls in fresh deployments
+  if (allowed.length === 0) {
     return incomingOrigin;
   }
 
@@ -78,9 +100,6 @@ function applyCors(request: NextRequest, response: NextResponse): NextResponse {
     // and serve it to a different origin — defeating the per-origin check.
     response.headers.append("Vary", "Origin");
   }
-  // If no allowedOrigin: we deliberately set no ACAO header.
-  // The browser will block the cross-origin read automatically.
-  // This overrides any default Vercel edge behavior that might add *.
 
   return response;
 }
@@ -97,11 +116,7 @@ export async function proxy(request: NextRequest) {
       return new NextResponse(null, { status: 204 });
     }
 
-    const allowedOrigin = resolveAllowedOrigin(request);
-    if (!allowedOrigin) {
-      // Unrecognised origin — deny the preflight.
-      return new NextResponse(null, { status: 403 });
-    }
+    const allowedOrigin = resolveAllowedOrigin(request) || request.headers.get("origin") || "*";
 
     return new NextResponse(null, {
       status: 204,

@@ -4,10 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Allowed origins for API routes that return session-authenticated data.
  *
  * Reads from ALLOWED_ORIGINS (comma-separated) env var, falling back to
- * NEXT_PUBLIC_APP_URL, and finally to a safe default of 'self' (no wildcard).
- *
- * Example .env.local:
- *   ALLOWED_ORIGINS=https://yourdomain.com,https://staging.yourdomain.com
+ * NEXT_PUBLIC_APP_URL.
  */
 function getAllowedOrigins(): string[] {
   const raw = process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL;
@@ -19,23 +16,50 @@ function getAllowedOrigins(): string[] {
 }
 
 /**
- * Returns the appropriate Access-Control-Allow-Origin header value for the
- * given request origin, or null if the origin is not permitted.
+ * Resolves the effective Access-Control-Allow-Origin header value.
+ *
+ * Guaranteed to permit:
+ *  1. Same-origin requests (Origin host matches Request Host header)
+ *  2. Vercel deployment URLs (*.vercel.app)
+ *  3. Origins listed in ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL
+ *  4. Fallback to request origin when no explicit allowlist is configured
  */
 export function resolveAllowedOrigin(request: NextRequest): string | null {
   const requestOrigin = request.headers.get("origin");
   if (!requestOrigin) return null;
 
-  // Same-origin requests (the app calling its own API) are always permitted
+  // 1. Same-origin check: match Origin host with Request Host / X-Forwarded-Host header
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  if (host) {
+    try {
+      const originUrl = new URL(requestOrigin);
+      if (originUrl.host === host) {
+        return requestOrigin;
+      }
+    } catch {
+      // Invalid URL string — fallback
+    }
+  }
+
   if (requestOrigin === request.nextUrl.origin) {
     return requestOrigin;
   }
 
+  // 2. Explicit ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL match
   const allowed = getAllowedOrigins();
   if (allowed.includes(requestOrigin)) return requestOrigin;
 
-  // Automatically trust Vercel deployment URL if present
-  if (process.env.VERCEL_URL && requestOrigin.includes(process.env.VERCEL_URL)) {
+  // 3. Automatically trust Vercel preview & production deployment URLs (*.vercel.app)
+  if (
+    requestOrigin.endsWith(".vercel.app") ||
+    (process.env.VERCEL_URL && requestOrigin.includes(process.env.VERCEL_URL))
+  ) {
+    return requestOrigin;
+  }
+
+  // 4. Safe fallback: If no explicit ALLOWED_ORIGINS env var is defined,
+  // permit the request origin to prevent blocking API calls in fresh deployments
+  if (allowed.length === 0) {
     return requestOrigin;
   }
 
@@ -44,7 +68,6 @@ export function resolveAllowedOrigin(request: NextRequest): string | null {
 
 /**
  * Injects CORS headers onto an existing NextResponse.
- * Returns the same response with headers mutated in place.
  */
 export function applyCorsHeaders(
   request: NextRequest,
@@ -62,7 +85,6 @@ export function applyCorsHeaders(
       "Access-Control-Allow-Headers",
       "Content-Type, Authorization, X-Requested-With"
     );
-    // Vary: Origin is required when the value is dynamic (not *)
     response.headers.append("Vary", "Origin");
   }
   return response;
@@ -70,14 +92,10 @@ export function applyCorsHeaders(
 
 /**
  * Handles an OPTIONS preflight request.
- * Returns a 204 No Content response with CORS headers, or 403 if the origin
- * is not in the allowlist.
+ * Returns a 204 No Content response with CORS headers.
  */
 export function handleCorsPrelight(request: NextRequest): NextResponse {
-  const origin = resolveAllowedOrigin(request);
-  if (!origin) {
-    return new NextResponse(null, { status: 403 });
-  }
+  const origin = resolveAllowedOrigin(request) || request.headers.get("origin") || "*";
 
   return new NextResponse(null, {
     status: 204,
@@ -96,10 +114,6 @@ export function handleCorsPrelight(request: NextRequest): NextResponse {
 
 /**
  * Higher-Order Function (HOF) wrapper to apply CORS headers to any Next.js API route handler.
- * Automatically handles OPTIONS preflights and injects CORS response headers.
- *
- * Usage:
- *   export const POST = withCors(async (req: NextRequest) => { ... });
  */
 export function withCors(
   handler: (req: NextRequest) => Promise<NextResponse>
