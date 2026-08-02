@@ -49,12 +49,18 @@ export function resolveAllowedOrigin(request: NextRequest): string | null {
   const allowed = getAllowedOrigins();
   if (allowed.includes(requestOrigin)) return requestOrigin;
 
-  // 3. Automatically trust Vercel preview & production deployment URLs (*.vercel.app)
-  if (
-    requestOrigin.endsWith(".vercel.app") ||
-    (process.env.VERCEL_URL && requestOrigin.includes(process.env.VERCEL_URL))
-  ) {
+  // 3. Automatically trust Vercel deployment URL (exact origin or *.vercel.app domain)
+  if (process.env.VERCEL_URL && requestOrigin === `https://${process.env.VERCEL_URL}`) {
     return requestOrigin;
+  }
+
+  try {
+    const originUrl = new URL(requestOrigin);
+    if (originUrl.hostname.endsWith(".vercel.app")) {
+      return requestOrigin;
+    }
+  } catch {
+    // Ignore invalid URL
   }
 
   // 4. Safe fallback: If no explicit ALLOWED_ORIGINS env var is defined,
