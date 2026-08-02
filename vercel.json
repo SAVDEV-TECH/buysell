@@ -2,11 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/escrow-auto-release",
-      "schedule": "0 * * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/escrow-reconciliation",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/fx-rates",
+      "schedule": "0 6 * * *"
     }
   ]
 }
