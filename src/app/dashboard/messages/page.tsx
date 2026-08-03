@@ -233,6 +233,17 @@ export default function MessagesPage() {
   const fetchMessages = useCallback(async (convId: string) => {
     setLoadingMsgs(true);
     try {
+      // Primary: Server API route to bypass client RLS hiccups
+      const res = await fetch(`/api/messages?conversationId=${convId}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          setMessages(json.data as DBMessage[]);
+          return;
+        }
+      }
+
+      // Fallback: Client-side Supabase query
       const { data, error } = await supabase
         .from("messages")
         .select("*")
