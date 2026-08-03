@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (order.status !== "pending_escrow") {
+    if (!["pending", "pending_escrow"].includes(order.status)) {
       return NextResponse.json(
         { error: `Order is already in status: ${order.status}. Cannot re-fund escrow.` },
         { status: 409 }
@@ -127,13 +127,18 @@ export async function POST(request: NextRequest) {
     );
 
     // Log the pending payment intent in orders table
-    await supabase
+    const now = new Date().toISOString();
+    const { error: updateErr } = await supabase
       .from("orders")
       .update({
-        escrow_reference_id: paymentIntent.id,
-        updated_at: new Date().toISOString(),
+        payment_reference: paymentIntent.id,
+        updated_at: now,
       })
       .eq("id", orderId);
+
+    if (updateErr) {
+      console.warn("[Global Inbound] Payment reference update notice:", updateErr.message);
+    }
 
     return successResponse({
       clientSecret: paymentIntent.client_secret,
@@ -145,14 +150,14 @@ export async function POST(request: NextRequest) {
       buyerInstructions: route.instructions,
       paymentMethods: route.stripePaymentMethods ?? ["card"],
     });
-  } catch (error: any) {
-    // Stripe errors have a specific type
-    if (error?.type?.startsWith("Stripe")) {
+  } catch (error: unknown) {
+    const err = error as { type?: string; message?: string; code?: string };
+    if (err?.type?.startsWith("Stripe")) {
       return NextResponse.json(
         {
-          error: `Payment provider error: ${error.message}`,
-          code: error.code,
-          type: error.type,
+          error: `Payment provider error: ${err.message}`,
+          code: err.code,
+          type: err.type,
         },
         { status: 400 }
       );
