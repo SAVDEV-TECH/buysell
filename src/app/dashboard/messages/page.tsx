@@ -354,7 +354,9 @@ export default function MessagesPage() {
       const json = await res.json();
 
       if (!res.ok || !json.success) {
-        setCreateError(json.error || "Failed to initialize conversation channel.");
+        const rawErr = json.error || json.message || "Failed to initialize conversation channel.";
+        const displayMsg = typeof rawErr === "string" ? rawErr : (rawErr?.message ? String(rawErr.message) : JSON.stringify(rawErr));
+        setCreateError(displayMsg);
         return;
       }
 
@@ -366,7 +368,7 @@ export default function MessagesPage() {
         setNewConvEmail("");
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Network or server error starting conversation.";
+      const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "Network or server error starting conversation.";
       setCreateError(msg);
     } finally {
       setCreatingConv(false);
