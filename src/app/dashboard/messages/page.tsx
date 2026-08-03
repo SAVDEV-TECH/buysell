@@ -299,10 +299,11 @@ export default function MessagesPage() {
     setSending(true);
 
     const partnerId = activeConv.participant_a === user.id ? activeConv.participant_b : activeConv.participant_a;
+    const optimisticId = `opt-${Date.now()}`;
 
     // Optimistic insert
     const optimistic: DBMessage = {
-      id: `opt-${Date.now()}`,
+      id: optimisticId,
       conversation_id: activeConv.id,
       sender_id: user.id,
       text,
@@ -331,9 +332,8 @@ export default function MessagesPage() {
       const { error: insertErr } = await supabase.from("messages").insert(insertPayload);
 
       if (insertErr) {
-        console.warn("[Messages] Custom column insert failed, executing resilient fallback:", insertErr.message);
+        console.warn("[Messages] Primary column insert failed, trying plain text fallback:", insertErr.message);
 
-        // Fallback: If custom schema columns do not exist yet, fallback to clean text insert
         let fallbackText = text;
         if (quote) {
           fallbackText = `[OFFER] ${quote.title} - $${quote.unit_price}/unit (MOQ: ${quote.moq}, ${quote.incoterms})`;
@@ -350,16 +350,21 @@ export default function MessagesPage() {
 
         if (fallbackErr) {
           console.error("[Messages] Fallback insert failed:", fallbackErr);
-          alert("Could not send message: " + fallbackErr.message);
+          setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+          alert("Message delivery failed: " + fallbackErr.message);
           return;
         }
       }
 
-      // 2. Update conversation's last message
-      await supabase.from("conversations").update({
+      // 2. Non-blocking update of conversation timestamp
+      const { error: convErr } = await supabase.from("conversations").update({
         last_message_text: text,
         last_message_at: new Date().toISOString(),
       }).eq("id", activeConv.id);
+
+      if (convErr) {
+        console.warn("[Messages] Non-critical conversation timestamp update failed:", convErr.message);
+      }
 
       // 3. Notify partner
       if (partnerId) {
@@ -369,11 +374,12 @@ export default function MessagesPage() {
           text,
           "MESSAGE",
           `/dashboard/messages`
-        );
+        ).catch((e) => console.warn("[Messages] Push notification failed:", e));
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[Messages] Send error:", msg);
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       alert("Error sending message: " + msg);
     } finally {
       setSending(false);

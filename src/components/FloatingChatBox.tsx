@@ -143,8 +143,9 @@ export default function FloatingChatBox({
     setNewMessage("");
     setSending(true);
 
+    const optimisticId = `opt-${Date.now()}`;
     const optimistic: ChatMessage = {
-      id: `opt-${Date.now()}`,
+      id: optimisticId,
       sender_id: user.id,
       text,
       created_at: new Date().toISOString(),
@@ -160,19 +161,27 @@ export default function FloatingChatBox({
         read: false,
       });
 
-      if (sendErr) throw sendErr;
+      if (sendErr) {
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+        throw sendErr;
+      }
 
-      // 2. Update conversation last message timestamp
-      await supabase
+      // 2. Update conversation last message timestamp (non-blocking)
+      const { error: convErr } = await supabase
         .from("conversations")
         .update({
           last_message_text: text,
           last_message_at: new Date().toISOString(),
         })
         .eq("id", conversationId);
+
+      if (convErr) {
+        console.warn("[FloatingChatBox] Non-critical conversation timestamp update failed:", convErr.message);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error("[FloatingChatBox] Send error:", msg);
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       alert("Failed to send message: " + msg);
     } finally {
       setSending(false);
