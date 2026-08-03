@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useNotifications } from "@/context/NotificationContext";
 import {
   useState,
   useRef,
@@ -29,7 +30,8 @@ import {
   Download,
   ExternalLink,
   Tag,
-  Building2,
+  Mail,
+  Bell,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -45,6 +47,13 @@ interface QuoteData {
   status: "pending" | "accepted" | "rejected";
 }
 
+interface DBProfile {
+  id?: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  email?: string | null;
+}
+
 interface DBConversation {
   id: string;
   participant_a: string;
@@ -52,8 +61,8 @@ interface DBConversation {
   last_message_text: string | null;
   last_message_at: string | null;
   created_at: string;
-  participant_a_profile?: { full_name: string; avatar_url: string } | null;
-  participant_b_profile?: { full_name: string; avatar_url: string } | null;
+  participant_a_profile?: DBProfile | null;
+  participant_b_profile?: DBProfile | null;
 }
 
 interface DBMessage {
@@ -86,7 +95,7 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
   const colors = ["bg-primary", "bg-purple-500", "bg-blue-500", "bg-emerald-500", "bg-orange-500"];
   const color = colors[(name?.charCodeAt(0) || 0) % colors.length];
   return (
-    <div className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-extrabold flex-shrink-0`}>
+    <div className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-extrabold flex-shrink-0 shadow-sm`}>
       {name ? name[0].toUpperCase() : <User size={16} />}
     </div>
   );
@@ -94,6 +103,7 @@ function Avatar({ name, size = "md" }: { name: string; size?: "sm" | "md" | "lg"
 
 export default function MessagesPage() {
   const { user, profile } = useAuth();
+  const { sendNotification } = useNotifications();
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
 
@@ -106,7 +116,7 @@ export default function MessagesPage() {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewConv, setShowNewConv] = useState(false);
-  const [newConvEmail, setNewConvEmail] = useState("");
+  const [newConvQuery, setNewConvQuery] = useState("");
   const [creatingConv, setCreatingConv] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -135,8 +145,8 @@ export default function MessagesPage() {
         .from("conversations")
         .select(`
           *,
-          participant_a_profile:users!conversations_participant_a_fkey(full_name, avatar_url),
-          participant_b_profile:users!conversations_participant_b_fkey(full_name, avatar_url)
+          participant_a_profile:users!conversations_participant_a_fkey(full_name, avatar_url, email),
+          participant_b_profile:users!conversations_participant_b_fkey(full_name, avatar_url, email)
         `)
         .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
         .order("last_message_at", { ascending: false, nullsFirst: false });
@@ -172,9 +182,13 @@ export default function MessagesPage() {
       }
 
       // 3. Attach profiles
-      const formatted = rawList.map((c) => {
+      const formatted: DBConversation[] = rawList.map((c) => {
         const partnerId = c.participant_a === user.id ? c.participant_b : c.participant_a;
-        const profileObj = profilesMap[partnerId] || { full_name: partnerId?.slice(0, 8) || "B2B Partner", avatar_url: null };
+        const profileObj = profilesMap[partnerId] || {
+          full_name: partnerId?.slice(0, 8) || "B2B Partner",
+          email: "partner@buysell.com",
+          avatar_url: null,
+        };
 
         return {
           ...c,
@@ -183,13 +197,18 @@ export default function MessagesPage() {
         };
       });
 
-      setConversations(formatted as DBConversation[]);
+      setConversations(formatted);
+
+      // Auto-select first conversation if none selected
+      if (!activeConv && formatted.length > 0) {
+        setActiveConv(formatted[0]);
+      }
     } catch (err) {
       console.error("[Messages] Resilient fetch error:", err);
     } finally {
       setLoadingConvs(false);
     }
-  }, [user, profile, supabase]);
+  }, [user, profile, supabase, activeConv]);
 
   useEffect(() => {
     fetchConversations();
@@ -236,27 +255,36 @@ export default function MessagesPage() {
 
   // ─── Realtime Subscription: Messages in active conversation ─────────────────
   useEffect(() => {
-    if (!activeConv) return;
+    if (!activeConv || !user) return;
     const channel = supabase
       .channel(`realtime-msg-${activeConv.id}`)
       .on("postgres_changes", {
-        event: "*",
+        event: "INSERT",
         schema: "public",
         table: "messages",
         filter: `conversation_id=eq.${activeConv.id}`,
       }, (payload) => {
-        if (payload.eventType === "INSERT") {
-          const newMsg = payload.new as DBMessage;
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === newMsg.id)) return prev;
-            return [...prev, newMsg];
-          });
+        const newMsg = payload.new as DBMessage;
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
+
+        // Trigger notification toast if message is from counterpart
+        if (newMsg.sender_id !== user.id) {
+          sendNotification(
+            user.id,
+            "💬 New Trade Message Received",
+            newMsg.text || "You received a new document attachment or quotation.",
+            "MESSAGE",
+            `/dashboard/messages`
+          );
         }
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [activeConv, supabase]);
+  }, [activeConv, user, supabase, sendNotification]);
 
   // ─── Auto Scroll to Bottom ───────────────────────────────────────────────────
   useEffect(() => {
@@ -269,6 +297,8 @@ export default function MessagesPage() {
     const text = newMessage.trim() || (quote ? `Formal Offer: ${quote.title}` : `Attached Document: ${attachmentName}`);
     setNewMessage("");
     setSending(true);
+
+    const partnerId = activeConv.participant_a === user.id ? activeConv.participant_b : activeConv.participant_a;
 
     // Optimistic insert
     const optimistic: DBMessage = {
@@ -285,8 +315,8 @@ export default function MessagesPage() {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
-      // Insert message
-      await supabase.from("messages").insert({
+      // 1. Insert message
+      const { error: insertErr } = await supabase.from("messages").insert({
         conversation_id: activeConv.id,
         sender_id: user.id,
         text,
@@ -296,11 +326,24 @@ export default function MessagesPage() {
         quote_data: quote || null,
       });
 
-      // Update conversation's last message
+      if (insertErr) throw insertErr;
+
+      // 2. Update conversation's last message
       await supabase.from("conversations").update({
         last_message_text: text,
         last_message_at: new Date().toISOString(),
       }).eq("id", activeConv.id);
+
+      // 3. Notify partner
+      if (partnerId) {
+        await sendNotification(
+          partnerId,
+          `💬 New Message from ${profile?.full_name || user.email}`,
+          text,
+          "MESSAGE",
+          `/dashboard/messages`
+        );
+      }
     } catch (err) {
       console.error("[Messages] Send error:", err);
     } finally {
@@ -331,7 +374,6 @@ export default function MessagesPage() {
         .upload(filePath, file, { cacheControl: "3600", upsert: true });
 
       if (uploadErr) {
-        // Fallback: create object URL if bucket restricts custom paths
         const fallbackUrl = URL.createObjectURL(file);
         await handleSendMessage(fallbackUrl, file.name);
       } else {
@@ -380,7 +422,7 @@ export default function MessagesPage() {
   // ─── Start New Conversation ──────────────────────────────────────────────────
   const handleStartConversation = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !newConvEmail.trim()) return;
+    if (!user || !newConvQuery.trim()) return;
     setCreatingConv(true);
     setCreateError("");
 
@@ -388,7 +430,7 @@ export default function MessagesPage() {
       const res = await fetch("/api/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipientEmail: newConvEmail.trim() }),
+        body: JSON.stringify({ recipientQuery: newConvQuery.trim() }),
       });
 
       const json = await res.json();
@@ -405,7 +447,7 @@ export default function MessagesPage() {
         await fetchConversations();
         setActiveConv(conv as DBConversation);
         setShowNewConv(false);
-        setNewConvEmail("");
+        setNewConvQuery("");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : typeof err === "string" ? err : "Network or server error starting conversation.";
@@ -415,18 +457,26 @@ export default function MessagesPage() {
     }
   };
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────────
+  // ─── Profile Resolution Helpers ─────────────────────────────────────────────
   const getPartnerName = (conv: DBConversation): string => {
     if (!user) return "Counterpart";
-    if (conv.participant_a === user.id) {
-      return (conv.participant_b_profile as any)?.full_name || "B2B Partner";
-    }
-    return (conv.participant_a_profile as any)?.full_name || "B2B Partner";
+    const partnerProfile = conv.participant_a === user.id ? conv.participant_b_profile : conv.participant_a_profile;
+    return partnerProfile?.full_name || partnerProfile?.email || "B2B Partner";
   };
 
-  const filteredConvs = conversations.filter((c) =>
-    getPartnerName(c).toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const getPartnerEmail = (conv: DBConversation): string => {
+    if (!user) return "";
+    const partnerProfile = conv.participant_a === user.id ? conv.participant_b_profile : conv.participant_a_profile;
+    return partnerProfile?.email || "";
+  };
+
+  const filteredConvs = conversations.filter((c) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      getPartnerName(c).toLowerCase().includes(q) ||
+      getPartnerEmail(c).toLowerCase().includes(q)
+    );
+  });
 
   const myName = profile?.full_name || user?.email || "You";
 
@@ -455,7 +505,7 @@ export default function MessagesPage() {
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search partners…"
+                placeholder="Search by name or email…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
@@ -480,11 +530,15 @@ export default function MessagesPage() {
             ) : (
               filteredConvs.map((conv) => {
                 const partnerName = getPartnerName(conv);
+                const partnerEmail = getPartnerEmail(conv);
                 const isActive = activeConv?.id === conv.id;
                 return (
                   <button
                     key={conv.id}
-                    onClick={() => setActiveConv(conv)}
+                    onClick={() => {
+                      setActiveConv(conv);
+                      fetchMessages(conv.id);
+                    }}
                     className={`w-full text-left px-5 py-4 transition-all hover:bg-slate-100 dark:hover:bg-slate-800/60 ${isActive ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}`}
                   >
                     <div className="flex items-start gap-3">
@@ -496,6 +550,11 @@ export default function MessagesPage() {
                             {formatTime(conv.last_message_at)}
                           </span>
                         </div>
+                        {partnerEmail && (
+                          <p className="text-[10px] text-primary/70 font-semibold truncate mb-1">
+                            {partnerEmail}
+                          </p>
+                        )}
                         <p className="text-xs text-muted-foreground truncate">
                           {conv.last_message_text || "Start negotiating…"}
                         </p>
@@ -514,7 +573,7 @@ export default function MessagesPage() {
             <>
               {/* Chat Header */}
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => setActiveConv(null)}
                     className="md:hidden p-1 mr-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
@@ -522,21 +581,23 @@ export default function MessagesPage() {
                     ←
                   </button>
                   <Avatar name={getPartnerName(activeConv)} />
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
                       {getPartnerName(activeConv)}
                       <VerifiedBadge showText />
                     </h3>
-                    <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                      <ShieldCheck size={12} /> Escrow Trade Channel Protected
-                    </p>
+                    {getPartnerEmail(activeConv) && (
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-medium truncate flex items-center gap-1">
+                        <Mail size={11} className="text-primary" /> {getPartnerEmail(activeConv)}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowQuoteModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-black hover:bg-emerald-500/20 transition-all"
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-black hover:bg-emerald-500/20 transition-all shadow-sm"
                   >
                     <Tag size={14} /> Counter-Offer Quote
                   </button>
@@ -831,11 +892,11 @@ export default function MessagesPage() {
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-extrabold">New Conversation</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Enter the email of a registered BuySell user.</p>
+                    <h3 className="text-lg font-extrabold">New B2B Conversation</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Enter email address or user name to connect.</p>
                   </div>
                   <button
-                    onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvEmail(""); }}
+                    onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvQuery(""); }}
                     className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
                   >
                     <X size={18} />
@@ -849,25 +910,29 @@ export default function MessagesPage() {
                 )}
 
                 <form onSubmit={handleStartConversation} className="space-y-4">
-                  <input
-                    type="email"
-                    required
-                    placeholder="supplier@company.com"
-                    value={newConvEmail}
-                    onChange={(e) => setNewConvEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
-                  />
+                  <div>
+                    <label className="text-xs font-bold block mb-1">Partner Email or Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. ssamuel106@uniport.edu.ng or Samuel"
+                      value={newConvQuery}
+                      onChange={(e) => setNewConvQuery(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                    />
+                  </div>
+
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvEmail(""); }}
+                      onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvQuery(""); }}
                       className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      disabled={creatingConv || !newConvEmail.trim()}
+                      disabled={creatingConv || !newConvQuery.trim()}
                       className="flex-1 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {creatingConv ? <Loader2 size={16} className="animate-spin" /> : "Start Chat"}

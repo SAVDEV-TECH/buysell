@@ -2,8 +2,7 @@
  * POST /api/conversations
  *
  * Enterprise API route for starting / fetching 1-to-1 conversations.
- * Uses server-side Supabase client to bypass client RLS hiccups while preserving
- * strict authentication and authorization checks.
+ * Supports recipient lookup by email, full name, or user ID.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -12,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 
 interface StartConversationRequest {
+  recipientQuery?: string;  // Email, Full Name, or User ID
   recipientEmail?: string;
   recipientId?: string;
 }
@@ -30,43 +30,55 @@ export async function POST(request: NextRequest) {
     }
 
     const body: StartConversationRequest = await request.json();
-    const { recipientEmail, recipientId } = body;
+    const query = (body.recipientQuery || body.recipientEmail || body.recipientId || "").trim();
 
-    if (!recipientEmail && !recipientId) {
+    if (!query) {
       return NextResponse.json(
-        { success: false, error: "Recipient email or ID is required." },
+        { success: false, error: "Recipient email, full name, or ID is required." },
         { status: 400 }
       );
     }
 
-    let targetUserId = recipientId;
+    let targetUserId = "";
     let targetFullName = "";
+    let targetEmail = "";
 
-    // 2. Resolve recipient if email was passed
-    if (recipientEmail) {
-      const cleanEmail = recipientEmail.trim().toLowerCase();
+    // 2. Resolve recipient by ID first, then email, then name
+    if (query.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+      const { data: userById } = await supabase
+        .from("users")
+        .select("id, full_name, email")
+        .eq("id", query)
+        .maybeSingle();
+
+      if (userById) {
+        targetUserId = userById.id;
+        targetFullName = userById.full_name;
+        targetEmail = userById.email;
+      }
+    }
+
+    if (!targetUserId) {
+      // Lookup by email or full name
       const { data: targetUser, error: userErr } = await supabase
         .from("users")
         .select("id, full_name, email")
-        .eq("email", cleanEmail)
+        .or(`email.ilike.${query},full_name.ilike.%${query}%`)
         .maybeSingle();
 
       if (userErr || !targetUser) {
         return NextResponse.json(
           {
             success: false,
-            error: `No registered user found with email '${cleanEmail}'. Please ask them to join BuySell first.`,
+            error: `No registered user found matching '${query}'. Please ask them to register on BuySell first.`,
           },
           { status: 404 }
         );
       }
 
       targetUserId = targetUser.id;
-      targetFullName = targetUser.full_name || cleanEmail;
-    }
-
-    if (!targetUserId) {
-      return NextResponse.json({ success: false, error: "Target user could not be resolved." }, { status: 400 });
+      targetFullName = targetUser.full_name || targetUser.email;
+      targetEmail = targetUser.email;
     }
 
     // 3. Prevent self-conversations
@@ -91,13 +103,14 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           conversation: existingConv,
+          targetUser: { id: targetUserId, full_name: targetFullName, email: targetEmail },
           isExisting: true,
           message: "Existing conversation retrieved.",
         },
       });
     }
 
-    // 5. Create new conversation (resilient select without strict foreign key constraints)
+    // 5. Create new conversation safely
     const now = new Date().toISOString();
     const { data: newConv, error: createErr } = await supabase
       .from("conversations")
@@ -132,8 +145,9 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         conversation: newConv,
+        targetUser: { id: targetUserId, full_name: targetFullName, email: targetEmail },
         isExisting: false,
-        message: `Conversation started with ${targetFullName || "partner"}.`,
+        message: `Conversation started with ${targetFullName || targetEmail || "partner"}.`,
       },
     });
   } catch (error: unknown) {
