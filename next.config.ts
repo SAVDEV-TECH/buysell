@@ -18,10 +18,10 @@ const isDev = process.env.NODE_ENV === "development";
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://accounts.google.com https://js.stripe.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com;
   font-src 'self' https://fonts.gstatic.com data:;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.paystack.co https://api.flutterwave.com https://accounts.google.com https://api.stripe.com https://js.stripe.com https://api.smileidentity.com https://api.vertofx.com https://openexchangerates.org;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ipapi.co https://api.ipify.org https://api.paystack.co https://api.flutterwave.com https://accounts.google.com https://api.stripe.com https://js.stripe.com https://api.smileidentity.com https://api.vertofx.com https://openexchangerates.org;
   frame-src 'self' https://accounts.google.com https://checkout.flutterwave.com https://js.paystack.co https://js.stripe.com https://hooks.stripe.com;
   worker-src 'self' blob:;
   object-src 'none';

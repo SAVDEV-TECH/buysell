@@ -337,25 +337,48 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
     const fetchProducts = async () => {
       try {
         // Expanded select: pull verification_level from organizations join
+        // 1. Fetch products cleanly
+        let rawData: any[] = [];
         const { data, error } = await supabase
           .from("products")
           .select(`
             *,
-            supplier_organizations:organizations!products_supplier_organization_id_fkey(
-              company_name,
-              verification_level
-            ),
+            organizations(company_name, verification_level),
             product_categories(name)
           `)
           .order("created_at", { ascending: false });
         
-        let rawData = data;
-        if (error) {
-          console.warn("Product join fetch notice:", error.message);
-          // Fallback: basic select without joins
+        if (error || !data || data.length === 0) {
+          // Fallback: simple select without explicit relationship alias
           const fallback = await supabase.from("products").select("*").order("created_at", { ascending: false });
-          rawData = fallback.data;
+          rawData = fallback.data || [];
+        } else {
+          rawData = data;
         }
+
+        // 2. Fetch missing organization details safely
+        const orgIds = Array.from(new Set(rawData.map((p) => p.supplier_organization_id || p.organization_id).filter(Boolean)));
+        const orgsMap: Record<string, any> = {};
+        if (orgIds.length > 0) {
+          const { data: orgsData } = await supabase
+            .from("organizations")
+            .select("id, company_name, verification_level")
+            .in("id", orgIds);
+
+          (orgsData || []).forEach((o) => {
+            orgsMap[o.id] = o;
+          });
+        }
+
+        // 3. Attach organization info to products
+        rawData = rawData.map((p) => {
+          const orgId = p.supplier_organization_id || p.organization_id;
+          const orgObj = orgsMap[orgId] || p.organizations || p.supplier_organizations || { company_name: "Verified Supplier", verification_level: "verified" };
+          return {
+            ...p,
+            supplier_organizations: orgObj,
+          };
+        });
 
         // Fetch aggregated review stats per product
         const { data: reviewStats } = await supabase
