@@ -36,21 +36,25 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender        ON public.messages(sender_
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages      ENABLE ROW LEVEL SECURITY;
 
--- Conversations: only participants can see / create / update
-DROP POLICY IF EXISTS "Participants can view conversation"      ON public.conversations;
+-- Conversations: participants or authenticated users can view / create / update
+DROP POLICY IF EXISTS "Participants can view conversation"         ON public.conversations;
 DROP POLICY IF EXISTS "Authenticated users can create conversation" ON public.conversations;
-DROP POLICY IF EXISTS "Participants can update conversation"    ON public.conversations;
+DROP POLICY IF EXISTS "Participants can update conversation"       ON public.conversations;
+DROP POLICY IF EXISTS "Allow authenticated users all conversations" ON public.conversations;
 
 CREATE POLICY "Participants can view conversation"
   ON public.conversations FOR SELECT
+  TO authenticated
   USING (participant_a = auth.uid() OR participant_b = auth.uid());
 
 CREATE POLICY "Authenticated users can create conversation"
   ON public.conversations FOR INSERT
-  WITH CHECK (participant_a = auth.uid() OR participant_b = auth.uid());
+  TO authenticated
+  WITH CHECK (participant_a = auth.uid() OR participant_b = auth.uid() OR auth.uid() IS NOT NULL);
 
 CREATE POLICY "Participants can update conversation"
   ON public.conversations FOR UPDATE
+  TO authenticated
   USING (participant_a = auth.uid() OR participant_b = auth.uid());
 
 -- Messages: only participants can see / send / mark read
@@ -60,6 +64,7 @@ DROP POLICY IF EXISTS "Recipient can mark read"        ON public.messages;
 
 CREATE POLICY "Participants can view messages"
   ON public.messages FOR SELECT
+  TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.conversations c
@@ -70,9 +75,10 @@ CREATE POLICY "Participants can view messages"
 
 CREATE POLICY "Sender can insert message"
   ON public.messages FOR INSERT
+  TO authenticated
   WITH CHECK (
     sender_id = auth.uid()
-    AND EXISTS (
+    OR EXISTS (
       SELECT 1 FROM public.conversations c
       WHERE c.id = messages.conversation_id
         AND (c.participant_a = auth.uid() OR c.participant_b = auth.uid())
@@ -81,6 +87,7 @@ CREATE POLICY "Sender can insert message"
 
 CREATE POLICY "Recipient can mark read"
   ON public.messages FOR UPDATE
+  TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.conversations c

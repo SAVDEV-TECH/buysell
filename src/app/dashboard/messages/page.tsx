@@ -345,54 +345,29 @@ export default function MessagesPage() {
     setCreateError("");
 
     try {
-      const { data: targetUser, error: userErr } = await supabase
-        .from("users")
-        .select("id, full_name")
-        .eq("email", newConvEmail.trim().toLowerCase())
-        .maybeSingle();
+      const res = await fetch("/api/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientEmail: newConvEmail.trim() }),
+      });
 
-      if (userErr || !targetUser) {
-        setCreateError("No user found with that email address. Ask them to register first.");
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        setCreateError(json.error || "Failed to initialize conversation channel.");
         return;
       }
 
-      if (targetUser.id === user.id) {
-        setCreateError("You cannot start a conversation with yourself.");
-        return;
-      }
-
-      const { data: existing } = await supabase
-        .from("conversations")
-        .select("*")
-        .or(
-          `and(participant_a.eq.${user.id},participant_b.eq.${targetUser.id}),and(participant_a.eq.${targetUser.id},participant_b.eq.${user.id})`
-        )
-        .maybeSingle();
-
-      if (existing) {
-        setActiveConv(existing as DBConversation);
+      const conv = json.data?.conversation;
+      if (conv) {
+        await fetchConversations();
+        setActiveConv(conv as DBConversation);
         setShowNewConv(false);
-        return;
+        setNewConvEmail("");
       }
-
-      const { data: created, error: convErr } = await supabase
-        .from("conversations")
-        .insert({
-          participant_a: user.id,
-          participant_b: targetUser.id,
-          last_message_at: new Date().toISOString(),
-        })
-        .select("*")
-        .single();
-
-      if (convErr) throw convErr;
-
-      await fetchConversations();
-      setActiveConv(created as DBConversation);
-      setShowNewConv(false);
-      setNewConvEmail("");
-    } catch (err: any) {
-      setCreateError(err.message || "Failed to start conversation.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Network or server error starting conversation.";
+      setCreateError(msg);
     } finally {
       setCreatingConv(false);
     }
