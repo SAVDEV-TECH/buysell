@@ -9,7 +9,12 @@ import { getCountryFromIP } from "@/lib/geolocation";
 export default function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -47,6 +52,15 @@ export default function LanguageSwitcher() {
     localStorage.setItem("buysell_locale_set", "true");
     setOpen(false);
   };
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800">
+        <Globe size={15} className="text-primary shrink-0" />
+        <span className="w-12 h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div ref={ref} className="relative">
@@ -92,4 +106,3 @@ export default function LanguageSwitcher() {
     </div>
   );
 }
-
