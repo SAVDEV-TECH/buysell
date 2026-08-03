@@ -45,12 +45,23 @@ const Navbar = () => {
             <LanguageSwitcher />
             <CurrencySelector />
             {user ? (
-              <div className="hidden sm:flex items-center gap-3">
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/dashboard/messages"
+                  title="Trade Messages"
+                  className="p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
+                >
+                  <MessageSquare size={19} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                  )}
+                </Link>
+
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold uppercase">
+                  <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold uppercase shadow-sm">
                     {displayName?.charAt(0) || "U"}
                   </div>
-                  <span className="text-sm font-semibold text-foreground hidden md:block">
+                  <span className="text-sm font-semibold text-foreground hidden lg:block">
                     {displayName}
                   </span>
                 </Link>
