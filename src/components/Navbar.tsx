@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSwitcher from "./LanguageSwitcher";
+import NotificationPopover from "./NotificationPopover";
 import { BuySellLogo } from "@/components/BuySellLogo";
 
 const Navbar = () => {
@@ -36,7 +37,9 @@ const Navbar = () => {
             <Link href="/dashboard/messages" className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-primary transition-colors relative">
               <MessageSquare size={18} /> Messages
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-2 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse"></span>
+                <span className="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
               )}
             </Link>
           </nav>
@@ -45,7 +48,10 @@ const Navbar = () => {
             <LanguageSwitcher />
             <CurrencySelector />
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Notification Bell Icon with Red Dot & Numeric Count */}
+                <NotificationPopover />
+
                 <Link
                   href="/dashboard/messages"
                   title="Trade Messages"
@@ -53,7 +59,9 @@ const Navbar = () => {
                 >
                   <MessageSquare size={19} />
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 animate-pulse">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
                   )}
                 </Link>
 
