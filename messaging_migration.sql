@@ -36,33 +36,38 @@ CREATE INDEX IF NOT EXISTS idx_messages_sender        ON public.messages(sender_
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.messages      ENABLE ROW LEVEL SECURITY;
 
--- Conversations: participants or authenticated users can view / create / update
+-- Conversations RLS Policies
 DROP POLICY IF EXISTS "Participants can view conversation"         ON public.conversations;
 DROP POLICY IF EXISTS "Authenticated users can create conversation" ON public.conversations;
 DROP POLICY IF EXISTS "Participants can update conversation"       ON public.conversations;
-DROP POLICY IF EXISTS "Allow authenticated users all conversations" ON public.conversations;
+DROP POLICY IF EXISTS "Allow authenticated users to view conversations" ON public.conversations;
+DROP POLICY IF EXISTS "Allow authenticated users to insert conversations" ON public.conversations;
+DROP POLICY IF EXISTS "Allow authenticated users to update conversations" ON public.conversations;
 
-CREATE POLICY "Participants can view conversation"
+CREATE POLICY "Allow authenticated users to view conversations"
   ON public.conversations FOR SELECT
   TO authenticated
   USING (participant_a = auth.uid() OR participant_b = auth.uid());
 
-CREATE POLICY "Authenticated users can create conversation"
+CREATE POLICY "Allow authenticated users to insert conversations"
   ON public.conversations FOR INSERT
   TO authenticated
-  WITH CHECK (participant_a = auth.uid() OR participant_b = auth.uid() OR auth.uid() IS NOT NULL);
+  WITH CHECK (true);
 
-CREATE POLICY "Participants can update conversation"
+CREATE POLICY "Allow authenticated users to update conversations"
   ON public.conversations FOR UPDATE
   TO authenticated
   USING (participant_a = auth.uid() OR participant_b = auth.uid());
 
--- Messages: only participants can see / send / mark read
+-- Messages RLS Policies
 DROP POLICY IF EXISTS "Participants can view messages" ON public.messages;
 DROP POLICY IF EXISTS "Sender can insert message"      ON public.messages;
 DROP POLICY IF EXISTS "Recipient can mark read"        ON public.messages;
+DROP POLICY IF EXISTS "Allow authenticated users to view messages" ON public.messages;
+DROP POLICY IF EXISTS "Allow authenticated users to insert messages" ON public.messages;
+DROP POLICY IF EXISTS "Allow authenticated users to update messages" ON public.messages;
 
-CREATE POLICY "Participants can view messages"
+CREATE POLICY "Allow authenticated users to view messages"
   ON public.messages FOR SELECT
   TO authenticated
   USING (
@@ -73,28 +78,15 @@ CREATE POLICY "Participants can view messages"
     )
   );
 
-CREATE POLICY "Sender can insert message"
+CREATE POLICY "Allow authenticated users to insert messages"
   ON public.messages FOR INSERT
   TO authenticated
-  WITH CHECK (
-    sender_id = auth.uid()
-    OR EXISTS (
-      SELECT 1 FROM public.conversations c
-      WHERE c.id = messages.conversation_id
-        AND (c.participant_a = auth.uid() OR c.participant_b = auth.uid())
-    )
-  );
+  WITH CHECK (true);
 
-CREATE POLICY "Recipient can mark read"
+CREATE POLICY "Allow authenticated users to update messages"
   ON public.messages FOR UPDATE
   TO authenticated
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.conversations c
-      WHERE c.id = messages.conversation_id
-        AND (c.participant_a = auth.uid() OR c.participant_b = auth.uid())
-    )
-  );
+  USING (true);
 
 -- 4. Enable Realtime for WebSocket subscriptions
 ALTER PUBLICATION supabase_realtime ADD TABLE public.conversations;
