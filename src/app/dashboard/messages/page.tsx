@@ -128,6 +128,9 @@ export default function MessagesPage() {
     if (!user) return;
     setLoadingConvs(true);
     try {
+      let rawList: any[] = [];
+
+      // 1. Primary fetch with joins
       const { data, error } = await supabase
         .from("conversations")
         .select(`
@@ -138,14 +141,55 @@ export default function MessagesPage() {
         .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
         .order("last_message_at", { ascending: false, nullsFirst: false });
 
-      if (error) throw error;
-      setConversations((data as DBConversation[]) || []);
+      if (error || !data || data.length === 0) {
+        // Fallback: simple select without explicit foreign key alias
+        const fallback = await supabase
+          .from("conversations")
+          .select("*")
+          .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
+          .order("last_message_at", { ascending: false, nullsFirst: false });
+
+        rawList = fallback.data || [];
+      } else {
+        rawList = data;
+      }
+
+      // 2. Fetch missing partner profiles safely
+      const partnerIds = Array.from(new Set(
+        rawList.map((c) => (c.participant_a === user.id ? c.participant_b : c.participant_a)).filter(Boolean)
+      ));
+
+      const profilesMap: Record<string, any> = {};
+      if (partnerIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from("users")
+          .select("id, full_name, avatar_url, email")
+          .in("id", partnerIds);
+
+        (usersData || []).forEach((u) => {
+          profilesMap[u.id] = u;
+        });
+      }
+
+      // 3. Attach profiles
+      const formatted = rawList.map((c) => {
+        const partnerId = c.participant_a === user.id ? c.participant_b : c.participant_a;
+        const profileObj = profilesMap[partnerId] || { full_name: partnerId?.slice(0, 8) || "B2B Partner", avatar_url: null };
+
+        return {
+          ...c,
+          participant_a_profile: c.participant_a_profile || (c.participant_a === user.id ? profile : profileObj),
+          participant_b_profile: c.participant_b_profile || (c.participant_b === user.id ? profile : profileObj),
+        };
+      });
+
+      setConversations(formatted as DBConversation[]);
     } catch (err) {
-      console.warn("[Messages] Could not fetch conversations:", err);
+      console.error("[Messages] Resilient fetch error:", err);
     } finally {
       setLoadingConvs(false);
     }
-  }, [user, supabase]);
+  }, [user, profile, supabase]);
 
   useEffect(() => {
     fetchConversations();
@@ -155,18 +199,11 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("conversations-updates")
+      .channel("global-conversations-realtime")
       .on("postgres_changes", {
         event: "*",
         schema: "public",
         table: "conversations",
-        filter: `participant_a=eq.${user.id}`,
-      }, fetchConversations)
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "conversations",
-        filter: `participant_b=eq.${user.id}`,
       }, fetchConversations)
       .subscribe();
 
@@ -201,17 +238,20 @@ export default function MessagesPage() {
   useEffect(() => {
     if (!activeConv) return;
     const channel = supabase
-      .channel(`messages-${activeConv.id}`)
+      .channel(`realtime-msg-${activeConv.id}`)
       .on("postgres_changes", {
-        event: "INSERT",
+        event: "*",
         schema: "public",
         table: "messages",
         filter: `conversation_id=eq.${activeConv.id}`,
       }, (payload) => {
-        setMessages((prev) => {
-          if (prev.find((m) => m.id === payload.new.id)) return prev;
-          return [...prev, payload.new as DBMessage];
-        });
+        if (payload.eventType === "INSERT") {
+          const newMsg = payload.new as DBMessage;
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
+        }
       })
       .subscribe();
 
