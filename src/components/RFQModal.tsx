@@ -39,7 +39,7 @@ interface RFQModalProps {
     price?: number;
     moq?: number;
   };
-  manufacturer: {
+  manufacturer?: {
     id: string;
     name: string;
   };
@@ -101,7 +101,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
           quantity: Number(quantity),
           productId: product?.id,
           targetPrice: targetPrice ? Number(targetPrice) : null,
-          manufacturerId: manufacturer.id,
+          manufacturerId: manufacturer?.id || null,
         },
         status: "published",
       });
