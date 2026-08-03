@@ -26,8 +26,16 @@ CREATE TABLE IF NOT EXISTS public.messages (
   sender_id        UUID        NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
   text             TEXT        NOT NULL CHECK (length(trim(text)) > 0),
   read             BOOLEAN     NOT NULL DEFAULT false,
+  attachment_url   TEXT,
+  attachment_name  TEXT,
+  quote_data       JSONB,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Ensure existing database tables add the new columns if table already existed
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS attachment_url  TEXT;
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS attachment_name TEXT;
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS quote_data       JSONB;
 
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON public.messages(conversation_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_messages_sender        ON public.messages(sender_id);

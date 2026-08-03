@@ -315,18 +315,45 @@ export default function MessagesPage() {
     setMessages((prev) => [...prev, optimistic]);
 
     try {
-      // 1. Insert message
-      const { error: insertErr } = await supabase.from("messages").insert({
+      // 1. Build insert payload
+      const insertPayload: Record<string, any> = {
         conversation_id: activeConv.id,
         sender_id: user.id,
         text,
         read: false,
-        attachment_url: attachmentUrl || null,
-        attachment_name: attachmentName || null,
-        quote_data: quote || null,
-      });
+      };
 
-      if (insertErr) throw insertErr;
+      if (attachmentUrl) insertPayload.attachment_url = attachmentUrl;
+      if (attachmentName) insertPayload.attachment_name = attachmentName;
+      if (quote) insertPayload.quote_data = quote;
+
+      // Primary insert
+      const { error: insertErr } = await supabase.from("messages").insert(insertPayload);
+
+      if (insertErr) {
+        console.warn("[Messages] Custom column insert failed, executing resilient fallback:", insertErr.message);
+
+        // Fallback: If custom schema columns do not exist yet, fallback to clean text insert
+        let fallbackText = text;
+        if (quote) {
+          fallbackText = `[OFFER] ${quote.title} - $${quote.unit_price}/unit (MOQ: ${quote.moq}, ${quote.incoterms})`;
+        } else if (attachmentName) {
+          fallbackText = `[ATTACHMENT] ${attachmentName}: ${attachmentUrl || ""}`;
+        }
+
+        const { error: fallbackErr } = await supabase.from("messages").insert({
+          conversation_id: activeConv.id,
+          sender_id: user.id,
+          text: fallbackText,
+          read: false,
+        });
+
+        if (fallbackErr) {
+          console.error("[Messages] Fallback insert failed:", fallbackErr);
+          alert("Could not send message: " + fallbackErr.message);
+          return;
+        }
+      }
 
       // 2. Update conversation's last message
       await supabase.from("conversations").update({
@@ -344,8 +371,10 @@ export default function MessagesPage() {
           `/dashboard/messages`
         );
       }
-    } catch (err) {
-      console.error("[Messages] Send error:", err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[Messages] Send error:", msg);
+      alert("Error sending message: " + msg);
     } finally {
       setSending(false);
     }
