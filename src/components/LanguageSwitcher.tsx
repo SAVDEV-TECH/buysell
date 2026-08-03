@@ -29,6 +29,7 @@ export default function LanguageSwitcher() {
 
   // Auto-detect language from IP on first load if not manually selected
   useEffect(() => {
+    if (!mounted) return;
     const hasManualPreference = localStorage.getItem("buysell_locale_set");
     if (!hasManualPreference) {
       getCountryFromIP().then((code) => {
@@ -43,7 +44,7 @@ export default function LanguageSwitcher() {
         }
       });
     }
-  }, [setLocale]);
+  }, [setLocale, mounted]);
 
   const current = LOCALES.find((l) => l.code === locale) ?? LOCALES[0];
 
@@ -53,28 +54,24 @@ export default function LanguageSwitcher() {
     setOpen(false);
   };
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800">
-        <Globe size={15} className="text-primary shrink-0" />
-        <span className="w-12 h-3 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
-      </div>
-    );
-  }
-
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" suppressHydrationWarning>
       <button
         id="language-switcher-btn"
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
+        suppressHydrationWarning
         className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-700 shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200"
         title="Change language"
       >
         <Globe size={15} className="text-primary shrink-0" />
-        <span className="text-base leading-none">{current.flag}</span>
-        <span className="hidden sm:block text-xs">{current.label}</span>
+        <span className="text-base leading-none" suppressHydrationWarning>
+          {mounted ? current.flag : "🇺🇸"}
+        </span>
+        <span className="hidden sm:block text-xs" suppressHydrationWarning>
+          {mounted ? current.label : "English"}
+        </span>
       </button>
 
       {open && (
