@@ -98,9 +98,9 @@ const nextConfig: NextConfig = {
         source: "/api/auth/:path*",
         headers: privateApiHeaders,
       },
-      // ALL pages and root path — full security header suite
+      // ALL app pages except Next.js static asset bundles
       {
-        source: "/:path*",
+        source: "/((?!_next/static|_next/image|favicon.ico).*)",
         headers: securityHeaders,
       },
     ];
