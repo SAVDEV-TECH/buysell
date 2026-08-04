@@ -43,6 +43,8 @@ export const viewport = {
   maximumScale: 1,
 };
 
+import CookieConsentBanner from "@/components/CookieConsentBanner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -60,6 +62,7 @@ export default function RootLayout({
                   <PwaRegister />
                   <GoogleOneTap />
                   <LiveNotificationToast />
+                  <CookieConsentBanner />
                 </CartProvider>
               </NotificationProvider>
             </AuthProvider>

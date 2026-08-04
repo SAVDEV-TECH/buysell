@@ -93,7 +93,15 @@ export default function Footer() {
             <span>|</span>
             <Link href="#" className="hover:text-foreground transition-colors">{t("footer_privacy")}</Link>
             <span>|</span>
-            <Link href="#" className="hover:text-foreground transition-colors">{t("footer_cookie")}</Link>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                window.dispatchEvent(new Event("openBuySellCookiePreferences"));
+              }}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              {t("footer_cookie")}
+            </button>
           </div>
           
           <p className="text-xs text-muted-foreground">
