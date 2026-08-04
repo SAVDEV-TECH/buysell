@@ -53,7 +53,7 @@ export default function FloatingFeedbackModal() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Feedback & Support"
-        className="fixed bottom-20 right-6 z-40 flex items-center gap-2 px-3.5 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-slate-700 dark:border-slate-200"
+        className="fixed bottom-32 right-4 sm:bottom-20 sm:right-6 z-40 flex items-center gap-2 px-3 sm:px-3.5 h-9 sm:h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-slate-700 dark:border-slate-200"
       >
         <MessageSquarePlus size={16} className="text-primary group-hover:rotate-12 transition-transform" />
         <span className="hidden sm:inline">Feedback & Support</span>

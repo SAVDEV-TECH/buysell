@@ -104,7 +104,7 @@ export default function AISourcingAssistant() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-40 p-4 rounded-full bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white shadow-2xl shadow-primary/40 flex items-center gap-2 font-bold text-sm"
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 p-3.5 sm:p-4 rounded-full bg-gradient-to-r from-primary via-purple-600 to-indigo-600 text-white shadow-2xl shadow-primary/40 flex items-center gap-2 font-bold text-xs sm:text-sm"
         aria-label="Open AI Sourcing Assistant"
       >
         <Sparkles size={20} className="animate-pulse" />

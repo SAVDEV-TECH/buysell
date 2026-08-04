@@ -21,7 +21,7 @@ export default function MainLayoutShell({ children }: { children: React.ReactNod
     <>
       <Navbar />
       <CartDrawer />
-      <main className="flex-1 pt-16 pb-24 md:pb-0">{children}</main>
+      <main className="flex-1 pb-24 md:pb-0">{children}</main>
       <Footer />
       <MobileBottomNav />
       <AISourcingAssistant />
