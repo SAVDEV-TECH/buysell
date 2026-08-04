@@ -1,17 +1,7 @@
 import type { NextConfig } from "next";
 
 /**
- * Content-Security-Policy
- *
- * Changes from previous version:
- *  - REMOVED `https://js.paystack.co` and `https://checkout.flutterwave.com` from
- *    script-src. These CDN domains are NOT used directly — the app uses the npm
- *    packages `react-paystack` and `flutterwave-react-v3` which bundle locally.
- *    Removing them from script-src reduces the attack surface (SRI issue).
- *  - KEPT `https://checkout.flutterwave.com` in frame-src — Flutterwave opens
- *    its checkout in an iframe even when using the npm package.
- *  - KEPT `https://js.paystack.co` in frame-src for the same reason.
- *  - All other changes from the previous hardening pass are preserved.
+ * Content-Security-Policy Hardening Suite
  */
 const isDev = process.env.NODE_ENV === "development";
 
@@ -63,13 +53,12 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin-allow-popups",
+  },
 ];
 
-/**
- * Authenticated API routes must never be stored in shared caches.
- * Even though Next.js dynamic routes default to no-store, being explicit
- * prevents accidental caching at CDN/Vercel Edge layers.
- */
 const privateApiHeaders = [
   {
     key: "Cache-Control",
@@ -81,12 +70,6 @@ const privateApiHeaders = [
   },
 ];
 
-/**
- * Webhook routes must NOT have CORS headers.
- * Paystack, Flutterwave, and Stripe call webhooks from their own servers
- * (not browsers), so CORS is irrelevant — and a wildcard origin here would
- * be misleading and potentially dangerous.
- */
 const webhookHeaders = [
   {
     key: "X-Robots-Tag",
@@ -100,25 +83,25 @@ const nextConfig: NextConfig = {
     return [
       // Webhook routes — minimal headers, no CORS, no caching
       {
-        source: "/api/webhooks/(.*)",
+        source: "/api/webhooks/:path*",
         headers: webhookHeaders,
       },
       // Authenticated API routes — explicitly prevent caching
       {
-        source: "/api/admin/(.*)",
+        source: "/api/admin/:path*",
         headers: privateApiHeaders,
       },
       {
-        source: "/api/escrow/(.*)",
+        source: "/api/escrow/:path*",
         headers: privateApiHeaders,
       },
       {
-        source: "/api/auth/(.*)",
+        source: "/api/auth/:path*",
         headers: privateApiHeaders,
       },
-      // All routes — full security header suite
+      // ALL pages and root path — full security header suite
       {
-        source: "/(.*)",
+        source: "/:path*",
         headers: securityHeaders,
       },
     ];

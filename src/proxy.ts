@@ -5,14 +5,6 @@ const PROTECTED_PREFIXES = ["/dashboard", "/admin", "/checkout", "/onboarding"];
 
 /**
  * Allowed origins for cross-origin browser requests.
- *
- * Reads from ALLOWED_ORIGINS (comma-separated) or NEXT_PUBLIC_APP_URL.
- * An empty list means NO cross-origin requests are permitted (strictest mode).
- *
- * Example .env.local:
- *   ALLOWED_ORIGINS=https://yourdomain.com,https://staging.yourdomain.com
- *   # or simply:
- *   NEXT_PUBLIC_APP_URL=https://yourdomain.com
  */
 function getAllowedOrigins(): string[] {
   const raw = process.env.ALLOWED_ORIGINS || process.env.NEXT_PUBLIC_APP_URL;
@@ -25,15 +17,11 @@ function getAllowedOrigins(): string[] {
 
 /**
  * Resolves the effective ACAO header value for the incoming Origin.
- * Returns the origin string if it is in the allowlist, null otherwise.
- *
- * Never returns "*" — the wildcard is the root cause of the A01 finding.
  */
 function resolveAllowedOrigin(request: NextRequest): string | null {
   const incomingOrigin = request.headers.get("origin");
   if (!incomingOrigin) return null;
 
-  // 1. Same-origin check: match Origin host with Request Host / X-Forwarded-Host header
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
   if (host) {
     try {
@@ -50,11 +38,9 @@ function resolveAllowedOrigin(request: NextRequest): string | null {
     return incomingOrigin;
   }
 
-  // 2. Explicit ALLOWED_ORIGINS / NEXT_PUBLIC_APP_URL match
   const allowed = getAllowedOrigins();
   if (allowed.includes(incomingOrigin)) return incomingOrigin;
 
-  // 3. Exact Vercel deployment URL match (without wildcard subdomains)
   if (process.env.VERCEL_URL && incomingOrigin === `https://${process.env.VERCEL_URL}`) {
     return incomingOrigin;
   }
@@ -64,11 +50,8 @@ function resolveAllowedOrigin(request: NextRequest): string | null {
 
 /**
  * Injects CORS response headers onto the NextResponse.
- * If the origin is permitted, sets the full set of CORS headers.
- * If the origin is not permitted, sets nothing (browser enforces block).
  */
 function applyCors(request: NextRequest, response: NextResponse): NextResponse {
-  // Webhooks are server-to-server — they must never have CORS headers.
   if (request.nextUrl.pathname.startsWith("/api/webhooks/")) {
     return response;
   }
@@ -126,6 +109,8 @@ export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
+  const isProduction = process.env.NODE_ENV === "production";
+
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll() {
@@ -137,7 +122,12 @@ export async function proxy(request: NextRequest) {
         );
         supabaseResponse = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
+          supabaseResponse.cookies.set(name, value, {
+            ...options,
+            httpOnly: options?.httpOnly ?? true,
+            secure: isProduction || options?.secure === true,
+            sameSite: options?.sameSite || "lax",
+          })
         );
       },
     },
@@ -171,7 +161,7 @@ export async function proxy(request: NextRequest) {
   );
   supabaseResponse.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
 
-  // ── CORS Headers (applied last so they take precedence over any edge defaults) ──
+  // ── CORS Headers ─────────────────────────────────────────────────────────
   applyCors(request, supabaseResponse);
 
   return supabaseResponse;

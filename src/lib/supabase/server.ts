@@ -5,6 +5,7 @@ export async function createClient() {
   const cookieStore = await cookies()
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+  const isProduction = process.env.NODE_ENV === 'production';
 
   return createServerClient(
     url,
@@ -17,7 +18,12 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, {
+                ...options,
+                httpOnly: options?.httpOnly ?? true,
+                secure: isProduction || options?.secure === true,
+                sameSite: options?.sameSite || 'lax',
+              })
             )
           } catch {
             // Server component setAll ignore
