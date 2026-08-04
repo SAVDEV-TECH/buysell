@@ -44,6 +44,7 @@ export const viewport = {
 };
 
 import CookieConsentBanner from "@/components/CookieConsentBanner";
+import FloatingFeedbackModal from "@/components/FloatingFeedbackModal";
 
 export default function RootLayout({
   children,
@@ -63,6 +64,7 @@ export default function RootLayout({
                   <GoogleOneTap />
                   <LiveNotificationToast />
                   <CookieConsentBanner />
+                  <FloatingFeedbackModal />
                 </CartProvider>
               </NotificationProvider>
             </AuthProvider>
