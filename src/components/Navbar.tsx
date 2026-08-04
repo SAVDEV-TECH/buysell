@@ -43,7 +43,7 @@ const Navbar = () => {
         <div className="flex h-20 lg:h-16 items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <BuySellLogo size="sm" showTagline={false} />
+              <BuySellLogo size="sm" showTagline={false} hideTextOnMobile={true} />
             </Link>
           </div>
           

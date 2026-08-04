@@ -7,6 +7,7 @@ interface BuySellLogoProps {
   showTagline?: boolean;
   className?: string;
   isAnimated?: boolean;
+  hideTextOnMobile?: boolean;
 }
 
 export function BuySellLogo({
@@ -14,6 +15,7 @@ export function BuySellLogo({
   showTagline = true,
   className = "",
   isAnimated = false,
+  hideTextOnMobile = false,
 }: BuySellLogoProps) {
   // Dimensions
   const iconSizes = {
@@ -87,8 +89,8 @@ export function BuySellLogo({
           </svg>
         </div>
 
-        {/* Text 'buysell' */}
-        <div className="flex flex-col">
+        {/* Text 'buysell' - Hidden on mobile if hideTextOnMobile is true */}
+        <div className={`flex flex-col ${hideTextOnMobile ? "hidden sm:flex" : ""}`}>
           <span className={`font-black tracking-tight leading-none ${titleSizes[size]}`}>
             <span className="text-slate-900 dark:text-white">buy</span>
             <span className="text-slate-600 dark:text-slate-400 font-semibold">sell</span>
