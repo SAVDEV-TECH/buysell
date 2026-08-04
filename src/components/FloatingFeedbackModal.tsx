@@ -49,13 +49,13 @@ export default function FloatingFeedbackModal() {
 
   return (
     <>
-      {/* ── Floating Widget Trigger Button ──────────────────────────────── */}
+      {/* ── Floating Widget Trigger Button (Stacked cleanly above AI Assistant) ──────────────── */}
       <button
         onClick={() => setOpen(true)}
         aria-label="Feedback & Support"
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 h-11 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-slate-700 dark:border-slate-200"
+        className="fixed bottom-20 right-6 z-40 flex items-center gap-2 px-3.5 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-slate-700 dark:border-slate-200"
       >
-        <MessageSquarePlus size={18} className="text-primary group-hover:rotate-12 transition-transform" />
+        <MessageSquarePlus size={16} className="text-primary group-hover:rotate-12 transition-transform" />
         <span className="hidden sm:inline">Feedback & Support</span>
       </button>
 

@@ -63,7 +63,8 @@ export default function LoginPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        router.replace("/dashboard");
+        const params = new URLSearchParams(window.location.search);
+        router.replace(safeRedirectPath(params.get("redirect"), "/marketplace"));
       } else {
         setCheckingSession(false);
       }
@@ -71,11 +72,9 @@ export default function LoginPage() {
   }, [router, supabase]);
 
   const getRedirectPath = () => {
-    if (typeof window === "undefined") return "/dashboard";
+    if (typeof window === "undefined") return "/marketplace";
     const params = new URLSearchParams(window.location.search);
-    // Validate the redirect param to prevent open redirect attacks.
-    // e.g. ?redirect=//evil.com or ?redirect=https://phishing.com are rejected.
-    return safeRedirectPath(params.get("redirect"), "/dashboard");
+    return safeRedirectPath(params.get("redirect"), "/marketplace");
   };
 
   /** Routes the user based on account status and role. */

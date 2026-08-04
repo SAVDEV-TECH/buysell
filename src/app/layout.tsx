@@ -45,6 +45,7 @@ export const viewport = {
 
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import FloatingFeedbackModal from "@/components/FloatingFeedbackModal";
+import UserGuidedTourTooltip from "@/components/UserGuidedTourTooltip";
 
 export default function RootLayout({
   children,
@@ -65,6 +66,7 @@ export default function RootLayout({
                   <LiveNotificationToast />
                   <CookieConsentBanner />
                   <FloatingFeedbackModal />
+                  <UserGuidedTourTooltip />
                 </CartProvider>
               </NotificationProvider>
             </AuthProvider>
