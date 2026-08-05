@@ -3,12 +3,7 @@
 import Script from "next/script";
 
 export default function MicrosoftClarity() {
-  const clarityProjectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
-
-  if (!clarityProjectId) {
-    // Clarity script will execute when NEXT_PUBLIC_CLARITY_PROJECT_ID is provided in environment variables
-    return null;
-  }
+  const clarityProjectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID || "xxe01qhlyp";
 
   return (
     <Script
