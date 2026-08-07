@@ -4,70 +4,53 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, CheckCircle, Loader } from "lucide-react";
+import { Mail, CheckCircle, Loader, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function VerifyEmailPage() {
   const [verified, setVerified] = useState(false);
   const [resendSent, setResendSent] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push("/login");
-        return;
-      }
-      setUserEmail(user.email ?? null);
-      if (user.email_confirmed_at) {
-        setVerified(true);
-        setTimeout(() => {
-          router.push("/onboarding/business");
-        }, 2000);
-      }
-    }
-
-    checkUser();
-
+    // Poll every 3 seconds to check if the user has clicked the verification link
     const interval = setInterval(async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email_confirmed_at) {
         setVerified(true);
-        setTimeout(() => {
-          router.push("/onboarding/business");
-        }, 2000);
+        clearInterval(interval);
+        setTimeout(() => router.push("/dashboard"), 2500);
       }
     }, 3000);
 
     return () => clearInterval(interval);
   }, [router, supabase]);
 
+  // Resend cooldown countdown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
   const handleResendEmail = async () => {
-    if (!userEmail) return;
     try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: userEmail,
-      });
-      if (!error) {
-        setResendSent(true);
-        setTimeout(() => setResendSent(false), 3000);
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.email) return;
+      await supabase.auth.resend({ type: "signup", email: user.email });
+      setResendSent(true);
+      setResendCooldown(60);
+      setTimeout(() => setResendSent(false), 4000);
     } catch (error) {
-      console.error("Error resending email:", error);
+      console.error("Error resending verification email:", error);
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      router.push("/login");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
   return (
@@ -78,6 +61,7 @@ export default function VerifyEmailPage() {
         className="max-w-md w-full"
       >
         <div className="glass rounded-2xl border border-borderline p-8 text-center">
+          {/* Header icon */}
           <div className="mb-8">
             {verified ? (
               <motion.div
@@ -98,56 +82,62 @@ export default function VerifyEmailPage() {
             </h1>
             <p className="text-muted-foreground text-sm">
               {verified
-                ? "Your email has been verified. Redirecting to next step..."
+                ? "Your email has been verified. Taking you to your dashboard…"
                 : "We've sent a verification link to your email. Please click it to continue."}
             </p>
           </div>
 
+          {/* Resend success */}
           {resendSent && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-green-500 text-sm font-medium justify-center"
+              className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-2 text-green-500 text-sm"
             >
               <CheckCircle size={16} />
               <span>Verification email sent!</span>
             </motion.div>
           )}
 
+          {/* Waiting state */}
           {!verified && (
             <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
               <div className="flex items-center justify-center gap-2 text-amber-600 text-sm mb-3">
                 <Loader size={16} className="animate-spin" />
-                <span>Waiting for email verification...</span>
+                <span>Waiting for email verification…</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Check your spam folder if you don't see the email
+                Check your spam folder if you don&apos;t see the email.
               </p>
             </div>
           )}
 
+          {/* Verified state */}
           {verified && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-lg"
+              className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-600 text-sm"
             >
-              <div className="flex items-center justify-center gap-2 text-green-600 text-sm font-medium">
-                <CheckCircle size={16} />
-                <span>Email verified successfully!</span>
-              </div>
+              <CheckCircle size={16} className="inline mr-2" />
+              Email verified successfully!
             </motion.div>
           )}
 
+          {/* Action buttons */}
           <div className="space-y-3">
             {!verified && (
               <>
                 <button
                   onClick={handleResendEmail}
-                  disabled={resendSent}
-                  className="w-full px-4 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-all disabled:opacity-50 font-medium text-sm"
+                  disabled={resendSent || resendCooldown > 0}
+                  className="w-full px-4 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-all disabled:opacity-50 font-medium text-sm flex items-center justify-center gap-2"
                 >
-                  {resendSent ? "Email Sent!" : "Resend Verification Email"}
+                  {resendCooldown > 0 ? (
+                    <><RefreshCw size={14} className="animate-spin" /> Resend in {resendCooldown}s</>
+                  ) : (
+                    "Resend Verification Email"
+                  )}
                 </button>
 
                 <button
@@ -157,6 +147,12 @@ export default function VerifyEmailPage() {
                   Sign Out
                 </button>
               </>
+            )}
+
+            {verified && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-muted-foreground animate-pulse">
+                Redirecting to Dashboard…
+              </motion.div>
             )}
           </div>
 

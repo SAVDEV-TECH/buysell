@@ -1,61 +1,52 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-
-export async function verifyBearerToken(
-  request: NextRequest
-): Promise<any | null> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  return user;
-}
-
-export async function verifySessionCookie(
-  sessionCookie: string
-): Promise<any | null> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  return user;
-}
-
-export async function requireAuth(
-  request?: NextRequest
-): Promise<any> {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
-    throw new AuthError("Unauthorized", 401);
-  }
-  return user;
-}
-
-export async function requireSuperAdmin(request?: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
-    throw new AuthError("Unauthorized: Session login required", 401);
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const isSuperAdmin = profile?.role === "super_admin" || user.app_metadata?.role === "super_admin";
-  if (!isSuperAdmin) {
-    throw new AuthError("Forbidden: Super Admin privileges required", 403);
-  }
-
-  return { user, profile };
-}
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export class AuthError extends Error {
   status: number;
-
   constructor(message: string, status: number) {
     super(message);
     this.status = status;
   }
+}
+
+/** Creates a server-side Supabase client using the current request's cookies. */
+async function getSupabaseUser(req: NextRequest) {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll(); },
+        setAll() {},
+      },
+    }
+  );
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new AuthError("Unauthorized", 401);
+  return { supabase, user };
+}
+
+/** Verifies any authenticated user. Returns the Supabase user. */
+export async function requireAuth(req: NextRequest) {
+  const { user } = await getSupabaseUser(req);
+  return user;
+}
+
+/** Verifies user has the super_admin role in the users table. */
+export async function requireSuperAdmin(req: NextRequest) {
+  const { supabase, user } = await getSupabaseUser(req);
+
+  const { data: profile, error } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error || !profile || profile.role !== "super_admin") {
+    throw new AuthError("Forbidden: Super Admin access required", 403);
+  }
+
+  return user;
 }

@@ -47,6 +47,7 @@ interface FormState {
   description: string;
 }
 
+// Derived from FormState so every key is always covered — no implicit-any errors.
 type FieldErrors = Partial<Record<keyof FormState, string>>;
 
 const STEPS: { id: StepId; label: string }[] = [
