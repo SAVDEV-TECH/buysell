@@ -1,7 +1,7 @@
-"use client";
+ "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   Package,
   ArrowRight,
@@ -12,6 +12,7 @@ import {
   Plus,
   ArrowUpRight,
   MessageCircle,
+  BadgeCheck,
   Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +23,6 @@ import { createClient } from "@/lib/supabase/client";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useLanguage } from "@/context/LanguageContext";
-import { getProductImageUrl } from "@/lib/productUtils";
 
 const PayWithPaystack = dynamic(() => import("@/components/PaystackButton"), {
   ssr: false,
@@ -31,16 +31,21 @@ const FloatingChatBox = dynamic(() => import("@/components/FloatingChatBox"), {
   ssr: false,
 });
 
+// Derive tiered pricing from product data (stored tiers or sensible defaults)
 function getProductPricing(product: Product) {
-  const baseMOQ = product.moq || 1;
+  const baseMOQ = product.moq || 10;
   const basePrice = product.price;
   const rawTiers =
     product.tiers && product.tiers.length > 0
       ? [...product.tiers].sort((a, b) => a.minQty - b.minQty)
       : [
           { minQty: baseMOQ, price: basePrice },
+          { minQty: baseMOQ * 5, price: Math.round(basePrice * 0.9) },
+          { minQty: baseMOQ * 10, price: Math.round(basePrice * 0.8) },
         ];
 
+  // De-dupe degenerate tiers (e.g. product with no real tiering data
+  // shouldn't show three identical-looking columns)
   const tiers = rawTiers.filter(
     (t, idx, arr) => idx === 0 || t.price !== arr[idx - 1].price || t.minQty !== arr[idx - 1].minQty
   );
@@ -71,6 +76,13 @@ export interface Product {
   tiers?: { minQty: number; price: number }[];
 }
 
+// ─────────────────────────────────────────────────────────────
+// Shared small pieces
+// ─────────────────────────────────────────────────────────────
+
+/** Gold Supplier is a paid/merchandising tier — kept visually distinct
+ *  from the (blue) identity-verification badge so the two meanings
+ *  never blur together. */
 function GoldSupplierPill({ compact = false }: { compact?: boolean }) {
   return (
     <span
@@ -85,6 +97,9 @@ function GoldSupplierPill({ compact = false }: { compact?: boolean }) {
   );
 }
 
+/** Only renders once a product actually has reviews. A visible "0" reads
+ *  as a bad rating rather than an unrated product, so new listings get a
+ *  neutral "New" tag instead. */
 function RatingBadge({ rating, reviews, compact = false }: { rating: number; reviews: number; compact?: boolean }) {
   if (!reviews || reviews <= 0) {
     return (
@@ -109,6 +124,8 @@ function RatingBadge({ rating, reviews, compact = false }: { rating: number; rev
   );
 }
 
+/** Collapses MOQ / lead time into whichever rows actually have data,
+ *  instead of printing "Ask Supplier" twice on every card. */
 function MoqLeadTimeRows({ product, compact = false }: { product: Product; compact?: boolean }) {
   const hasMoq = !!product.moq;
   const hasLead = !!product.leadTime;
@@ -139,6 +156,10 @@ function MoqLeadTimeRows({ product, compact = false }: { product: Product; compa
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// MOBILE CARD  (shown below sm breakpoint)
+// Designed for a 2-col grid. Readable at small width — no sub-8px text.
+// ─────────────────────────────────────────────────────────────
 function MobileProductCard({
   product,
   user,
@@ -153,6 +174,7 @@ function MobileProductCard({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full h-full">
+      {/* Image */}
       <Link
         href={`/marketplace/${product.id}`}
         className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0"
@@ -172,6 +194,7 @@ function MobileProductCard({
         </div>
       </Link>
 
+      {/* Body */}
       <div className="p-2 flex flex-col gap-1">
         <div className="flex items-center justify-between gap-1">
           <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate">
@@ -191,7 +214,7 @@ function MobileProductCard({
         </div>
 
         <p className="text-xs font-black text-primary tracking-tight mt-0.5">
-          ${pricing.minPrice.toLocaleString()}
+          ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
         <div className="flex gap-1 items-stretch mt-1">
@@ -203,7 +226,7 @@ function MobileProductCard({
             <MessageCircle size={13} />
           </button>
           <div className="flex-1 overflow-hidden rounded-lg">
-            <PayWithPaystack product={product} user={user} compact={true} />
+            <PayWithPaystack product={product} user={user} />
           </div>
         </div>
       </div>
@@ -211,6 +234,9 @@ function MobileProductCard({
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// DESKTOP CARD  (shown from sm breakpoint upward)
+// ─────────────────────────────────────────────────────────────
 function DesktopProductCard({
   product,
   user,
@@ -227,6 +253,7 @@ function DesktopProductCard({
 
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full group hover:shadow-lg transition-all duration-300">
+      {/* Image */}
       <div className="relative aspect-[4/3] bg-muted/30 dark:bg-slate-900 overflow-hidden">
         <Link href={`/marketplace/${product.id}`} className="absolute inset-0 z-10">
           <span className="sr-only">View product</span>
@@ -249,12 +276,15 @@ function DesktopProductCard({
         <button className="absolute top-2 right-2 p-1.5 bg-white/70 dark:bg-black/60 backdrop-blur-sm rounded-full hover:text-red-500 transition-all z-20 shadow">
           <Heart size={13} />
         </button>
+        {/* Verified is the identity/trust signal — anchored to the image, on its own */}
         <div className="absolute bottom-2 left-2 z-20">
           <VerifiedBadge showText={true} />
         </div>
       </div>
 
+      {/* Body */}
       <div className="p-3 md:p-4 flex-1 flex flex-col gap-2">
+        {/* Category + Rating */}
         <div className="flex items-center justify-between gap-2">
           <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground italic truncate">
             {product.category}
@@ -262,6 +292,7 @@ function DesktopProductCard({
           <RatingBadge rating={product.rating} reviews={product.reviews} />
         </div>
 
+        {/* Seller Info — Gold Supplier sits here as a merchandising tag, not on the image */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <Link href={`/manufacturers/${product.sellerId}`} className="flex items-center gap-1 group/seller min-w-0">
             <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-black uppercase text-primary border border-primary/10 shrink-0">
@@ -272,21 +303,42 @@ function DesktopProductCard({
             </span>
           </Link>
           {isGold && <GoldSupplierPill />}
+          {product.reviews > 0 && (
+            <span className="text-[8px] font-medium text-muted-foreground bg-muted px-1 py-0.5 rounded">
+              {product.reviews} review{product.reviews === 1 ? "" : "s"}
+            </span>
+          )}
         </div>
 
+        {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
           <h3 className="text-sm md:text-[14px] font-black tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
 
+        {/* Tiered pricing — collapses to fewer columns if tiers are de-duped */}
+        <div
+          className="grid gap-1 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl text-center text-[9px] border border-border/50 my-1 font-medium"
+          style={{ gridTemplateColumns: `repeat(${pricing.tiers.length}, minmax(0, 1fr))` }}
+        >
+          {pricing.tiers.map((t, idx) => (
+            <div key={idx} className="flex flex-col border-r last:border-r-0 border-border/40">
+              <span className="text-muted-foreground">{t.minQty}+ units</span>
+              <span className="font-bold text-primary">₦{t.price.toLocaleString()}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* MOQ + Lead time — only shows rows that have real data */}
         <div className="border-t border-border/50 pt-2">
           <MoqLeadTimeRows product={product} />
         </div>
 
+        {/* Price + actions */}
         <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
           <p className="text-sm font-black text-foreground tracking-tighter">
-            ${pricing.minPrice.toLocaleString()}{" "}
+            ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}{" "}
             <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
           </p>
           <div className="flex gap-1 items-stretch">
@@ -305,7 +357,7 @@ function DesktopProductCard({
               Contact
             </button>
             <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
-              <PayWithPaystack product={product} user={user} compact={true} />
+              <PayWithPaystack product={product} user={user} />
             </div>
           </div>
         </div>
@@ -314,132 +366,98 @@ function DesktopProductCard({
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// MAIN EXPLORER
+// ─────────────────────────────────────────────────────────────
 export default function ProductExplorer({ limit }: { limit?: number }) {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(["All Products", "Industrial", "Electronics", "Fashion", "Agriculture", "Chemicals", "Packaging"]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All Products");
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(1000000);
-  const [maxMoq, setMaxMoq] = useState<number>(100000);
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
-  // Fix: create client outside useEffect to avoid infinite re-render loop
-  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // Expanded select: pull verification_level from organizations join
-        // 1. Fetch products cleanly
-        let rawData: any[] = [];
+        const supabase = createClient();
+        // Fetch products joined with seller verification status
         const { data, error } = await supabase
           .from("products")
           .select(`
-            *,
-            organizations(company_name, verification_level),
-            product_categories(name)
+            id, name, price, category, image_url, description,
+            rating, reviews, stock, seller_id, seller_name,
+            moq, lead_time, tiers,
+            users!products_seller_id_fkey ( is_verified )
           `)
           .order("created_at", { ascending: false });
-        
-        if (error || !data || data.length === 0) {
-          // Fallback: simple select without explicit relationship alias
-          const fallback = await supabase.from("products").select("*").order("created_at", { ascending: false });
-          rawData = fallback.data || [];
-        } else {
-          rawData = data;
-        }
 
-        // 2. Fetch missing organization details safely
-        const orgIds = Array.from(new Set(rawData.map((p) => p.supplier_organization_id || p.organization_id).filter(Boolean)));
-        const orgsMap: Record<string, any> = {};
-        if (orgIds.length > 0) {
-          const { data: orgsData } = await supabase
-            .from("organizations")
-            .select("id, company_name, verification_level")
-            .in("id", orgIds);
+        if (error) throw error;
 
-          (orgsData || []).forEach((o) => {
-            orgsMap[o.id] = o;
-          });
-        }
-
-        // 3. Attach organization info to products
-        rawData = rawData.map((p) => {
-          const orgId = p.supplier_organization_id || p.organization_id;
-          const orgObj = orgsMap[orgId] || p.organizations || p.supplier_organizations || { company_name: "Verified Supplier", verification_level: "verified" };
+        const live: Product[] = (data ?? []).map((row) => {
+          const seller = Array.isArray(row.users) ? row.users[0] : row.users;
           return {
-            ...p,
-            supplier_organizations: orgObj,
+            id: row.id,
+            name: row.name,
+            price: row.price,
+            category: row.category,
+            imageUrl: row.image_url,
+            desc: row.description,
+            rating: row.rating ?? 0,
+            reviews: row.reviews ?? 0,
+            stock: row.stock,
+            sellerId: row.seller_id,
+            sellerName: row.seller_name,
+            moq: row.moq,
+            leadTime: row.lead_time,
+            tiers: row.tiers,
+            isSellerVerified: seller?.is_verified === true,
           };
         });
 
-        // Fetch aggregated review stats per product
-        const { data: reviewStats } = await supabase
-          .from("reviews")
-          .select("product_id, rating")
-          .in("product_id", (rawData || []).map((p: any) => p.id));
-
-        // Build per-product rating map from real review data
-        const ratingMap: Record<string, { avg: number; count: number }> = {};
-        if (reviewStats) {
-          for (const r of reviewStats) {
-            if (!ratingMap[r.product_id]) ratingMap[r.product_id] = { avg: 0, count: 0 };
-            ratingMap[r.product_id].count++;
-            ratingMap[r.product_id].avg += r.rating;
-          }
-          for (const pid of Object.keys(ratingMap)) {
-            ratingMap[pid].avg = Math.round((ratingMap[pid].avg / ratingMap[pid].count) * 10) / 10;
-          }
-        }
-
-        const formatted: Product[] = (rawData || []).map((p: any) => {
-          const orgVerification = p.supplier_organizations?.verification_level;
-          const isVerified = orgVerification === "verified";
-          const productRating = ratingMap[p.id];
-
-          return {
-            id: p.id,
-            name: p.title || "Unnamed Product",
-            price: Array.isArray(p.tiered_pricing) && p.tiered_pricing.length > 0
-              ? (p.tiered_pricing[0].unit_price || p.tiered_pricing[0].price || 10)
-              : 10,
-            category: p.product_categories?.name || "General B2B",
-            desc: p.description || "",
-            // Real rating from reviews table — null means no reviews yet
-            rating: productRating ? productRating.avg : 0,
-            reviews: productRating ? productRating.count : 0,
-            sellerId: p.supplier_organization_id || "supplier",
-            sellerName: p.supplier_organizations?.company_name || "Supplier",
-            moq: p.min_order_quantity || 1,
-            // Real verification status from organizations table
-            isSellerVerified: isVerified,
-            imageUrl: getProductImageUrl(p),
-          };
-        });
-
-        setProducts(formatted);
-
-        // Fetch categories dynamically
-        const { data: catData } = await supabase.from("product_categories").select("name").order("name");
-        if (catData && catData.length > 0) {
-          setCategories(["All Products", ...catData.map((c: any) => c.name)]);
-        }
+        setProducts(live);
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        setProducts([]);
+        // Fallback: fetch without join in case FK alias differs
+        try {
+          const supabase = createClient();
+          const { data: raw } = await supabase
+            .from("products")
+            .select("id, name, price, category, image_url, description, rating, reviews, stock, seller_id, seller_name, moq, lead_time, tiers")
+            .order("created_at", { ascending: false });
+          const live: Product[] = (raw ?? []).map((row) => ({
+            id: row.id,
+            name: row.name,
+            price: row.price,
+            category: row.category,
+            imageUrl: row.image_url,
+            desc: row.description,
+            rating: row.rating ?? 0,
+            reviews: row.reviews ?? 0,
+            stock: row.stock,
+            sellerId: row.seller_id,
+            sellerName: row.seller_name,
+            moq: row.moq,
+            leadTime: row.lead_time,
+            tiers: row.tiers,
+            isSellerVerified: false,
+          }));
+          setProducts(live);
+        } catch {
+          setProducts([]);
+        }
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
-  }, [supabase]);
+  }, []);
 
   const handleAddToCart = (product: Product) => {
     addToCart({
@@ -463,9 +481,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         p.category.toLowerCase().includes(search.toLowerCase());
       const matchCat = activeCategory === "All Products" || p.category === activeCategory;
       const matchPrice = p.price >= minPrice && p.price <= maxPrice;
-      const matchMoq = (p.moq || 1) <= maxMoq;
-      const matchVerified = !verifiedOnly || p.isSellerVerified;
-      return matchSearch && matchCat && matchPrice && matchMoq && matchVerified;
+      return matchSearch && matchCat && matchPrice;
     })
     .sort((a, b) => {
       if (sortBy === "Price: Low to High") return a.price - b.price;
@@ -474,26 +490,18 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
       return 0;
     });
 
-  const activeFilterCount =
-    (minPrice > 0 ? 1 : 0) +
-    (maxPrice < 1000000 ? 1 : 0) +
-    (maxMoq < 100000 ? 1 : 0) +
-    (verifiedOnly ? 1 : 0) +
-    (activeCategory !== "All Products" ? 1 : 0);
-
   const displayed = limit ? filtered.slice(0, limit) : filtered;
 
   const resetFilters = () => {
     setMinPrice(0);
     setMaxPrice(1000000);
-    setMaxMoq(100000);
-    setVerifiedOnly(false);
     setActiveCategory("All Products");
     setSearch("");
   };
 
   return (
     <div className="w-full overflow-x-hidden">
+      {/* Search + Sort */}
       <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0">
         <div className="flex-1 relative group min-w-0">
           <Search
@@ -512,7 +520,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-              showFilters || activeFilterCount > 0
+              showFilters
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background border-input hover:bg-accent text-muted-foreground"
             }`}
@@ -520,11 +528,6 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             <Filter size={14} className="sm:hidden" />
             <Filter size={16} className="hidden sm:block" />
             <span className="hidden sm:inline">{t("market_filters")}</span>
-            {activeFilterCount > 0 && (
-              <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-[10px] font-extrabold flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
           </button>
           <div className="flex-1 sm:flex-none lg:flex-none relative flex-shrink-0 min-w-0">
             <select
@@ -545,6 +548,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       </div>
 
+      {/* Filters panel */}
       <AnimatePresence>
         {showFilters && (
           <motion.div
@@ -553,19 +557,18 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mb-8"
           >
-            <div className="bg-card p-4 sm:p-6 md:p-8 rounded-2xl border border-border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 items-end shadow-sm">
-              {/* Price range */}
+            <div className="bg-card p-3 sm:p-5 md:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
-                  Price Range ($)
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
+                  Price Range (₦)
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <input
                     type="number"
                     placeholder="Min"
                     value={minPrice || ""}
                     onChange={(e) => setMinPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-background rounded-lg border border-input outline-none text-xs font-bold"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
                   />
                   <span className="opacity-30 font-black">—</span>
                   <input
@@ -573,53 +576,14 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                     placeholder="Max"
                     value={maxPrice === 1000000 ? "" : maxPrice}
                     onChange={(e) => setMaxPrice(Number(e.target.value) || 1000000)}
-                    className="w-full px-3 py-2 bg-background rounded-lg border border-input outline-none text-xs font-bold"
+                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
                   />
                 </div>
               </div>
-
-              {/* Max MOQ Filter */}
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
-                  Max Order Quantity (MOQ)
-                </p>
-                <div className="flex items-center gap-1.5">
-                  {[
-                    { label: "Any", val: 100000 },
-                    { label: "≤50", val: 50 },
-                    { label: "≤100", val: 100 },
-                    { label: "≤500", val: 500 },
-                  ].map((btn) => (
-                    <button
-                      key={btn.label}
-                      onClick={() => setMaxMoq(btn.val)}
-                      className={`px-2.5 py-2 rounded-lg text-xs font-bold border transition-all ${
-                        maxMoq === btn.val
-                          ? "bg-primary text-white border-primary"
-                          : "bg-background border-input hover:bg-accent"
-                      }`}
-                    >
-                      {btn.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Verified Supplier & Reset */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:col-span-2 md:col-span-1">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={verifiedOnly}
-                    onChange={(e) => setVerifiedOnly(e.target.checked)}
-                    className="w-4 h-4 rounded border-input text-primary focus:ring-primary accent-primary"
-                  />
-                  <span className="text-xs font-bold text-foreground">Verified Sellers Only</span>
-                </label>
-
+              <div className="flex justify-end">
                 <button
                   onClick={resetFilters}
-                  className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all whitespace-nowrap"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all"
                 >
                   Reset Filters
                 </button>
@@ -629,8 +593,9 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         )}
       </AnimatePresence>
 
+      {/* Categories */}
       <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 mb-4 sm:mb-6 lg:mb-10 scrollbar-hide snap-x w-full">
-        {categories.map((cat) => (
+        {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
@@ -645,6 +610,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         ))}
       </div>
 
+      {/* Grid */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
           {[...Array(limit || 6)].map((_, i) => (
@@ -656,10 +622,33 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
             <Search size={28} className="text-muted-foreground opacity-30" />
           </div>
-          <h3 className="text-2xl font-black mb-2 tracking-tighter">No Products Listed Yet</h3>
-          <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-8">
-            Check back soon as suppliers list items in PostgreSQL.
-          </p>
+          {products.length === 0 ? (
+            <>
+              <h3 className="text-2xl font-black mb-2 tracking-tighter">No Products Listed Yet</h3>
+              <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-8">
+                Manufacturers can list products from their dashboard. Check back soon.
+              </p>
+              <Link
+                href="/register"
+                className="inline-block px-8 py-3.5 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20"
+              >
+                Become a Supplier
+              </Link>
+            </>
+          ) : (
+            <>
+              <h3 className="text-2xl font-black mb-2 tracking-tighter">No Suppliers Found</h3>
+              <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-8">
+                Adjust your filters or search terms to source specific manufacturers.
+              </p>
+              <button
+                onClick={resetFilters}
+                className="px-8 py-3.5 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20"
+              >
+                Clear All Filters
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden">
@@ -693,6 +682,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       )}
 
+      {/* View all */}
       {limit && filtered.length > limit && (
         <div className="mt-12 sm:mt-16 text-center">
           <Link
@@ -705,6 +695,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </div>
       )}
 
+      {/* Floating Chat Box for B2B Sourcing Inquiry */}
       {activeChat && (
         <FloatingChatBox
           manufacturerId={activeChat.id}
