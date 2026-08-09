@@ -387,71 +387,56 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
     const fetchProducts = async () => {
       try {
         const supabase = createClient();
-        // Fetch products joined with seller verification status
         const { data, error } = await supabase
           .from("products")
           .select(`
-            id, name, price, category, image_url, description,
-            rating, reviews, stock, seller_id, seller_name,
-            moq, lead_time, tiers,
-            users!products_seller_id_fkey ( is_verified )
+            id, title, description, category_id, image_urls,
+            tiered_pricing, min_order_quantity, status,
+            supplier_organization_id, unit_of_measure,
+            product_categories ( name )
           `)
+          .eq("status", "active")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
 
         const live: Product[] = (data ?? []).map((row) => {
-          const seller = Array.isArray(row.users) ? row.users[0] : row.users;
+          const categoryName =
+            (Array.isArray(row.product_categories)
+              ? row.product_categories[0]?.name
+              : (row.product_categories as { name?: string } | null)?.name) ??
+            row.category_id ??
+            "General";
+
+          const tiers: { minQty: number; price: number }[] =
+            Array.isArray(row.tiered_pricing)
+              ? (row.tiered_pricing as { min_qty: number; unit_price: number }[])
+                  .sort((a, b) => a.min_qty - b.min_qty)
+                  .map((t) => ({ minQty: t.min_qty, price: t.unit_price }))
+              : [];
+
+          const basePrice = tiers.length > 0 ? tiers[0].price : 0;
+
           return {
             id: row.id,
-            name: row.name,
-            price: row.price,
-            category: row.category,
-            imageUrl: row.image_url,
-            desc: row.description,
-            rating: row.rating ?? 0,
-            reviews: row.reviews ?? 0,
-            stock: row.stock,
-            sellerId: row.seller_id,
-            sellerName: row.seller_name,
-            moq: row.moq,
-            leadTime: row.lead_time,
-            tiers: row.tiers,
-            isSellerVerified: seller?.is_verified === true,
+            name: row.title,
+            price: basePrice,
+            category: categoryName,
+            imageUrl: Array.isArray(row.image_urls) ? row.image_urls[0] : undefined,
+            desc: row.description ?? "",
+            rating: 0,
+            reviews: 0,
+            sellerId: row.supplier_organization_id ?? "",
+            moq: row.min_order_quantity,
+            tiers,
+            isSellerVerified: false,
           };
         });
 
         setProducts(live);
       } catch (error) {
         console.error("Failed to fetch products:", error);
-        // Fallback: fetch without join in case FK alias differs
-        try {
-          const supabase = createClient();
-          const { data: raw } = await supabase
-            .from("products")
-            .select("id, name, price, category, image_url, description, rating, reviews, stock, seller_id, seller_name, moq, lead_time, tiers")
-            .order("created_at", { ascending: false });
-          const live: Product[] = (raw ?? []).map((row) => ({
-            id: row.id,
-            name: row.name,
-            price: row.price,
-            category: row.category,
-            imageUrl: row.image_url,
-            desc: row.description,
-            rating: row.rating ?? 0,
-            reviews: row.reviews ?? 0,
-            stock: row.stock,
-            sellerId: row.seller_id,
-            sellerName: row.seller_name,
-            moq: row.moq,
-            leadTime: row.lead_time,
-            tiers: row.tiers,
-            isSellerVerified: false,
-          }));
-          setProducts(live);
-        } catch {
-          setProducts([]);
-        }
+        setProducts([]);
       } finally {
         setLoading(false);
       }
