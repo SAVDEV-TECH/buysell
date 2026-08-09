@@ -226,7 +226,7 @@ function MobileProductCard({
             <MessageCircle size={13} />
           </button>
           <div className="flex-1 overflow-hidden rounded-lg">
-            <PayWithPaystack product={product} user={user} />
+            <PayWithPaystack product={product} user={user} compact />
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ function DesktopProductCard({
               Contact
             </button>
             <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
-              <PayWithPaystack product={product} user={user} />
+              <PayWithPaystack product={product} user={user} compact />
             </div>
           </div>
         </div>
