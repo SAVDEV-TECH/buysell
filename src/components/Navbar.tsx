@@ -39,7 +39,14 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background dark:bg-slate-900 border-b border-border dark:border-slate-800">
+    <header className="sticky top-0 z-50 w-full bg-background dark:bg-slate-900 border-b border-border dark:border-slate-800 flex flex-col">
+      {/* Nigeria Beta Announcement Banner */}
+      <div className="w-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 py-2 px-4 text-center border-b border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center gap-2">
+        <span className="text-sm font-bold truncate">
+          🌍 BuySell is currently in Beta for the Nigerian Market. International trade coming soon.
+        </span>
+      </div>
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex h-20 lg:h-16 items-center justify-between">
           <div className="flex items-center">

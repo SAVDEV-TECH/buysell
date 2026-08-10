@@ -71,16 +71,31 @@ export default function CurrencySelector() {
                     key={code}
                     role="option"
                     aria-selected={isActive}
-                    onClick={() => { setCountry(code); setIsOpen(false); }}
+                    disabled={code !== "NG"}
+                    onClick={() => {
+                      if (code === "NG") {
+                        setCountry(code);
+                        setIsOpen(false);
+                      }
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left mb-0.5 ${
                       isActive
                         ? "bg-primary/10 text-primary"
+                        : code !== "NG"
+                        ? "opacity-50 cursor-not-allowed"
                         : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                     }`}
                   >
                     <span className="text-xl leading-none w-7 text-center">{countryFlag(code)}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
+                        {!isActive && code !== "NG" && (
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
+                            Coming Soon
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-muted-foreground font-medium">
                         {cfg.currencySymbol} · {cfg.currencyCode}
                       </p>
@@ -109,16 +124,31 @@ export default function CurrencySelector() {
                     key={code}
                     role="option"
                     aria-selected={isActive}
-                    onClick={() => { setCountry(code); setIsOpen(false); }}
+                    disabled={code !== "NG"}
+                    onClick={() => {
+                      if (code === "NG") {
+                        setCountry(code);
+                        setIsOpen(false);
+                      }
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-left mb-0.5 ${
                       isActive
                         ? "bg-primary/10 text-primary"
+                        : code !== "NG"
+                        ? "opacity-50 cursor-not-allowed"
                         : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                     }`}
                   >
                     <span className="text-xl leading-none w-7 text-center">{countryFlag(code)}</span>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
+                        {!isActive && code !== "NG" && (
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
+                            Coming Soon
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[11px] text-muted-foreground font-medium">
                         {cfg.currencySymbol} · {cfg.currencyCode}
                       </p>

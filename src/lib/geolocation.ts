@@ -183,28 +183,9 @@ export const EXCHANGE_RATES: Record<string, number> = {
 };
 
 export async function detectCountry(): Promise<CountryData> {
-  try {
-    // Try ipapi.co first (free tier, no key required)
-    const response = await fetch("https://ipapi.co/json/", {
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
-
-    if (!response.ok) throw new Error("Primary geolocation failed");
-
-    const data = await response.json();
-    const countryCode = data.country_code?.toUpperCase();
-
-    if (countryCode && COUNTRY_CONFIG[countryCode]) {
-      return COUNTRY_CONFIG[countryCode];
-    }
-
-    // Fallback to region detection
-    const region = data.region || "Unknown";
-    return getDefaultByRegion(region);
-  } catch {
-    // If all geolocation fails, return default (Nigeria - largest market)
-    return COUNTRY_CONFIG.NG;
-  }
+  // BETA PHASE: Hardcode to Nigeria (NG)
+  // We are bypassing IP detection to restrict operations locally before global rollout.
+  return COUNTRY_CONFIG.NG;
 }
 
 function getDefaultByRegion(region: string): CountryData {
