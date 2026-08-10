@@ -237,43 +237,43 @@ export default function AdminCommandCenter() {
     {
       label: "Registered Users",
       value: stats.totalUsers.toLocaleString(),
-      icon: <Users size={20} className="text-blue-400" />,
-      color: "bg-blue-500/10",
+      icon: <Users size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/users",
     },
     {
       label: "Active Products",
       value: stats.totalProducts.toLocaleString(),
-      icon: <Package size={20} className="text-purple-400" />,
-      color: "bg-purple-500/10",
+      icon: <Package size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/products",
     },
     {
       label: "Total Orders",
       value: stats.totalOrders.toLocaleString(),
-      icon: <ShoppingCart size={20} className="text-cyan-400" />,
-      color: "bg-cyan-500/10",
+      icon: <ShoppingCart size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/orders",
     },
     {
       label: "Pending Approvals",
       value: stats.pendingVerifications,
-      icon: <Clock size={20} className="text-amber-400" />,
-      color: "bg-amber-500/10",
+      icon: <Clock size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/verifications",
     },
     {
       label: "Verified Businesses",
       value: stats.verifiedOrgs.toLocaleString(),
-      icon: <ShieldCheck size={20} className="text-emerald-400" />,
-      color: "bg-emerald-500/10",
+      icon: <ShieldCheck size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/verifications",
     },
     {
-      label: "Gross Platform Revenue",
+      label: "Platform Revenue",
       value: `$${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-      icon: <TrendingUp size={20} className="text-green-400" />,
-      color: "bg-green-500/10",
+      icon: <TrendingUp size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
+      color: "bg-slate-800",
       href: "/admin/payouts",
     },
   ];
@@ -285,8 +285,8 @@ export default function AdminCommandCenter() {
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
             Admin Command Center
-            <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Super Admin Server API
+            <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+              Super Admin
             </span>
           </h1>
           <p className="text-slate-400 text-sm mt-1 font-bold">
@@ -307,7 +307,7 @@ export default function AdminCommandCenter() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="p-5 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
         >
           <div className="flex items-center gap-3">
             <Clock size={24} className="text-amber-400 shrink-0" />
@@ -383,14 +383,14 @@ export default function AdminCommandCenter() {
                       <p className="font-bold text-white">{ord.buyer_name}</p>
                       <p className="text-[10px] text-slate-500">Supplier: {ord.supplier_name}</p>
                     </td>
-                    <td className="py-3 font-black text-emerald-400">
+                    <td className="py-3 font-black text-white">
                       ${ord.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
                     <td className="py-3 text-slate-400 uppercase text-[10px] font-bold">
                       {ord.payment_method}
                     </td>
                     <td className="py-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
                         {ord.status}
                       </span>
                     </td>
@@ -445,11 +445,11 @@ export default function AdminCommandCenter() {
                 >
                   <div className="flex-shrink-0">
                     {item.type === "approved" ? (
-                      <CheckCircle2 size={16} className="text-emerald-400" />
+                      <CheckCircle2 size={16} className="text-slate-400" />
                     ) : item.type === "rejected" ? (
-                      <XCircle size={16} className="text-red-400" />
+                      <XCircle size={16} className="text-slate-400" />
                     ) : (
-                      <Clock size={16} className="text-amber-400" />
+                      <Clock size={16} className="text-slate-400" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -483,29 +483,29 @@ export default function AdminCommandCenter() {
                 label: "Review Pending Verifications",
                 desc: `${stats.pendingVerifications} organizations awaiting KYB approval`,
                 href: "/admin/verifications",
-                icon: <ShieldCheck size={18} className="text-amber-400" />,
-                bg: "bg-amber-500/8 hover:bg-amber-500/15 border-amber-500/15",
+                icon: <ShieldCheck size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
+                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
               },
               {
                 label: "Manage All Orders",
                 desc: `${stats.totalOrders} commercial B2B orders logged`,
                 href: "/admin/orders",
-                icon: <ShoppingCart size={18} className="text-cyan-400" />,
-                bg: "bg-cyan-500/8 hover:bg-cyan-500/15 border-cyan-500/15",
+                icon: <ShoppingCart size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
+                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
               },
               {
                 label: "Manage All Users",
                 desc: `${stats.totalUsers} registered accounts on the platform`,
                 href: "/admin/users",
-                icon: <Users size={18} className="text-blue-400" />,
-                bg: "bg-blue-500/8 hover:bg-blue-500/15 border-blue-500/15",
+                icon: <Users size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
+                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
               },
               {
                 label: "Review Marketplace Products",
                 desc: `${stats.totalProducts} live products on the marketplace`,
                 href: "/admin/products",
-                icon: <Package size={18} className="text-purple-400" />,
-                bg: "bg-purple-500/8 hover:bg-purple-500/15 border-purple-500/15",
+                icon: <Package size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
+                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
               },
             ].map((action) => (
               <Link
@@ -535,18 +535,18 @@ export default function AdminCommandCenter() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-900/40 flex flex-col sm:flex-row items-center justify-between gap-4"
+        className="p-5 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
           <div>
-            <p className="text-sm font-black text-emerald-300">All Systems Operational</p>
-            <p className="text-xs text-emerald-600 font-bold">
+            <p className="text-sm font-black text-white">All Systems Operational</p>
+            <p className="text-xs text-slate-400 font-bold">
               Supabase realtime · PostgreSQL · Server API RLS Bypass — all online
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-500">
           <span>DB: ✓ Connected</span>
           <span>Server API: ✓ Active</span>
           <span>RLS Bypass: ✓ Enabled</span>
