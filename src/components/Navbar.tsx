@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import CurrencySelector from "./CurrencySelector";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationPopover from "./NotificationPopover";
+import ThemeToggle from "./ThemeToggle";
 import { BuySellLogo } from "@/components/BuySellLogo";
 
 const Navbar = () => {
@@ -65,6 +66,7 @@ const Navbar = () => {
           </nav>
           
           <div className="flex items-center gap-3 lg:gap-4">
+            <ThemeToggle />
             <LanguageSwitcher />
             <CurrencySelector />
             {user ? (

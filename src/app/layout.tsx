@@ -47,6 +47,7 @@ import CookieConsentBanner from "@/components/CookieConsentBanner";
 import FloatingFeedbackModal from "@/components/FloatingFeedbackModal";
 import UserGuidedTourTooltip from "@/components/UserGuidedTourTooltip";
 import MicrosoftClarity from "@/components/MicrosoftClarity";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -54,26 +55,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full flex flex-col min-h-screen relative`}>
-        <LanguageProvider>
-          <CurrencyProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <CartProvider>
-                  <MainLayoutShell>{children}</MainLayoutShell>
-                  <PwaRegister />
-                  <GoogleOneTap />
-                  <LiveNotificationToast />
-                  <CookieConsentBanner />
-                  <FloatingFeedbackModal />
-                  <UserGuidedTourTooltip />
-                  <MicrosoftClarity />
-                </CartProvider>
-              </NotificationProvider>
-            </AuthProvider>
-          </CurrencyProvider>
-        </LanguageProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <AuthProvider>
+                <NotificationProvider>
+                  <CartProvider>
+                    <MainLayoutShell>{children}</MainLayoutShell>
+                    <PwaRegister />
+                    <GoogleOneTap />
+                    <LiveNotificationToast />
+                    <CookieConsentBanner />
+                    <FloatingFeedbackModal />
+                    <UserGuidedTourTooltip />
+                    <MicrosoftClarity />
+                  </CartProvider>
+                </NotificationProvider>
+              </AuthProvider>
+            </CurrencyProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
