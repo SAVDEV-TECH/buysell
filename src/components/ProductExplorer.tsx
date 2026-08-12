@@ -214,7 +214,7 @@ function MobileProductCard({
           <MoqLeadTimeRows product={product} compact />
         </div>
 
-        <p className="text-xs font-black text-primary tracking-tight mt-0.5">
+        <p className="text-xs font-black text-primary tracking-tight mt-0.5 truncate w-full">
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
@@ -340,7 +340,7 @@ function DesktopProductCard({
 
         {/* Price + actions */}
         <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
-          <p className="text-sm font-black text-foreground tracking-tighter">
+          <p className="text-sm font-black text-foreground tracking-tighter truncate w-full">
             ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}{" "}
             <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
           </p>
@@ -504,7 +504,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             className="w-full pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm"
           />
         </div>
-        <div className="flex gap-2 sm:gap-3 flex-shrink-0">
+        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0 overflow-hidden">
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
