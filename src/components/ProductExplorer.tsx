@@ -503,7 +503,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             placeholder={t("market_search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-w-0 pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm"
+            className="w-full min-w-0 pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-base sm:text-sm"
           />
         </div>
         <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0 overflow-hidden">
@@ -523,7 +523,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-xs sm:text-sm appearance-none truncate"
+              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-base sm:text-sm appearance-none truncate"
             >
               <option value="Newest">{t("market_sort_newest")}</option>
               <option value="Price: Low to High">{t("market_sort_low")}</option>
