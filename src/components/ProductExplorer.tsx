@@ -517,11 +517,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
             <Filter size={16} className="hidden sm:block" />
             <span className="hidden sm:inline">{t("market_filters")}</span>
           </button>
-          <div className="flex-1 sm:flex-none lg:flex-none relative flex-shrink-0 min-w-0">
+          <div className="flex-1 sm:flex-none relative min-w-0 shrink">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-xs sm:text-sm appearance-none whitespace-nowrap"
+              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-xs sm:text-sm appearance-none truncate"
             >
               <option value="Newest">{t("market_sort_newest")}</option>
               <option value="Price: Low to High">{t("market_sort_low")}</option>

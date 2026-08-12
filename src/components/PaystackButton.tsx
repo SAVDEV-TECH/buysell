@@ -103,12 +103,12 @@ export default function PaystackButton({
         {preparing ? (
           <>
             <Loader2 size={12} className="animate-spin shrink-0" />
-            <span className="truncate">Wait</span>
+            <span className="truncate">Securing...</span>
           </>
         ) : (
           <>
             <ShieldCheck size={12} className="shrink-0" />
-            <span className="truncate">Buy</span>
+            <span className="truncate">Escrow Pay</span>
           </>
         )}
       </button>
