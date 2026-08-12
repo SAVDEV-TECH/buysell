@@ -72,10 +72,13 @@ const Navbar = () => {
             </Link>
           </nav>
           
-          <div className="flex items-center gap-3 lg:gap-4">
-            <ThemeToggle />
-            <LanguageSwitcher />
-            <CurrencySelector />
+          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+            <div className="hidden md:flex items-center gap-3 lg:gap-4">
+              <ThemeToggle />
+              <LanguageSwitcher />
+              <CurrencySelector />
+            </div>
+            
             {user ? (
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Notification Bell Icon with Red Dot & Numeric Count */}
@@ -203,7 +206,7 @@ const Navbar = () => {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-border dark:border-slate-800 bg-background dark:bg-slate-900 px-4 pt-2 pb-4 space-y-1 shadow-lg absolute w-full z-40">
+        <div className="md:hidden absolute top-full left-0 w-full border-t border-border dark:border-slate-800 bg-background dark:bg-slate-900 px-4 pt-2 pb-4 space-y-1 shadow-lg z-40">
           <Link href="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-3 rounded-md text-base font-semibold text-slate-700 dark:text-slate-200 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 border-b border-border/50">
             Products
           </Link>
@@ -219,8 +222,17 @@ const Navbar = () => {
             Messages 
             {unreadCount > 0 && <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{unreadCount}</span>}
           </Link>
-          <div className="px-3 py-2 border-b border-border/50">
+          <div className="px-3 py-3 border-b border-border/50 flex items-center justify-between">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Theme</span>
+            <ThemeToggle />
+          </div>
+          <div className="px-3 py-3 border-b border-border/50 flex flex-col gap-2">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Language</span>
             <LanguageSwitcher />
+          </div>
+          <div className="px-3 py-3 border-b border-border/50 flex flex-col gap-2">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Currency & Region</span>
+            <CurrencySelector />
           </div>
           {!user && (
             <div className="pt-4 mt-2 flex flex-col gap-3">
