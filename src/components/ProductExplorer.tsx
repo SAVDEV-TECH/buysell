@@ -140,17 +140,17 @@ function MoqLeadTimeRows({ product, compact = false }: { product: Product; compa
   }
 
   return (
-    <div className={`flex flex-col gap-0.5 ${compact ? "text-[8px]" : "text-[11px]"} text-muted-foreground`}>
+    <div className={`flex flex-col gap-0.5 ${compact ? "text-[8px]" : "text-[11px]"} text-muted-foreground w-full min-w-0`}>
       {hasMoq && (
-        <div className="flex justify-between gap-2">
+        <div className="flex justify-between gap-2 w-full min-w-0">
           <span className="shrink-0">MOQ:</span>
-          <span className="font-semibold text-foreground truncate text-right">{product.moq} units</span>
+          <span className="font-semibold text-foreground truncate text-right min-w-0 flex-1">{product.moq} units</span>
         </div>
       )}
       {hasLead && (
-        <div className="flex justify-between gap-2">
+        <div className="flex justify-between gap-2 w-full min-w-0">
           <span className="shrink-0">Lead time:</span>
-          <span className="font-semibold text-foreground truncate text-right">{product.leadTime}</span>
+          <span className="font-semibold text-foreground truncate text-right min-w-0 flex-1">{product.leadTime}</span>
         </div>
       )}
     </div>
@@ -196,29 +196,31 @@ function MobileProductCard({
       </Link>
 
       {/* Body */}
-      <div className="p-2 flex flex-col gap-1">
-        <div className="flex items-center justify-between gap-1">
-          <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate">
+      <div className="p-2 flex flex-col gap-1 w-full min-w-0">
+        <div className="flex items-center justify-between gap-1 w-full min-w-0">
+          <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate min-w-0 flex-1">
             {product.category}
           </span>
-          {isGold && <GoldSupplierPill compact />}
+          <div className="shrink-0">
+            {isGold && <GoldSupplierPill compact />}
+          </div>
         </div>
 
-        <Link href={`/marketplace/${product.id}`}>
-          <p className="text-[11px] font-bold leading-tight line-clamp-2 text-foreground min-h-[2.2em]">
+        <Link href={`/marketplace/${product.id}`} className="w-full min-w-0 block">
+          <p className="text-[11px] font-bold leading-tight line-clamp-2 text-foreground min-h-[2.2em] w-full min-w-0 break-words">
             {product.name}
           </p>
         </Link>
 
-        <div className="border-t border-border/50 pt-1 mt-0.5">
+        <div className="border-t border-border/50 pt-1 mt-0.5 w-full min-w-0">
           <MoqLeadTimeRows product={product} compact />
         </div>
 
-        <p className="text-xs font-black text-primary tracking-tight mt-0.5 truncate w-full">
+        <p className="text-xs font-black text-primary tracking-tight mt-0.5 truncate w-full min-w-0">
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
-        <div className="flex gap-2 items-stretch mt-1">
+        <div className="flex gap-2 items-stretch mt-1 w-full min-w-0">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
             className="w-11 h-11 bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0"
@@ -226,7 +228,7 @@ function MobileProductCard({
           >
             <MessageCircle size={13} />
           </button>
-          <div className="flex-1 overflow-hidden rounded-lg">
+          <div className="flex-1 overflow-hidden rounded-lg min-w-0">
             <PayWithPaystack product={product} user={user} compact />
           </div>
         </div>
