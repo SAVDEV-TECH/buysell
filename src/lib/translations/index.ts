@@ -50,7 +50,7 @@ export const translations = {
     footer_copyright: "BuySell Platform. All rights reserved.",
 
     // Marketplace
-    market_search: "Search products, categories or wholesalers...",
+    market_search: "Search products or suppliers...",
     market_filters: "Filters",
     market_sort_newest: "Newest",
     market_sort_low: "Price ↑",
@@ -161,7 +161,7 @@ export const translations = {
     footer_copyright: "BuySell Platform. All rights reserved.",
 
     // Marketplace
-    market_search: "Search products, categories or wholesalers...",
+    market_search: "Search products or sellers...",
     market_filters: "Filter Am",
     market_sort_newest: "New First",
     market_sort_low: "Price ↑",
@@ -272,7 +272,7 @@ export const translations = {
     footer_copyright: "منصة BuySell. جميع الحقوق محفوظة.",
 
     // Marketplace
-    market_search: "ابحث عن منتجات أو فئات أو تجار جملة...",
+    market_search: "ابحث عن منتجات أو موردين...",
     market_filters: "فلترة",
     market_sort_newest: "الأحدث",
     market_sort_low: "السعر ↑",
@@ -383,7 +383,7 @@ export const translations = {
     footer_copyright: "BuySell平台。保留所有权利。",
 
     // Marketplace
-    market_search: "搜索产品、类别或批发商...",
+    market_search: "搜索产品或供应商...",
     market_filters: "筛选",
     market_sort_newest: "最新",
     market_sort_low: "价格 ↑",
@@ -494,7 +494,7 @@ export const translations = {
     footer_copyright: "Plateforme BuySell. Tous droits réservés.",
 
     // Marketplace
-    market_search: "Rechercher des produits, catégories ou usines...",
+    market_search: "Rechercher des produits ou fournisseurs...",
     market_filters: "Filtres",
     market_sort_newest: "Plus récents",
     market_sort_low: "Prix ↑",
@@ -565,7 +565,7 @@ export const translations = {
     footer_copyright: "Plataforma BuySell. Todos os direitos reservados.",
 
     // Marketplace
-    market_search: "Buscar produtos, categorias ou fabricantes...",
+    market_search: "Buscar produtos ou fabricantes...",
     market_filters: "Filtros",
     market_sort_newest: "Mais Recentes",
     market_sort_low: "Preço ↑",

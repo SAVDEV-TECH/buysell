@@ -202,7 +202,7 @@ function SoundToggle({ enabled, onToggle }: SoundToggleProps) {
       animate={{ opacity: 1, scale: 1 }}
       onClick={onToggle}
       title={enabled ? "Mute notification sounds" : "Enable notification sounds"}
-      className="fixed bottom-6 left-6 z-[9998] p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-all hover:scale-110 active:scale-95"
+      className="hidden md:flex fixed bottom-6 left-6 z-[9998] p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-all hover:scale-110 active:scale-95"
     >
       {enabled ? <Volume2 size={18} /> : <VolumeX size={18} className="opacity-50" />}
     </motion.button>
