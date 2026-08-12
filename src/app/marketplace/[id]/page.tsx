@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import ReviewSection from "@/components/ReviewSection";
 import { getAllProductImages } from "@/lib/productUtils";
@@ -55,11 +56,13 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
       {/* Main Image Stage */}
       <div className="aspect-square glass rounded-[2.5rem] md:rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center relative bg-muted/20 group">
         {activeImage && !imageErrors[selectedIndex] ? (
-          <img
+          <Image
             src={activeImage}
             alt={`${title} - View ${selectedIndex + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             onError={() => setImageErrors((prev) => ({ ...prev, [selectedIndex]: true }))}
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+            className="object-cover transition-all duration-300 group-hover:scale-105"
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
@@ -126,11 +129,13 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
                 }`}
               >
                 {!hasError ? (
-                  <img
+                  <Image
                     src={img}
                     alt={`Thumbnail ${idx + 1}`}
+                    fill
+                    sizes="80px"
                     onError={() => setImageErrors((prev) => ({ ...prev, [idx]: true }))}
-                    className="w-full h-full object-cover"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -155,10 +160,11 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
           </button>
 
           <div className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center">
-            <img
+            <Image
               src={activeImage}
               alt={title}
-              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+              fill
+              className="object-contain rounded-2xl shadow-2xl"
             />
 
             {images.length > 1 && (

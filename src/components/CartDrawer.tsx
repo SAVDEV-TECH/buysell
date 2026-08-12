@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -74,7 +75,7 @@ export default function CartDrawer() {
                   <div key={item.id} className="flex gap-4 border-b border-borderline/50 pb-6 last:border-0">
                     <div className="w-20 h-20 rounded-xl bg-muted overflow-hidden flex-shrink-0 relative">
                       {item.imageUrl ? (
-                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                        <Image src={item.imageUrl} alt={item.name} fill sizes="80px" className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900">
                           {item.image || <ShoppingBag size={24} className="text-muted-foreground opacity-20" />}

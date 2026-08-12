@@ -10,6 +10,7 @@ import MainLayoutShell from "@/components/MainLayoutShell";
 import PwaRegister from "@/components/PwaRegister";
 import GoogleOneTap from "@/components/GoogleOneTap";
 import LiveNotificationToast from "@/components/LiveNotificationToast";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,7 +57,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full flex flex-col min-h-screen relative`}>
+      <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full flex flex-col min-h-screen relative pb-16 md:pb-0`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
             <CurrencyProvider>
@@ -64,6 +65,7 @@ export default function RootLayout({
                 <NotificationProvider>
                   <CartProvider>
                     <MainLayoutShell>{children}</MainLayoutShell>
+                    <MobileBottomNav />
                     <PwaRegister />
                     <GoogleOneTap />
                     <LiveNotificationToast />

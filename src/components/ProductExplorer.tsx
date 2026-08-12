@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
@@ -180,7 +181,7 @@ function MobileProductCard({
         className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0"
       >
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt={product.name} className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Package size={20} className="text-muted-foreground opacity-20" />
@@ -217,10 +218,10 @@ function MobileProductCard({
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
-        <div className="flex gap-1 items-stretch mt-1">
+        <div className="flex gap-2 items-stretch mt-1">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-            className="px-2 bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0"
+            className="w-11 h-11 bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0"
             title="Chat with Supplier"
           >
             <MessageCircle size={13} />
@@ -260,10 +261,12 @@ function DesktopProductCard({
         </Link>
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
         {product.imageUrl ? (
-          <img
+          <Image
             src={product.imageUrl}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            fill
+            sizes="(max-width: 1024px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-700"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">

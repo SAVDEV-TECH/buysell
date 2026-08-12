@@ -21,6 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
@@ -502,8 +503,9 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex items-center gap-4 group">
                      <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0 flex items-center justify-center border border-borderline">
                         {item.imageUrl ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                          <div className="relative w-full h-full">
+                            <Image src={item.imageUrl} alt={item.name} fill sizes="56px" className="object-cover" />
+                          </div>
                         ) : (
                           <ShoppingBag size={20} className="text-slate-400" />
                         )}
