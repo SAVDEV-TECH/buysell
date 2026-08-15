@@ -11,8 +11,8 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com;
   font-src 'self' https://fonts.gstatic.com data:;
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ipapi.co https://api.ipify.org https://api.paystack.co https://api.flutterwave.com https://accounts.google.com https://api.stripe.com https://js.stripe.com https://api.smileidentity.com https://api.vertofx.com https://openexchangerates.org;
-  frame-src 'self' https://accounts.google.com https://checkout.flutterwave.com https://js.paystack.co https://js.stripe.com https://hooks.stripe.com;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://ipapi.co https://api.ipify.org https://api.paystack.co https://api.flutterwave.com https://accounts.google.com https://api.stripe.com https://js.stripe.com https://api.smileidentity.com https://api.vertofx.com https://openexchangerates.org https://buysell-ai-agent-production.up.railway.app;
+  frame-src 'self' https://accounts.google.com https://checkout.flutterwave.com https://js.paystack.co https://js.stripe.com https://hooks.stripe.com https://buysell-ai-agent-production.up.railway.app;
   worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
