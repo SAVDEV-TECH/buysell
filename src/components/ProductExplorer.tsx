@@ -174,7 +174,7 @@ function MobileProductCard({
   const pricing = getProductPricing(product);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full h-full">
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full h-full min-w-0 max-w-full">
       {/* Image */}
       <Link
         href={`/marketplace/${product.id}`}
@@ -196,7 +196,7 @@ function MobileProductCard({
       </Link>
 
       {/* Body */}
-      <div className="p-2 flex flex-col gap-1 w-full min-w-0">
+      <div className="p-2 flex flex-col gap-1 w-full min-w-0 flex-1 overflow-hidden">
         <div className="flex items-center justify-between gap-1 w-full min-w-0">
           <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate min-w-0 flex-1">
             {product.category}
@@ -220,15 +220,15 @@ function MobileProductCard({
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
-        <div className="flex gap-2 items-stretch mt-1 w-full min-w-0">
+        <div className="grid grid-cols-[40px_1fr] sm:grid-cols-[44px_1fr] gap-1.5 sm:gap-2 items-stretch mt-1 w-full min-w-0 max-w-full">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-            className="w-11 h-11 bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0"
+            className="w-full h-full bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0 min-w-0"
             title="Chat with Supplier"
           >
             <MessageCircle size={13} />
           </button>
-          <div className="flex-1 overflow-hidden rounded-lg min-w-0">
+          <div className="overflow-hidden rounded-lg min-w-0 w-full">
             <PayWithPaystack product={product} user={user} compact />
           </div>
         </div>
@@ -492,8 +492,8 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   return (
     <div className="w-full overflow-x-hidden">
       {/* Search + Sort */}
-      <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0">
-        <div className="flex-1 relative group min-w-0 overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0 max-w-full">
+        <div className="flex-1 relative group min-w-0 max-w-full overflow-hidden">
           <Search
             size={18}
             className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
@@ -641,7 +641,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden min-w-0 max-w-full">
           {displayed.map((product, i) => (
             <motion.div
               key={product.id}
@@ -649,7 +649,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="w-full min-w-0 overflow-hidden"
+              className="w-full min-w-0 max-w-full overflow-hidden"
             >
               <div className="block sm:hidden w-full">
                 <MobileProductCard
