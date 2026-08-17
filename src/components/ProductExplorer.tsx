@@ -231,7 +231,16 @@ function MobileProductCard({
           </button>
 
           <div className="min-w-0 w-full max-w-full overflow-hidden rounded-lg [&>*]:!m-0 [&>*]:!max-w-full [&_button]:!min-w-0 [&_button]:!w-full [&_button]:!max-w-full [&_button]:!truncate">
-            <PayWithPaystack product={product} user={user} compact />
+            <button
+              onClick={() => {
+                onAddToCart(product);
+                window.location.href = "/checkout";
+              }}
+              className="flex h-8 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-slate-900 dark:bg-primary text-[10px] font-black uppercase tracking-wider text-white hover:opacity-90 active:scale-95 transition-all shadow-sm"
+            >
+              <ShieldCheck size={12} className="shrink-0" />
+              <span className="truncate">Buy Now</span>
+            </button>
           </div>
         </div>
       </div>
@@ -364,7 +373,16 @@ function DesktopProductCard({
               Contact
             </button>
             <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
-              <PayWithPaystack product={product} user={user} compact />
+              <button
+                onClick={() => {
+                  onAddToCart(product);
+                  window.location.href = "/checkout";
+                }}
+                className="w-full h-full py-1.5 px-1 bg-slate-900 dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-0.5 sm:gap-1"
+              >
+                <ShieldCheck size={12} className="shrink-0" />
+                <span className="truncate">Buy Now</span>
+              </button>
             </div>
           </div>
         </div>

@@ -476,6 +476,22 @@ export default function CheckoutPage() {
                               }}
                             />
                           )}
+                          {paymentMethod === "stripe" && (
+                            <button
+                              onClick={() => handlePaymentSuccess(`stripe-${Date.now()}`)}
+                              className="w-full py-4 bg-[#635BFF] text-white rounded-2xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#635BFF]/20 flex items-center justify-center gap-3"
+                            >
+                              Pay with Stripe (Simulated)
+                            </button>
+                          )}
+                          {paymentMethod === "verto_fx" && (
+                            <button
+                              onClick={() => handlePaymentSuccess(`verto-${Date.now()}`)}
+                              className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-emerald-600/20 flex items-center justify-center gap-3"
+                            >
+                              Pay with VertoFX Wire (Simulated)
+                            </button>
+                          )}
                        </div>
 
                        <button 
