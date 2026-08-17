@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MessageSquare, Menu, X, LayoutDashboard, ShoppingBag, Settings, LogOut, ChevronDown } from "lucide-react";
+import { Search, MessageSquare, Menu, X, LayoutDashboard, ShoppingBag, Settings, LogOut, ChevronDown, ShieldCheck } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -13,7 +13,7 @@ import ThemeToggle from "./ThemeToggle";
 import { BuySellLogo } from "@/components/BuySellLogo";
 
 const Navbar = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, role } = useAuth();
   const { unreadCount } = useNotifications();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -139,6 +139,17 @@ const Navbar = () => {
                         <LayoutDashboard size={16} />
                         <span>Go to Dashboard</span>
                       </Link>
+
+                      {(role === "admin" || role === "super_admin") && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors mb-1 shadow-sm"
+                        >
+                          <ShieldCheck size={16} />
+                          <span>Super Admin</span>
+                        </Link>
+                      )}
 
                       <Link
                         href="/dashboard/orders"

@@ -45,7 +45,7 @@ export default function DashboardLayout({
     router.push("/");
   };
 
-  const navItems = [
+  const baseNavItems = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag },
     { name: "Quick Order", href: "/dashboard/quick-order", icon: Layers },
@@ -56,6 +56,13 @@ export default function DashboardLayout({
     { name: "Analytics", href: "/dashboard/analytics", icon: PieChart },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
+
+  const adminNavItems = (role === "admin" || role === "super_admin") ? [
+    { name: "Super Admin", href: "/admin", icon: ShieldCheck },
+    { name: "Escrow Ledger", href: "/admin/escrow-ledger", icon: Layers },
+  ] : [];
+
+  const navItems = [...baseNavItems, ...adminNavItems];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
