@@ -608,7 +608,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 w-full min-w-0">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 w-full min-w-0">
           {[...Array(limit || 6)].map((_, i) => (
             <ProductSkeleton key={i} />
           ))}
@@ -647,7 +647,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full overflow-hidden min-w-0 max-w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full overflow-hidden min-w-0 max-w-full">
           {displayed.map((product, i) => (
             <motion.div
               key={product.id}
