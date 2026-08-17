@@ -137,3 +137,24 @@
   @apply bg-card text-card-foreground border border-border rounded-lg shadow-sm;
 }
 
+.mobile-product-grid,
+.mobile-product-grid > *,
+.mobile-product-card {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.mobile-product-card img,
+.mobile-product-card a,
+.mobile-product-card button,
+.mobile-product-card input,
+.mobile-product-card select {
+  max-width: 100%;
+}
+
+@media (max-width: 639px) {
+  .mobile-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

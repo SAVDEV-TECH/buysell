@@ -156,11 +156,6 @@ function MoqLeadTimeRows({ product, compact = false }: { product: Product; compa
     </div>
   );
 }
-
-// ─────────────────────────────────────────────────────────────
-// MOBILE CARD  (shown below sm breakpoint)
-// Designed for a 2-col grid. Readable at small width — no sub-8px text.
-// ─────────────────────────────────────────────────────────────
 function MobileProductCard({
   product,
   user,
@@ -174,17 +169,17 @@ function MobileProductCard({
   const pricing = getProductPricing(product);
 
   return (
-    <article className="mobile-product-card flex min-w-0 max-w-full flex-col overflow-hidden rounded-xl border border-border bg-card box-border">
+    <article className="mobile-product-card box-border flex h-full min-w-0 w-full max-w-full flex-col overflow-hidden rounded-xl border border-border bg-card">
       <Link
         href={`/marketplace/${product.id}`}
-        className="relative block aspect-square min-w-0 w-full overflow-hidden bg-muted/40 dark:bg-slate-900"
+        className="relative block aspect-square min-w-0 w-full max-w-full shrink-0 overflow-hidden bg-muted/40 dark:bg-slate-900"
       >
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.name}
             fill
-            sizes="(max-width: 419px) 100vw, 50vw"
+            sizes="50vw"
             className="max-w-full object-cover"
           />
         ) : (
@@ -193,26 +188,26 @@ function MobileProductCard({
           </div>
         )}
 
-        <div className="absolute left-1.5 top-1.5">
+        <div className="absolute left-1.5 top-1.5 z-10">
           <RatingBadge rating={product.rating} reviews={product.reviews} compact />
         </div>
-        <div className="absolute right-1.5 top-1.5">
+        <div className="absolute right-1.5 top-1.5 z-10">
           <VerifiedBadge showText={false} />
         </div>
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2">
-        <div className="flex min-w-0 w-full items-center justify-between gap-1">
+      <div className="flex min-w-0 w-full max-w-full flex-1 flex-col gap-1 overflow-hidden p-2">
+        <div className="flex min-w-0 w-full max-w-full items-center justify-between gap-1 overflow-hidden">
           <span className="min-w-0 flex-1 truncate text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
             {product.category}
           </span>
-          <span className="min-w-0 max-w-[48%] shrink truncate">
+          <span className="min-w-0 max-w-[45%] shrink truncate">
             {isGold && <GoldSupplierPill compact />}
           </span>
         </div>
 
-        <Link href={`/marketplace/${product.id}`} className="block min-w-0 w-full">
-          <p className="line-clamp-2 min-h-[2.2em] w-full min-w-0 text-[11px] font-bold leading-tight text-foreground [overflow-wrap:anywhere]">
+        <Link href={`/marketplace/${product.id}`} className="block min-w-0 w-full max-w-full">
+          <p className="line-clamp-2 min-h-[2.2em] min-w-0 w-full max-w-full break-words text-[11px] font-bold leading-tight text-foreground">
             {product.name}
           </p>
         </Link>
@@ -221,20 +216,21 @@ function MobileProductCard({
           <MoqLeadTimeRows product={product} compact />
         </div>
 
-        <p className="mt-0.5 w-full min-w-0 truncate text-[11px] font-black tracking-tight text-primary">
+        <p className="mt-0.5 min-w-0 w-full max-w-full truncate text-[11px] font-black tracking-tight text-primary">
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
-        <div className="mt-1 grid min-w-0 w-full max-w-full grid-cols-[32px_minmax(0,1fr)] items-stretch gap-1.5">
+        <div className="mt-1 grid min-w-0 w-full max-w-full grid-cols-[28px_minmax(0,1fr)] gap-1.5">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-            className="flex h-8 min-w-0 w-full shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-primary hover:bg-accent"
+            className="flex h-8 min-w-0 w-full items-center justify-center overflow-hidden rounded-lg border border-border bg-muted text-primary hover:bg-accent"
             title="Chat with Supplier"
             aria-label="Chat with Supplier"
           >
             <MessageCircle size={13} />
           </button>
-          <div className="min-w-0 w-full max-w-full overflow-hidden rounded-lg [&_*]:max-w-full [&_button]:min-w-0 [&_button]:w-full [&_button]:truncate">
+
+          <div className="min-w-0 w-full max-w-full overflow-hidden rounded-lg [&>*]:!m-0 [&>*]:!max-w-full [&_button]:!min-w-0 [&_button]:!w-full [&_button]:!max-w-full [&_button]:!truncate">
             <PayWithPaystack product={product} user={user} compact />
           </div>
         </div>
@@ -496,7 +492,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   };
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full min-w-0 max-w-full overflow-x-clip">
       {/* Search + Sort */}
       <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0 max-w-full">
         <div className="flex-1 relative group min-w-0 max-w-full overflow-hidden">
@@ -608,7 +604,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 w-full min-w-0">
+        <div className="mobile-product-grid grid w-full min-w-0 max-w-full grid-cols-[repeat(2,minmax(0,1fr))] gap-2 overflow-x-clip sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
           {[...Array(limit || 6)].map((_, i) => (
             <ProductSkeleton key={i} />
           ))}
@@ -647,7 +643,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full overflow-hidden min-w-0 max-w-full">
+        <div className="mobile-product-grid grid w-full min-w-0 max-w-full grid-cols-[repeat(2,minmax(0,1fr))] gap-2 overflow-x-clip sm:gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6">
           {displayed.map((product, i) => (
             <motion.div
               key={product.id}
@@ -655,7 +651,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.04 }}
-              className="w-full min-w-0 max-w-full overflow-hidden"
+              className="min-w-0 w-full max-w-full overflow-hidden"
             >
               <div className="block sm:hidden w-full">
                 <MobileProductCard
