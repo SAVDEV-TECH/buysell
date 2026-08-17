@@ -234,12 +234,12 @@ function MobileProductCard({
           >
             <MessageCircle size={13} />
           </button>
-          <div className="overflow-hidden rounded-lg min-w-0 w-full">
+          <div className="min-w-0 w-full max-w-full overflow-hidden rounded-lg [&_*]:max-w-full [&_button]:min-w-0 [&_button]:w-full [&_button]:truncate">
             <PayWithPaystack product={product} user={user} compact />
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
