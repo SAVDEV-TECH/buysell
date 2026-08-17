@@ -98,17 +98,17 @@ export default function PaystackButton({
       <button
         onClick={handleClick}
         disabled={preparing}
-        className="w-full h-full py-1.5 px-1.5 sm:px-2.5 bg-slate-900 dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1 disabled:opacity-60 overflow-hidden min-w-0"
+        className="w-full h-full py-1.5 px-1 bg-slate-900 dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-0.5 sm:gap-1 disabled:opacity-60 overflow-hidden min-w-0"
       >
         {preparing ? (
           <>
             <Loader2 size={12} className="animate-spin shrink-0" />
-            <span className="truncate min-w-0">Securing...</span>
+            <span className="truncate min-w-0 flex-1 text-left">Securing</span>
           </>
         ) : (
           <>
             <ShieldCheck size={12} className="shrink-0" />
-            <span className="truncate min-w-0">Escrow Pay</span>
+            <span className="truncate min-w-0 flex-1 text-left">Escrow</span>
           </>
         )}
       </button>
