@@ -109,11 +109,16 @@ export default function GoogleOneTap() {
             role: "buyer_admin",
             is_email_verified: true,
           });
-          routerRef.current.push("/onboarding/business");
-          return;
         }
 
-        routerRef.current.push("/dashboard");
+        // Only redirect to dashboard if the user was explicitly on an auth page.
+        // Otherwise, allow them to continue browsing exactly where they were.
+        const currentPath = window.location.pathname;
+        if (currentPath === "/login" || currentPath === "/register") {
+          routerRef.current.push("/dashboard");
+        } else {
+          routerRef.current.refresh();
+        }
       } catch (err) {
         console.error("[GoogleOneTap] Unexpected error:", err);
       }
