@@ -174,57 +174,63 @@ function MobileProductCard({
   const pricing = getProductPricing(product);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full h-full min-w-0 max-w-full">
-      {/* Image */}
+    <article className="mobile-product-card flex min-w-0 max-w-full flex-col overflow-hidden rounded-xl border border-border bg-card box-border">
       <Link
         href={`/marketplace/${product.id}`}
-        className="block relative aspect-square w-full bg-muted/40 dark:bg-slate-900 overflow-hidden flex-shrink-0"
+        className="relative block aspect-square min-w-0 w-full overflow-hidden bg-muted/40 dark:bg-slate-900"
       >
         {product.imageUrl ? (
-          <Image src={product.imageUrl} alt={product.name} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 419px) 100vw, 50vw"
+            className="max-w-full object-cover"
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Package size={20} className="text-muted-foreground opacity-20" />
           </div>
         )}
-        <div className="absolute top-1.5 left-1.5">
+
+        <div className="absolute left-1.5 top-1.5">
           <RatingBadge rating={product.rating} reviews={product.reviews} compact />
         </div>
-        <div className="absolute top-1.5 right-1.5">
+        <div className="absolute right-1.5 top-1.5">
           <VerifiedBadge showText={false} />
         </div>
       </Link>
 
-      {/* Body */}
-      <div className="p-2 flex flex-col gap-1 w-full min-w-0 flex-1 overflow-hidden">
-        <div className="flex items-center justify-between gap-1 w-full min-w-0">
-          <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground truncate min-w-0 flex-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1 overflow-hidden p-2">
+        <div className="flex min-w-0 w-full items-center justify-between gap-1">
+          <span className="min-w-0 flex-1 truncate text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
             {product.category}
           </span>
-          <div className="shrink-0">
+          <span className="min-w-0 max-w-[48%] shrink truncate">
             {isGold && <GoldSupplierPill compact />}
-          </div>
+          </span>
         </div>
 
-        <Link href={`/marketplace/${product.id}`} className="w-full min-w-0 block">
-          <p className="text-[11px] font-bold leading-tight line-clamp-2 text-foreground min-h-[2.2em] w-full min-w-0 break-words">
+        <Link href={`/marketplace/${product.id}`} className="block min-w-0 w-full">
+          <p className="line-clamp-2 min-h-[2.2em] w-full min-w-0 text-[11px] font-bold leading-tight text-foreground [overflow-wrap:anywhere]">
             {product.name}
           </p>
         </Link>
 
-        <div className="border-t border-border/50 pt-1 mt-0.5 w-full min-w-0">
+        <div className="mt-0.5 min-w-0 w-full border-t border-border/50 pt-1">
           <MoqLeadTimeRows product={product} compact />
         </div>
 
-        <p className="text-xs font-black text-primary tracking-tight mt-0.5 truncate w-full min-w-0">
+        <p className="mt-0.5 w-full min-w-0 truncate text-[11px] font-black tracking-tight text-primary">
           ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
         </p>
 
-        <div className="grid grid-cols-[40px_1fr] sm:grid-cols-[44px_1fr] gap-1.5 sm:gap-2 items-stretch mt-1 w-full min-w-0 max-w-full">
+        <div className="mt-1 grid min-w-0 w-full max-w-full grid-cols-[32px_minmax(0,1fr)] items-stretch gap-1.5">
           <button
             onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-            className="w-full h-full bg-muted hover:bg-accent text-primary rounded-lg border border-border flex items-center justify-center shrink-0 min-w-0"
+            className="flex h-8 min-w-0 w-full shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-primary hover:bg-accent"
             title="Chat with Supplier"
+            aria-label="Chat with Supplier"
           >
             <MessageCircle size={13} />
           </button>
@@ -602,7 +608,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 w-full min-w-0">
           {[...Array(limit || 6)].map((_, i) => (
             <ProductSkeleton key={i} />
           ))}
@@ -641,7 +647,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 w-full overflow-hidden min-w-0 max-w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full overflow-hidden min-w-0 max-w-full">
           {displayed.map((product, i) => (
             <motion.div
               key={product.id}
