@@ -32,9 +32,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden w-full" suppressHydrationWarning>
+    <div className="flex flex-col gap-4 sm:gap-8 pb-20 overflow-x-hidden w-full max-w-[100vw]" suppressHydrationWarning>
       {/* Hero Section */}
-      <section className="relative pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden">
+      <section className="relative pt-16 sm:pt-24 pb-8 sm:pb-12 overflow-hidden w-full max-w-[100vw]">
         <div className="absolute inset-0 z-0 opacity-10">
            <div className="absolute top-1/4 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-primary rounded-full blur-[80px] sm:blur-[120px] animate-blob" />
            <div className="absolute top-1/3 right-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-secondary rounded-full blur-[80px] sm:blur-[120px] animate-blob animation-delay-2000" />

@@ -57,7 +57,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full flex flex-col min-h-screen relative pb-16 md:pb-0`}>
+      <body className={`${inter.variable} font-sans antialiased overflow-x-hidden w-full max-w-[100vw] flex flex-col min-h-screen relative pb-16 md:pb-0`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
             <CurrencyProvider>
