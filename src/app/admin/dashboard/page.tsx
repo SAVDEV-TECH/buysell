@@ -18,6 +18,7 @@ import {
   Activity,
   DollarSign,
   Building2,
+  Lock,
 } from "lucide-react";
 import BuySellLoader from "@/components/BuySellLoader";
 
@@ -28,6 +29,7 @@ interface PlatformStats {
   pendingVerifications: number;
   verifiedOrgs: number;
   totalRevenue: number;
+  escrowBalance?: number;
   recentActivity: RecentAction[];
   recentOrders: RecentOrder[];
 }
@@ -99,6 +101,7 @@ export default function AdminCommandCenter() {
     pendingVerifications: 0,
     verifiedOrgs: 0,
     totalRevenue: 0,
+    escrowBalance: 0,
     recentActivity: [],
     recentOrders: [],
   });
@@ -214,6 +217,7 @@ export default function AdminCommandCenter() {
           pendingVerifications: pendingCount,
           verifiedOrgs: verifiedCount,
           totalRevenue,
+          escrowBalance: 0,
           recentActivity: activity,
           recentOrders: formattedOrders,
         });
@@ -275,6 +279,13 @@ export default function AdminCommandCenter() {
       icon: <TrendingUp size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
       color: "bg-slate-800",
       href: "/admin/payouts",
+    },
+    {
+      label: "Escrow Balance",
+      value: `$${(stats.escrowBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      icon: <Lock size={20} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />,
+      color: "bg-slate-800",
+      href: "/admin/escrow-ledger",
     },
   ];
 

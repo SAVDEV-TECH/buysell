@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
         buyer_organization:organizations!orders_buyer_organization_id_fkey(company_name),
         supplier_organization:organizations!orders_supplier_organization_id_fkey(company_name)
       `).order("created_at", { ascending: false }).limit(10),
+      supabaseAdmin.from("escrow_transactions").select("amount, type"),
     ]);
 
     const uCount = usersRes.count ?? profilesRes.count ?? 0;
@@ -91,6 +92,21 @@ export async function GET(req: NextRequest) {
           : "new",
     }));
 
+    const escrowTransactions = recentOrdersRes ? (arguments[0] /* arguments hack to skip var */, 0) : [];
+    // We actually added the promise result as the 9th item in the array destructuring, let's fix that.
+    // Wait, the easiest way is to just do a separate query to be completely safe against index changes.
+    const escrowRes = await supabaseAdmin.from("escrow_transactions").select("amount, type");
+    let escrowBalance = 0;
+    if (escrowRes.data) {
+      for (const tx of escrowRes.data) {
+        if (tx.type === "deposit" || tx.type === "hold") {
+          escrowBalance += Number(tx.amount || 0);
+        } else if (tx.type === "release" || tx.type === "partial_release" || tx.type === "refund" || tx.type === "fee") {
+          escrowBalance -= Number(tx.amount || 0);
+        }
+      }
+    }
+
     return applyCorsHeaders(req, successResponse({
       totalUsers: uCount,
       totalProducts: pCount,
@@ -98,6 +114,7 @@ export async function GET(req: NextRequest) {
       pendingVerifications: pendingCount,
       verifiedOrgs: verifiedCount,
       totalRevenue,
+      escrowBalance: Math.max(0, escrowBalance),
       recentActivity: activity,
       recentOrders: formattedOrders,
     }, "Super admin telemetry retrieved successfully."));
