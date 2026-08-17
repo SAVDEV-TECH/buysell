@@ -2,8 +2,8 @@ import ProductExplorer from "@/components/ProductExplorer";
 
 export default function MarketplacePage() {
   return (
-    <div className="w-full overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    <div className="w-full min-w-0 max-w-full overflow-x-clip">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12 w-full min-w-0 max-w-full">
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter">
             Global <span className="gradient-text">Marketplace</span>
