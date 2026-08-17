@@ -34,6 +34,7 @@ interface Product {
   min_order_quantity: number;
   tiered_pricing?: Array<{ min_qty: number; unit_price: number }>;
   image_urls?: string[];
+  supplier_organization_id?: string;
 }
 
 interface QuickOrderRow {
@@ -75,7 +76,7 @@ export default function QuickOrderPage() {
       try {
         const { data } = await supabase
           .from("products")
-          .select("id, title, hs_code, unit_of_measure, min_order_quantity, tiered_pricing, image_urls")
+          .select("id, title, hs_code, unit_of_measure, min_order_quantity, tiered_pricing, image_urls, supplier_organization_id")
           .eq("status", "active");
 
         setProducts((data as Product[]) || []);
@@ -248,6 +249,8 @@ export default function QuickOrderPage() {
             price: r.unitPrice,
             imageUrl: r.matchedProduct.image_urls?.[0] || "",
             moq: r.matchedProduct.min_order_quantity,
+            sellerId: r.matchedProduct.supplier_organization_id,
+            manufacturerId: r.matchedProduct.supplier_organization_id,
           },
           r.quantity
         );

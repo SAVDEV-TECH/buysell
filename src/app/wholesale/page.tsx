@@ -40,16 +40,18 @@ export default function WholesaleDirectoryPage() {
   useEffect(() => {
     const fetchWholesaleProducts = async () => {
       try {
-        const { data, error } = await supabase.from("products").select("*").limit(50);
+        const { data, error } = await supabase.from("products").select("*, product_categories(name)").limit(50);
         if (error) throw error;
 
         const fetched = (data || []).map((p: any) => ({
           id: p.id,
           name: p.title,
           price: p.tiered_pricing?.[0]?.unit_price || 10,
-          category: "Industrial",
+          category: p.product_categories?.name || "Industrial",
           description: p.description || "",
-          sellerName: "Supplier Node",
+          sellerName: "Verified Supplier",
+          sellerId: p.supplier_organization_id,
+          manufacturerId: p.supplier_organization_id,
         }));
 
         setProducts(fetched);
@@ -149,7 +151,9 @@ export default function WholesaleDirectoryPage() {
                            price: product.price,
                            category: product.category,
                            imageUrl: product.imageUrl,
-                           desc: product.description
+                           desc: product.description,
+                           sellerId: product.sellerId,
+                           manufacturerId: product.manufacturerId
                          })}
                          className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer"
                        >
