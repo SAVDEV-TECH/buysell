@@ -98,97 +98,97 @@ export default function ManufacturerProfile({ id }: { id: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-secondary/20 pb-24">
-      <div className="h-48 md:h-64 bg-slate-800 w-full relative overflow-hidden">
+    <div className="min-h-screen bg-background text-foreground pb-24">
+      <div className="h-48 md:h-64 bg-slate-950 w-full relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl -mt-16 md:-mt-24 relative z-10">
-        <div className="solid-card p-6 md:p-8 mb-8 flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-          <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-xl shadow-md border flex items-center justify-center text-4xl font-black text-primary shrink-0">
+        <div className="bg-card rounded-2xl border border-border p-6 md:p-8 mb-8 flex flex-col md:flex-row gap-6 md:gap-8 items-start shadow-sm">
+          <div className="w-20 h-20 md:w-28 md:h-28 bg-primary/10 rounded-2xl border border-primary/20 flex items-center justify-center text-3xl md:text-4xl font-bold text-primary shrink-0">
             {manufacturer?.name?.charAt(0) || "M"}
           </div>
           
           <div className="flex-1">
-            <Link href="/manufacturers" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4 transition-colors">
-              <ArrowLeft size={16} className="mr-1" /> Back to Directory
+            <Link href="/manufacturers" className="inline-flex items-center text-xs font-bold text-muted-foreground hover:text-primary mb-3 transition-colors">
+              <ArrowLeft size={14} className="mr-1" /> Back to Directory
             </Link>
             
-            <h1 className="text-3xl md:text-4xl font-extrabold text-foreground flex items-center gap-3 mb-3">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2.5 mb-2">
               {manufacturer.name}
               {manufacturer.isVerified && <VerifiedBadge />}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
+            <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mb-5">
               <div className="flex items-center gap-1.5">
-                <MapPin size={16} className="text-primary/70" />
+                <MapPin size={14} className="text-primary" />
                 <span>{manufacturer.location}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Calendar size={16} className="text-primary/70" />
+                <Calendar size={14} className="text-primary" />
                 <span>Est. {manufacturer.yearEstablished}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Users size={16} className="text-primary/70" />
+                <Users size={14} className="text-primary" />
                 <span>{manufacturer.employees} Employees</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:flex md:flex-row gap-3 border-t border-border pt-6 flex-wrap">
+            <div className="grid grid-cols-1 min-[400px]:grid-cols-2 md:flex md:flex-row gap-2.5 border-t border-border pt-4 flex-wrap">
               <button 
                 onClick={() => setIsChatOpen(true)} 
-                className="flex-1 sm:flex-none bg-[#0f172a] text-white h-12 px-8 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-[#0f172a]/90 transition-all shadow-sm"
+                className="flex-1 sm:flex-none bg-primary text-white h-10 px-6 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-sm"
               >
-                <MessageSquare size={18} /> Message Supplier
+                <MessageSquare size={16} /> Message Supplier
               </button>
               <button 
                 onClick={() => handleRequestQuote()}
-                className="flex-1 sm:flex-none border border-input bg-background hover:bg-accent hover:text-accent-foreground h-12 px-8 rounded-lg font-bold flex items-center justify-center gap-2 transition-all"
+                className="flex-1 sm:flex-none border border-border bg-card hover:bg-muted text-foreground h-10 px-6 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
               >
-                <Star size={18} className="text-amber-500" /> Request Custom Quote
+                <Star size={16} className="text-amber-500" /> Request Custom Quote
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-8 border-b border-border mb-8">
+        <div className="flex gap-6 border-b border-border mb-6">
           <button 
             onClick={() => setActiveTab("catalog")}
-            className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === "catalog" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`pb-3 text-xs font-bold border-b-2 transition-colors ${activeTab === "catalog" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             Product Catalog
           </button>
           <button 
             onClick={() => setActiveTab("about")}
-            className={`pb-4 text-sm font-bold border-b-2 transition-colors ${activeTab === "about" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            className={`pb-3 text-xs font-bold border-b-2 transition-colors ${activeTab === "about" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             About Company
           </button>
         </div>
 
         {activeTab === "catalog" && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.length > 0 ? products.map(product => (
-              <div key={product.id} className="solid-card overflow-hidden group hover:shadow-md transition-all flex flex-col">
+              <div key={product.id} className="bg-card rounded-2xl border border-border overflow-hidden group hover:shadow-md transition-all flex flex-col">
                 <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
                   <ProductCardImage product={product} />
                 </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <h3 className="font-bold text-sm mb-2 line-clamp-2">{product.title}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">HS Code: {product.hs_code || "N/A"}</p>
-                    <div className="mt-auto flex justify-between items-end pt-3 border-t border-border">
-                      <button 
-                        onClick={() => handleRequestQuote(product)}
-                        className="text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-2 rounded-xl transition-all font-bold text-xs flex items-center gap-1.5"
-                      >
-                        <MessageSquare size={16} /> Request Quote
-                      </button>
-                    </div>
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-bold text-xs mb-1.5 line-clamp-2 text-foreground">{product.title}</h3>
+                  <p className="text-[11px] text-muted-foreground mb-2">HS Code: {product.hs_code || "N/A"}</p>
+                  <div className="mt-auto flex justify-between items-end pt-2.5 border-t border-border">
+                    <button 
+                      onClick={() => handleRequestQuote(product)}
+                      className="text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 p-1.5 rounded-lg transition-all font-bold text-xs flex items-center gap-1"
+                    >
+                      <MessageSquare size={14} /> Request Quote
+                    </button>
                   </div>
                 </div>
+              </div>
             )) : (
-              <div className="col-span-full py-20 text-center glass rounded-3xl border border-dashed border-borderline">
-                <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">This manufacturer hasn't uploaded a catalog yet.</p>
+              <div className="col-span-full py-16 text-center bg-card rounded-2xl border border-dashed border-border">
+                <p className="text-muted-foreground font-bold uppercase tracking-wider text-xs">This manufacturer hasn't uploaded a catalog yet.</p>
               </div>
             )}
           </div>

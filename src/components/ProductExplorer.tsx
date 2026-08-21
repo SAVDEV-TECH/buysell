@@ -175,7 +175,7 @@ function MobileProductCard({
     <article className="mobile-product-card box-border flex h-full min-w-0 w-full max-w-full flex-col overflow-hidden rounded-xl border border-border bg-card">
       <Link
         href={`/marketplace/${product.id}`}
-        className="relative block aspect-square min-w-0 w-full max-w-full shrink-0 overflow-hidden bg-muted/40 dark:bg-slate-900"
+        className="relative block aspect-square min-w-0 w-full max-w-full shrink-0 overflow-hidden bg-muted/40"
       >
         {product.imageUrl ? (
           <Image
@@ -239,7 +239,7 @@ function MobileProductCard({
                 onAddToCart(product);
                 window.location.href = "/checkout";
               }}
-              className="flex h-8 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-slate-900 dark:bg-primary text-[10px] font-black uppercase tracking-wider text-white hover:opacity-90 active:scale-95 transition-all shadow-sm"
+              className="flex h-8 w-full items-center justify-center gap-1 overflow-hidden rounded-lg bg-primary text-[10px] font-bold uppercase tracking-wider text-white hover:bg-primary/90 active:scale-95 transition-all shadow-sm"
             >
               <ShieldCheck size={12} className="shrink-0" />
               <span className="truncate">Buy Now</span>
@@ -271,7 +271,7 @@ function DesktopProductCard({
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card w-full group hover:shadow-lg transition-all duration-300">
       {/* Image */}
-      <div className="relative aspect-[4/3] bg-muted/30 dark:bg-slate-900 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-muted/30 overflow-hidden">
         <Link href={`/marketplace/${product.id}`} className="absolute inset-0 z-10">
           <span className="sr-only">View product</span>
         </Link>
@@ -292,7 +292,7 @@ function DesktopProductCard({
             />
           </div>
         )}
-        <button className="absolute top-2 right-2 p-1.5 bg-white/70 dark:bg-black/60 backdrop-blur-sm rounded-full hover:text-red-500 transition-all z-20 shadow">
+        <button className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-sm rounded-full hover:text-red-500 transition-all z-20 shadow">
           <Heart size={13} />
         </button>
         {/* Verified is the identity/trust signal — anchored to the image, on its own */}
@@ -305,7 +305,7 @@ function DesktopProductCard({
       <div className="p-3 md:p-4 flex-1 flex flex-col gap-2">
         {/* Category + Rating */}
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground italic truncate">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
             {product.category}
           </span>
           <RatingBadge rating={product.rating} reviews={product.reviews} />
@@ -314,7 +314,7 @@ function DesktopProductCard({
         {/* Seller Info — Gold Supplier sits here as a merchandising tag, not on the image */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <Link href={`/manufacturers/${product.sellerId}`} className="flex items-center gap-1 group/seller min-w-0">
-            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-black uppercase text-primary border border-primary/10 shrink-0">
+            <div className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] font-bold uppercase text-primary border border-primary/10 shrink-0">
               {product.sellerName ? product.sellerName.charAt(0) : "S"}
             </div>
             <span className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground group-hover/seller:text-primary transition-colors truncate">
@@ -331,14 +331,14 @@ function DesktopProductCard({
 
         {/* Name */}
         <Link href={`/marketplace/${product.id}`}>
-          <h3 className="text-sm md:text-[14px] font-black tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
+          <h3 className="text-sm md:text-[14px] font-bold tracking-tight leading-snug line-clamp-2 hover:text-primary transition-colors">
             {product.name}
           </h3>
         </Link>
 
         {/* Tiered pricing — collapses to fewer columns if tiers are de-duped */}
         <div
-          className="grid gap-1 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl text-center text-[9px] border border-border/50 my-1 font-medium"
+          className="grid gap-1 bg-muted p-2 rounded-xl text-center text-[9px] border border-border/50 my-1 font-medium"
           style={{ gridTemplateColumns: `repeat(${pricing.tiers.length}, minmax(0, 1fr))` }}
         >
           {pricing.tiers.map((t, idx) => (
@@ -356,37 +356,30 @@ function DesktopProductCard({
 
         {/* Price + actions */}
         <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
-          <p className="text-sm font-black text-foreground tracking-tighter truncate w-full">
+          <p className="text-sm font-bold text-foreground tracking-tight truncate w-full">
             ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}{" "}
-            <span className="text-[10px] text-muted-foreground font-normal font-sans">/ unit</span>
+            <span className="text-[10px] font-normal text-muted-foreground">/ piece</span>
           </p>
-          <div className="flex gap-1 items-stretch">
-            <button
-              onClick={() => onAddToCart(product)}
-              className="w-8.5 h-8.5 shrink-0 bg-muted/50 dark:bg-slate-800 text-primary rounded-lg hover:bg-accent transition-all flex items-center justify-center border border-border"
-              title="Add to PO"
-            >
-              <Plus size={14} />
-            </button>
+
+          <div className="flex items-center gap-1.5 w-full">
             <button
               onClick={() => onContactSupplier(product.sellerId, product.sellerName || "Manufacturer")}
-              className="flex-1 px-2.5 py-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-all text-[11px] font-bold uppercase tracking-wider text-center flex items-center justify-center gap-1"
+              className="w-8.5 h-8.5 shrink-0 bg-muted text-primary rounded-lg hover:bg-accent transition-all flex items-center justify-center border border-border"
+              title="Chat with Supplier"
             >
-              <MessageCircle size={12} />
-              Contact
+              <MessageCircle size={15} />
             </button>
-            <div className="flex-1 min-w-0 rounded-lg overflow-hidden shadow-sm">
-              <button
-                onClick={() => {
-                  onAddToCart(product);
-                  window.location.href = "/checkout";
-                }}
-                className="w-full h-full py-1.5 px-1 bg-slate-900 dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-0.5 sm:gap-1"
-              >
-                <ShieldCheck size={12} className="shrink-0" />
-                <span className="truncate">Buy Now</span>
-              </button>
-            </div>
+
+            <button
+              onClick={() => {
+                onAddToCart(product);
+                window.location.href = "/checkout";
+              }}
+              className="flex-1 h-8.5 py-1.5 px-3 bg-primary text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm"
+            >
+              <ShieldCheck size={14} className="shrink-0" />
+              <span>Buy Now</span>
+            </button>
           </div>
         </div>
       </div>

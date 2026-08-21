@@ -307,7 +307,7 @@ export default function LoginPage() {
       </motion.div>
 
       {/* ── Right: Form Panel ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 bg-slate-50 dark:bg-slate-950 relative">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 bg-background text-foreground relative">
         {/* Mobile logo bar */}
         <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
           <div
@@ -327,7 +327,7 @@ export default function LoginPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <h2 className="text-3xl font-black text-foreground mb-2 tracking-tight">
+            <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">
               Welcome back
             </h2>
             <p className="text-muted-foreground text-sm">
@@ -340,7 +340,7 @@ export default function LoginPage() {
             id="google-login-btn"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-foreground hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm hover:shadow-md mb-6 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-card border border-border rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-all shadow-sm mb-6 disabled:opacity-50"
           >
             <GoogleIcon />
             Continue with Google
@@ -349,7 +349,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               or sign in with email
             </span>
             <div className="flex-1 h-px bg-border" />
@@ -363,7 +363,7 @@ export default function LoginPage() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mb-5 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3 text-sm"
+                className="mb-5 p-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-start gap-3 text-sm"
               >
                 <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
@@ -372,10 +372,10 @@ export default function LoginPage() {
           </AnimatePresence>
 
           {/* Email / password form */}
-          <form onSubmit={handleLogin} className="space-y-5" noValidate>
+          <form onSubmit={handleLogin} className="space-y-4" noValidate>
             {/* Email */}
             <div className="space-y-1.5">
-              <label htmlFor="login-email" className="text-sm font-semibold text-foreground">
+              <label htmlFor="login-email" className="text-xs font-bold text-foreground">
                 Email address
               </label>
               <div className="relative">
@@ -391,7 +391,7 @@ export default function LoginPage() {
                   placeholder="you@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
               </div>
             </div>
@@ -399,12 +399,12 @@ export default function LoginPage() {
             {/* Password */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label htmlFor="login-password" className="text-sm font-semibold text-foreground">
+                <label htmlFor="login-password" className="text-xs font-bold text-foreground">
                   Password
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  className="text-xs text-primary hover:underline font-medium"
                 >
                   Forgot password?
                 </Link>
@@ -422,7 +422,7 @@ export default function LoginPage() {
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-12 py-2.5 bg-card border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
                 <button
                   type="button"
@@ -445,19 +445,19 @@ export default function LoginPage() {
                 tabIndex={0}
                 onClick={() => setRememberMe((v) => !v)}
                 onKeyDown={(e) => e.key === "Enter" && setRememberMe((v) => !v)}
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
                   rememberMe
-                    ? "bg-blue-600 border-blue-600"
-                    : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+                    ? "bg-primary border-primary"
+                    : "border-border bg-card"
                 }`}
               >
                 {rememberMe && (
-                  <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                  <svg width="10" height="8" viewBox="0 0 11 9" fill="none">
                     <path d="M1 4L4 7L10 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>
-              <span className="text-sm text-muted-foreground">Keep me signed in for 5 days</span>
+              <span className="text-xs text-muted-foreground">Keep me signed in for 5 days</span>
             </label>
 
             {/* Submit */}

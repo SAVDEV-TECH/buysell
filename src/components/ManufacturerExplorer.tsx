@@ -76,14 +76,14 @@ export default function ManufacturerExplorer() {
   });
 
   return (
-    <div className="min-h-screen bg-secondary/30 pt-10 pb-24">
+    <div className="min-h-screen bg-background pt-10 pb-24 text-foreground">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="mb-10 text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-3">
             Manufacturer Directory
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Discover, verify, and connect directly with top-tier verified suppliers on the BuySell network.
+          <p className="text-base text-muted-foreground">
+            Discover, verify, and connect directly with verified suppliers on the BuySell B2B network.
           </p>
         </div>
 

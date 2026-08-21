@@ -74,23 +74,23 @@ export default function WholesaleDirectoryPage() {
   });
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-slate-50 dark:bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-16">
-        <div className="glass rounded-[3rem] p-8 md:p-16 border border-primary/20 bg-primary/5 text-center relative overflow-hidden">
+    <div className="min-h-screen pt-12 pb-20 bg-background text-foreground">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
+        <div className="bg-card rounded-3xl p-8 md:p-12 border border-border text-center relative overflow-hidden shadow-sm">
           <div className="relative z-10 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase mb-6 tracking-wider ring-1 ring-primary/20">
-              <Building2 size={16} /> B2B Sourcing Hub
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase mb-4 tracking-wider">
+              <Building2 size={15} /> B2B Sourcing Hub
             </div>
-            <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+            <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight text-foreground leading-[1.1]">
               Source Direct From <br/><span className="gradient-text">Verified Wholesalers</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Buy in bulk directly from top manufacturers and distributors.
+            <p className="text-base text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Buy in bulk directly from top manufacturers and verified distributors.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register" className="w-full sm:w-auto px-8 py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-105 active:scale-95">
-                 Become a Seller <ArrowRight size={20} />
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link href="/register" className="w-full sm:w-auto px-6 py-3.5 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-md">
+                 Become a Seller <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -98,16 +98,16 @@ export default function WholesaleDirectoryPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-           <h2 className="text-3xl font-black">Wholesale Directory</h2>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+           <h2 className="text-2xl font-bold text-foreground">Wholesale Directory</h2>
            
            <div className="flex gap-4 w-full md:w-auto">
              <div className="flex-1 md:w-80 relative">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                <input 
                  type="text" 
                  placeholder="Search wholesale products..."
-                 className="w-full pl-12 pr-4 py-3 glass rounded-xl border border-borderline focus:ring-2 focus:ring-primary/50 outline-none"
+                 className="w-full pl-10 pr-4 py-2.5 bg-card rounded-xl border border-border focus:ring-1 focus:ring-primary outline-none text-xs text-foreground placeholder:text-muted-foreground"
                  value={search}
                  onChange={(e) => setSearch(e.target.value)}
                />
@@ -117,34 +117,34 @@ export default function WholesaleDirectoryPage() {
 
         {loading ? (
           <div className="py-20 flex flex-col items-center justify-center">
-             <Loader2 size={48} className="text-primary animate-spin mb-4" />
-             <p className="text-muted-foreground font-medium">Loading wholesale catalog...</p>
+             <Loader2 size={36} className="text-primary animate-spin mb-3" />
+             <p className="text-muted-foreground font-medium text-xs">Loading wholesale catalog...</p>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <AnimatePresence>
               {filteredProducts.map((product) => (
                 <motion.div 
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="solid-card rounded-[2rem] overflow-hidden group transition-all hover:-translate-y-2 flex flex-col"
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md hover:border-primary/30 transition-all flex flex-col"
                 >
-                  <div className="p-6 flex-1 flex flex-col">
-                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5 uppercase font-bold tracking-wider">
-                      <Building2 size={12} className="text-primary" /> {product.sellerName}
+                  <div className="p-4 flex-1 flex flex-col">
+                    <p className="text-[10px] text-muted-foreground mb-1.5 flex items-center gap-1.5 uppercase font-bold tracking-wider">
+                      <Building2 size={11} className="text-primary" /> {product.sellerName}
                     </p>
                     <Link href={`/marketplace/${product.id}`}>
-                      <h3 className="font-bold text-lg mb-4 line-clamp-2 leading-tight">
+                      <h3 className="font-bold text-sm mb-3 line-clamp-2 text-foreground hover:text-primary transition-colors">
                         {product.name}
                       </h3>
                     </Link>
                     
-                    <div className="mt-auto pt-4 border-t border-borderline flex items-center justify-between">
+                    <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
                        <div>
-                         <p className="text-[10px] text-muted-foreground uppercase font-bold">Bulk Price</p>
-                         <p className="font-black text-xl text-primary">${product.price}</p>
+                         <p className="text-[9px] text-muted-foreground uppercase font-semibold">Bulk Price</p>
+                         <p className="font-bold text-base text-primary">${product.price}</p>
                        </div>
                        <button 
                          onClick={() => addToCart({
@@ -157,9 +157,9 @@ export default function WholesaleDirectoryPage() {
                            sellerId: product.sellerId,
                            manufacturerId: product.manufacturerId
                          })}
-                         className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                         className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer"
                        >
-                         <ShoppingCart size={18} />
+                         <ShoppingCart size={15} />
                        </button>
                     </div>
                   </div>
@@ -168,8 +168,9 @@ export default function WholesaleDirectoryPage() {
             </AnimatePresence>
           </div>
         ) : (
-          <div className="py-24 text-center glass rounded-[3rem] border border-borderline">
-             <h3 className="text-2xl font-black mb-2">No items found</h3>
+          <div className="py-20 text-center bg-card rounded-2xl border border-border">
+             <h3 className="text-lg font-bold text-foreground mb-1">No items found</h3>
+             <p className="text-xs text-muted-foreground">Try adjusting your search criteria.</p>
           </div>
         )}
       </div>

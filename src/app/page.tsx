@@ -68,13 +68,13 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="solid-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl hover:shadow-lg hover:border-primary/20 transition-all group">
-              <div className="mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-primary/10 to-primary/5 dark:bg-slate-900 rounded-2xl w-fit shadow-lg shadow-primary/10 group-hover:shadow-xl group-hover:shadow-primary/20 group-hover:scale-110 transition-all duration-300">
+            <div key={index} className="solid-card p-6 sm:p-8 hover:shadow-lg hover:border-primary/30 transition-all group">
+              <div className="mb-6 p-4 bg-primary/10 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>
-              <h3 className="text-lg sm:text-xl font-black mb-3 sm:mb-4 tracking-tight">{feature.title}</h3>
+              <h3 className="text-lg sm:text-xl font-black mb-2 tracking-tight">{feature.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed font-medium">
                 {feature.description}
               </p>
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* Solution Section */}
-      <section className="bg-primary/5 py-16 sm:py-24 border-y border-primary/10 relative overflow-hidden">
+      <section className="bg-muted/40 py-16 sm:py-24 border-y border-border relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5"/></pattern></defs>
@@ -114,8 +114,8 @@ export default function Home() {
             </div>
           </div>
           <div className="flex-1 order-1 lg:order-2 w-full max-w-md lg:max-w-none">
-            <div className="relative aspect-video lg:aspect-square xl:aspect-video rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_0_50px_-12px_rgba(79,70,229,0.3)] border-4 sm:border-8 border-white dark:border-slate-800 lg:rotate-2 hover:rotate-0 transition-transform duration-700">
-               <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary opacity-30" />
+            <div className="relative aspect-video lg:aspect-square xl:aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-card lg:rotate-2 hover:rotate-0 transition-transform duration-700">
+               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30" />
                <div className="absolute inset-0 flex items-center justify-center">
                  <Package size={100} className="text-primary/40 animate-pulse sm:hidden" />
                  <Package size={140} className="text-primary/40 animate-pulse hidden sm:block" />
@@ -127,17 +127,17 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] p-8 sm:p-12 md:p-16 lg:p-20 text-center text-white overflow-hidden relative group">
-          <div className="absolute top-0 right-0 w-80 sm:w-96 lg:w-[500px] h-80 sm:h-96 lg:h-[500px] bg-primary/20 rounded-full blur-[100px] sm:blur-[120px] -mr-20 sm:-mr-40 -mt-20 sm:-mt-40 group-hover:bg-primary/30 transition-colors duration-500" />
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 sm:mb-8 relative z-10 tracking-tight">{t("home_cta_title")}</h2>
-          <p className="text-slate-300 max-w-2xl mx-auto mb-10 sm:mb-12 text-base sm:text-lg font-medium relative z-10 leading-relaxed">
+        <div className="bg-card border border-border rounded-3xl p-8 sm:p-12 md:p-16 lg:p-20 text-center overflow-hidden relative group shadow-lg">
+          <div className="absolute top-0 right-0 w-80 sm:w-96 lg:w-[500px] h-80 sm:h-96 lg:h-[500px] bg-primary/10 rounded-full blur-[100px] sm:blur-[120px] -mr-20 sm:-mr-40 -mt-20 sm:-mt-40 group-hover:bg-primary/20 transition-colors duration-500" />
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 sm:mb-8 relative z-10 tracking-tight text-foreground">{t("home_cta_title")}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto mb-10 sm:mb-12 text-base sm:text-lg font-medium relative z-10 leading-relaxed">
             {t("home_cta_subtitle")}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 relative z-10">
-            <Link href="/register" className="group/btn px-8 sm:px-12 py-4 sm:py-6 bg-white text-slate-900 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg hover:scale-105 hover:shadow-2xl transition-all shadow-xl flex items-center justify-center gap-3 w-full sm:w-auto min-h-[48px]">
+            <Link href="/register" className="group/btn px-8 sm:px-12 py-4 bg-primary text-white rounded-xl font-bold text-base sm:text-lg hover:bg-primary/90 hover:scale-105 transition-all shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto">
               {t("home_cta_open")} <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/help" className="px-8 sm:px-12 py-4 sm:py-6 border-2 border-white/20 hover:border-white/40 hover:bg-white/10 rounded-xl sm:rounded-2xl md:rounded-[1.5rem] font-black text-base sm:text-lg transition-all backdrop-blur-sm w-full sm:w-auto min-h-[48px]">
+            <Link href="/help" className="px-8 sm:px-12 py-4 border border-border bg-card hover:bg-muted text-foreground rounded-xl font-bold text-base sm:text-lg transition-all w-full sm:w-auto">
               {t("home_cta_demo")}
             </Link>
           </div>

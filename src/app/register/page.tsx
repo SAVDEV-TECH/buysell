@@ -287,7 +287,7 @@ export default function RegisterPage() {
             id="google-register-btn"
             onClick={handleGoogleSignUp}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-foreground hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm hover:shadow-md mb-6 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-card border border-border rounded-xl text-sm font-semibold text-foreground hover:bg-muted transition-all shadow-sm mb-6 disabled:opacity-50"
           >
             <GoogleIcon />
             Continue with Google
@@ -296,7 +296,7 @@ export default function RegisterPage() {
           {/* Divider */}
           <div className="relative flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               or register with email
             </span>
             <div className="flex-1 h-px bg-border" />
@@ -310,7 +310,7 @@ export default function RegisterPage() {
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className="mb-5 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-400 rounded-xl flex items-start gap-3 text-sm"
+                className="mb-5 p-4 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-start gap-3 text-sm"
               >
                 <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
@@ -321,7 +321,7 @@ export default function RegisterPage() {
           <form onSubmit={handleRegister} className="space-y-4" noValidate>
             {/* Full name */}
             <div className="space-y-1.5">
-              <label htmlFor="register-name" className="text-sm font-semibold text-foreground">
+              <label htmlFor="register-name" className="text-xs font-bold text-foreground">
                 Full name
               </label>
               <div className="relative">
@@ -337,14 +337,14 @@ export default function RegisterPage() {
                   placeholder="Jane Smith"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label htmlFor="register-email" className="text-sm font-semibold text-foreground">
+              <label htmlFor="register-email" className="text-xs font-bold text-foreground">
                 Email address
               </label>
               <div className="relative">
@@ -360,14 +360,14 @@ export default function RegisterPage() {
                   placeholder="jane@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label htmlFor="register-password" className="text-sm font-semibold text-foreground">
+              <label htmlFor="register-password" className="text-xs font-bold text-foreground">
                 Password
               </label>
               <div className="relative">
@@ -384,7 +384,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onFocus={() => setShowRequirements(true)}
-                  className="w-full pl-10 pr-12 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
+                  className="w-full pl-10 pr-12 py-2.5 bg-card border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary transition-all"
                 />
                 <button
                   type="button"
@@ -408,7 +408,7 @@ export default function RegisterPage() {
                       <div
                         key={i}
                         className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                          i <= strength.score ? strength.color : "bg-slate-200 dark:bg-slate-700"
+                          i <= strength.score ? strength.color : "bg-muted"
                         }`}
                       />
                     ))}
@@ -446,8 +446,8 @@ export default function RegisterPage() {
                         <div
                           className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                             req.met
-                              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "bg-muted text-muted-foreground"
                           }`}
                         >
                           <Check size={9} strokeWidth={3} />
@@ -484,12 +484,12 @@ export default function RegisterPage() {
                   placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 bg-white dark:bg-slate-800 border rounded-xl text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full pl-10 pr-12 py-2.5 bg-card border rounded-xl text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 transition-all ${
                     confirmPassword && !passwordsMatch
                       ? "border-red-400 focus:ring-red-400/30 focus:border-red-400"
                       : passwordsMatch
                       ? "border-emerald-400 focus:ring-emerald-400/30 focus:border-emerald-400"
-                      : "border-slate-200 dark:border-slate-700 focus:ring-blue-500/30 focus:border-blue-500"
+                      : "border-border focus:ring-primary"
                   }`}
                 />
                 {/* Eye toggle */}
@@ -523,25 +523,25 @@ export default function RegisterPage() {
                 tabIndex={0}
                 onClick={() => setAgreeTerms((v) => !v)}
                 onKeyDown={(e) => e.key === "Enter" && setAgreeTerms((v) => !v)}
-                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all cursor-pointer ${
+                className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5 transition-all cursor-pointer ${
                   agreeTerms
-                    ? "bg-blue-600 border-blue-600"
-                    : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+                    ? "bg-primary border-primary"
+                    : "border-border bg-card"
                 }`}
               >
                 {agreeTerms && (
-                  <svg width="11" height="9" viewBox="0 0 11 9" fill="none">
+                  <svg width="10" height="8" viewBox="0 0 11 9" fill="none">
                     <path d="M1 4L4 7L10 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </div>
-              <span className="text-sm text-muted-foreground leading-snug">
+              <span className="text-xs text-muted-foreground leading-snug">
                 I agree to the{" "}
-                <Link href="/terms" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                <Link href="/terms" className="text-primary font-semibold hover:underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
+                <Link href="/privacy" className="text-primary font-semibold hover:underline">
                   Privacy Policy
                 </Link>
               </span>

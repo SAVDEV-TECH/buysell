@@ -75,10 +75,10 @@ function ProductCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -4 }}
-      className="group bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+      className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-muted overflow-hidden">
         {imgSrc ? (
           <img
             src={imgSrc}
@@ -88,16 +88,16 @@ function ProductCard({
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-            <Package size={48} className="text-slate-300 dark:text-slate-600" />
-            <span className="text-xs text-slate-400 font-medium">No Image</span>
+            <Package size={40} className="text-muted-foreground" />
+            <span className="text-xs text-muted-foreground font-medium">No Image</span>
           </div>
         )}
         {/* MOQ badge */}
-        <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-black rounded-full tracking-wider">
+        <div className="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider">
           MOQ {moq.toLocaleString()} units
         </div>
         {/* Export ready */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-black rounded-full">
+        <div className="absolute top-3 right-3 px-2.5 py-1 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full">
           ✓ Export Ready
         </div>
       </div>
@@ -105,20 +105,20 @@ function ProductCard({
       {/* Body */}
       <div className="p-5 flex flex-col flex-1 gap-3">
         <div>
-          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">
+          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-1">
             {product.category || "Agricultural / Industrial"}
           </p>
-          <h3 className="font-black text-slate-900 dark:text-white text-base leading-tight line-clamp-2">
+          <h3 className="font-bold text-foreground text-sm md:text-base leading-tight line-clamp-2">
             {product.title || product.name}
           </h3>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-black text-primary">
+          <span className="text-xl font-bold text-primary">
             ${lowestPrice.toLocaleString()}
           </span>
-          <span className="text-xs text-muted-foreground font-bold">/ unit</span>
+          <span className="text-xs text-muted-foreground font-medium">/ unit</span>
         </div>
 
         {/* Tiered pricing hint */}
@@ -133,7 +133,7 @@ function ProductCard({
           {["FOB", "CIF", "EXW"].map((t) => (
             <span
               key={t}
-              className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-black rounded-full uppercase tracking-wider"
+              className="px-2 py-0.5 bg-muted text-muted-foreground text-[9px] font-bold rounded-md uppercase tracking-wider"
             >
               {t}
             </span>
@@ -144,13 +144,13 @@ function ProductCard({
         <div className="flex gap-2 mt-auto pt-2">
           <button
             onClick={() => onRequestQuote(product)}
-            className="flex-1 py-3 bg-primary text-white rounded-2xl font-black text-xs hover:bg-primary/90 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-primary/20"
+            className="flex-1 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5 shadow-sm"
           >
             <MessageSquare size={13} /> Get Quote
           </button>
           <Link
             href={`/marketplace/${product.id}`}
-            className="px-4 py-3 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-1"
+            className="px-3.5 py-2.5 border border-border rounded-xl font-bold text-xs text-foreground hover:bg-muted transition-all flex items-center gap-1"
           >
             View <ExternalLink size={11} />
           </Link>
@@ -179,12 +179,12 @@ function StatPill({
     purple:  "bg-purple-500/10 text-purple-600 dark:text-purple-400",
   };
   return (
-    <div className="flex flex-col items-center gap-1 px-5 py-4 bg-white/60 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-white/10 min-w-[110px]">
-      <div className={`p-2 rounded-xl ${colors[color]}`}>
-        <Icon size={18} />
+    <div className="flex flex-col items-center gap-1 px-4 py-3 bg-card rounded-xl border border-border min-w-[100px] shadow-sm">
+      <div className={`p-1.5 rounded-lg ${colors[color]}`}>
+        <Icon size={16} />
       </div>
-      <p className="text-xl font-black text-slate-900 dark:text-white">{value}</p>
-      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest text-center">
+      <p className="text-lg font-bold text-foreground">{value}</p>
+      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider text-center">
         {label}
       </p>
     </div>
@@ -291,12 +291,12 @@ export default function StorefrontPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+      <div className="min-h-screen bg-background text-foreground pb-24">
 
         {/* ── HERO BANNER ────────────────────────────────────────────── */}
         <div className="relative h-72 md:h-96 overflow-hidden">
           {/* Background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
           {/* Animated mesh */}
           <div className="absolute inset-0 opacity-20"
             style={{
@@ -332,7 +332,7 @@ export default function StorefrontPage() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-20 h-20 md:w-28 md:h-28 rounded-3xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white text-3xl md:text-4xl font-black shadow-2xl border-4 border-white/20 flex-shrink-0"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-primary flex items-center justify-center text-white text-3xl font-black shadow-xl border-2 border-white/20 flex-shrink-0"
               >
                 {seller.businessName?.[0] || "S"}
               </motion.div>
@@ -340,7 +340,7 @@ export default function StorefrontPage() {
               <div className="flex-1 min-w-0">
                 {/* Name + Verified */}
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <h1 className="text-2xl md:text-4xl font-black text-white truncate">
+                  <h1 className="text-2xl md:text-3xl font-bold text-white truncate">
                     {seller.businessName}
                   </h1>
                   {seller.isVerified && (
@@ -349,44 +349,44 @@ export default function StorefrontPage() {
                       kybData={seller.kybData}
                       supplierName={seller.businessName}
                       showText
-                      className="text-sm"
+                      className="text-xs"
                     />
                   )}
                 </div>
 
                 {/* Meta row */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-white/70">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-white/75">
                   <span className="flex items-center gap-1.5">
-                    <MapPin size={14} />
+                    <MapPin size={13} />
                     {flag} {countryName}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Clock size={14} /> Member since {seller.memberSince}
+                    <Clock size={13} /> Member since {seller.memberSince}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Zap size={14} /> Responds {seller.responseTime}
+                    <Zap size={13} /> Responds {seller.responseTime}
                   </span>
                   {seller.isVerified && (
                     <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                      <ShieldCheck size={14} /> Escrow Protected
+                      <ShieldCheck size={13} /> Escrow Protected
                     </span>
                   )}
                 </div>
               </div>
 
               {/* Hero CTA */}
-              <div className="flex gap-3 flex-shrink-0">
+              <div className="flex gap-2.5 flex-shrink-0">
                 <button
                   onClick={() => setRfqTarget({ name: "General Inquiry", id: null })}
-                  className="px-6 py-3.5 bg-primary text-white rounded-2xl font-black text-sm hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/30 flex items-center gap-2"
+                  className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all shadow-sm flex items-center gap-1.5"
                 >
-                  <MessageSquare size={16} /> Request Quote
+                  <MessageSquare size={15} /> Request Quote
                 </button>
                 <Link
                   href={`/dashboard/messages`}
-                  className="px-5 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-2xl font-black text-sm hover:bg-white/20 transition-all flex items-center gap-2"
+                  className="px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-bold text-xs hover:bg-white/20 transition-all flex items-center gap-1.5"
                 >
-                  <Mail size={16} /> Message
+                  <Mail size={15} /> Message
                 </Link>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default function StorefrontPage() {
         </div>
 
         {/* ── STATS BAR ──────────────────────────────────────────────── */}
-        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20 shadow-sm">
+        <div className="bg-card border-b border-border sticky top-0 z-20 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex overflow-x-auto gap-0 scrollbar-none py-1">
               {[
@@ -405,12 +405,12 @@ export default function StorefrontPage() {
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="flex items-center gap-3 px-6 py-4 border-r border-slate-100 dark:border-slate-800 last:border-r-0 min-w-fit"
+                  className="flex items-center gap-3 px-5 py-3 border-r border-border last:border-r-0 min-w-fit"
                 >
-                  <s.icon size={18} className="text-muted-foreground" />
+                  <s.icon size={16} className="text-muted-foreground" />
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none">{s.value}</p>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">{s.label}</p>
+                    <p className="text-base font-bold text-foreground leading-none">{s.value}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">{s.label}</p>
                   </div>
                 </div>
               ))}
@@ -419,22 +419,22 @@ export default function StorefrontPage() {
         </div>
 
         {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-6">
+          <div className="flex flex-col lg:flex-row gap-6">
 
             {/* ── LEFT: Products / About / Contact ─────────────────── */}
             <div className="flex-1 min-w-0">
 
               {/* Tab navigation */}
-              <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl mb-8 w-fit">
+              <div className="flex gap-1 p-1 bg-muted rounded-xl mb-6 w-fit">
                 {(["products", "about", "contact"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-5 py-2.5 rounded-xl font-black text-sm capitalize transition-all ${
+                    className={`px-4 py-2 rounded-lg font-bold text-xs capitalize transition-all ${
                       activeTab === tab
-                        ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                        : "text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300"
+                        ? "bg-card text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {tab}
@@ -452,37 +452,37 @@ export default function StorefrontPage() {
                     exit={{ opacity: 0, y: -8 }}
                   >
                     {/* Search bar */}
-                    <div className="relative mb-6">
-                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <div className="relative mb-5">
+                      <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
                       <input
                         type="text"
                         placeholder="Search products..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                        className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-xs font-medium focus:outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground transition-all shadow-sm"
                       />
                     </div>
 
                     {filteredProducts.length === 0 ? (
-                      <div className="text-center py-20 flex flex-col items-center gap-4">
-                        <Package size={56} className="text-slate-300 dark:text-slate-600" />
+                      <div className="text-center py-16 flex flex-col items-center gap-3">
+                        <Package size={40} className="text-muted-foreground" />
                         <div>
-                          <p className="font-black text-slate-500">No products found</p>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="font-bold text-foreground text-sm">No products found</p>
+                          <p className="text-xs text-muted-foreground mt-1">
                             {search ? "Try a different search term" : "This supplier hasn't listed products yet"}
                           </p>
                         </div>
                         {!search && (
                           <button
                             onClick={() => setRfqTarget({ name: "Custom Product Inquiry", id: null })}
-                            className="px-6 py-3 bg-primary text-white rounded-2xl font-black text-sm hover:bg-primary/90 transition-all"
+                            className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all shadow-sm"
                           >
                             Send Custom RFQ
                           </button>
                         )}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                         {filteredProducts.map((p) => (
                           <ProductCard
                             key={p.id}
@@ -502,39 +502,39 @@ export default function StorefrontPage() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="space-y-6"
+                    className="space-y-4"
                   >
                     {/* Bio */}
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-                      <h2 className="font-black text-slate-900 dark:text-white text-lg mb-3 flex items-center gap-2">
-                        <Factory size={20} className="text-primary" /> About This Supplier
+                    <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                      <h2 className="font-bold text-foreground text-base mb-2.5 flex items-center gap-2">
+                        <Factory size={18} className="text-primary" /> About This Supplier
                       </h2>
-                      <p className="text-muted-foreground leading-relaxed">{seller.bio}</p>
+                      <p className="text-muted-foreground text-xs leading-relaxed">{seller.bio}</p>
                     </div>
 
                     {/* Certifications */}
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-                      <h2 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                        <Award size={20} className="text-primary" /> Certifications & Compliance
+                    <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                      <h2 className="font-bold text-foreground text-base mb-3 flex items-center gap-2">
+                        <Award size={18} className="text-primary" /> Certifications & Compliance
                       </h2>
-                      <div className="space-y-3">
+                      <div className="space-y-2.5">
                         {CERT_BADGES.map((cert) => {
                           const passed = !!seller.kybData?.[cert.key];
                           return (
                             <div
                               key={cert.key}
-                              className={`flex items-center gap-3 p-3.5 rounded-2xl border ${
+                              className={`flex items-center gap-3 p-3 rounded-xl border ${
                                 passed
                                   ? colorMap[cert.color]
-                                  : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-50"
+                                  : "bg-muted/40 border-border opacity-50"
                               }`}
                             >
                               {passed
-                                ? <CheckCircle2 size={18} />
-                                : <Clock size={18} className="text-slate-400" />}
-                              <span className="font-bold text-sm">{cert.label}</span>
+                                ? <CheckCircle2 size={16} />
+                                : <Clock size={16} className="text-muted-foreground" />}
+                              <span className="font-bold text-xs">{cert.label}</span>
                               {!passed && (
-                                <span className="ml-auto text-[10px] font-black text-amber-500 uppercase tracking-wider">
+                                <span className="ml-auto text-[10px] font-bold text-amber-500 uppercase tracking-wider">
                                   Pending
                                 </span>
                               )}
@@ -545,15 +545,15 @@ export default function StorefrontPage() {
                     </div>
 
                     {/* Export destinations */}
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-                      <h2 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                        <Globe size={20} className="text-primary" /> Export Destinations
+                    <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                      <h2 className="font-bold text-foreground text-base mb-3 flex items-center gap-2">
+                        <Globe size={18} className="text-primary" /> Export Destinations
                       </h2>
                       <div className="flex flex-wrap gap-2">
                         {seller.exportCountries.map((code: string) => (
                           <span
                             key={code}
-                            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-black rounded-full"
+                            className="px-2.5 py-1 bg-muted text-foreground text-xs font-bold rounded-lg"
                           >
                             {COUNTRY_FLAGS[code] || "🌍"} {COUNTRY_NAMES[code] || code}
                           </span>
@@ -562,11 +562,11 @@ export default function StorefrontPage() {
                     </div>
 
                     {/* Trade terms */}
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-                      <h2 className="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
-                        <FileCheck size={20} className="text-primary" /> Standard Trade Terms
+                    <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                      <h2 className="font-bold text-foreground text-base mb-3 flex items-center gap-2">
+                        <FileCheck size={18} className="text-primary" /> Standard Trade Terms
                       </h2>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         {[
                           { label: "Default Incoterms",  value: seller.defaultIncoterms || "FOB" },
                           { label: "Payment Terms",       value: "100% Escrow (BuySell Protected)" },
@@ -575,9 +575,9 @@ export default function StorefrontPage() {
                           { label: "OEM / Private Label", value: "Available on request" },
                           { label: "Inspection Allowed",  value: "Yes — SGS / Bureau Veritas" },
                         ].map(({ label, value }) => (
-                          <div key={label} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl">
-                            <p className="text-muted-foreground font-bold text-[10px] uppercase tracking-widest">{label}</p>
-                            <p className="font-black text-slate-900 dark:text-white mt-1">{value}</p>
+                          <div key={label} className="p-3.5 bg-muted/40 rounded-xl border border-border">
+                            <p className="text-muted-foreground font-bold text-[10px] uppercase tracking-wider">{label}</p>
+                            <p className="font-bold text-foreground mt-0.5">{value}</p>
                           </div>
                         ))}
                       </div>
@@ -592,48 +592,48 @@ export default function StorefrontPage() {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="space-y-5"
+                    className="space-y-4"
                   >
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 text-center flex flex-col items-center gap-6">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                        <Users size={32} />
+                    <div className="bg-card rounded-2xl border border-border p-6 text-center flex flex-col items-center gap-4 shadow-sm">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <Users size={24} />
                       </div>
                       <div>
-                        <h2 className="font-black text-xl text-slate-900 dark:text-white mb-1">
+                        <h2 className="font-bold text-lg text-foreground mb-1">
                           Connect with {seller.businessName}
                         </h2>
-                        <p className="text-muted-foreground text-sm">
+                        <p className="text-muted-foreground text-xs">
                           All communication and payments are protected through BuySell's escrow system.
                         </p>
                       </div>
 
-                      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <button
                           onClick={() => setRfqTarget({ name: "General Inquiry", id: null })}
-                          className="w-full py-4 bg-primary text-white rounded-2xl font-black text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20"
+                          className="w-full py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5 shadow-sm"
                         >
-                          <MessageSquare size={18} /> Send RFQ
+                          <MessageSquare size={15} /> Send RFQ
                         </button>
                         <Link
                           href="/dashboard/messages"
-                          className="w-full py-4 border border-slate-200 dark:border-slate-700 rounded-2xl font-black text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                          className="w-full py-3 border border-border rounded-xl font-bold text-xs text-foreground hover:bg-muted transition-all flex items-center justify-center gap-1.5"
                         >
-                          <Mail size={18} /> Direct Message
+                          <Mail size={15} /> Direct Message
                         </Link>
                       </div>
 
                       {seller.phone && (
-                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                          <Phone size={14} />
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                          <Phone size={13} />
                           <a href={`tel:${seller.phone}`} className="hover:text-primary transition-colors font-bold">
                             {seller.phone}
                           </a>
                         </div>
                       )}
 
-                      <div className="w-full p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-3 text-left">
-                        <AlertCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-amber-700 dark:text-amber-400 font-bold leading-relaxed">
+                      <div className="w-full p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-left">
+                        <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
                           Never pay outside BuySell. All deals must go through our escrow system to protect both buyers and sellers.
                         </p>
                       </div>
@@ -641,8 +641,8 @@ export default function StorefrontPage() {
 
                     {/* Freight Calculator in contact for quick estimates */}
                     {products.length > 0 && (
-                      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6">
-                        <h3 className="font-black text-slate-900 dark:text-white text-lg mb-4">
+                      <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                        <h3 className="font-bold text-foreground text-base mb-3">
                           Quick Freight Estimate
                         </h3>
                         <FreightCalculator
@@ -659,40 +659,40 @@ export default function StorefrontPage() {
             </div>
 
             {/* ── RIGHT: Trust sidebar ──────────────────────────────── */}
-            <div className="lg:w-80 xl:w-96 flex-shrink-0 space-y-5">
+            <div className="lg:w-80 xl:w-96 flex-shrink-0 space-y-4">
 
               {/* Trust card */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="p-5 bg-gradient-to-r from-blue-600 to-cyan-500 text-white">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheck size={20} />
-                    <span className="font-black text-sm">BuySell Trust Score</span>
+              <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
+                <div className="p-5 bg-primary text-white">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <ShieldCheck size={18} />
+                    <span className="font-bold text-xs uppercase tracking-wider">BuySell Trust Score</span>
                   </div>
-                  <p className="text-3xl font-black">
+                  <p className="text-2xl font-bold">
                     {seller.isVerified ? "Verified ✓" : "Pending"}
                   </p>
-                  <p className="text-xs text-white/70 mt-1">
+                  <p className="text-xs text-white/80 mt-0.5">
                     {seller.isVerified
                       ? "This supplier passed KYB verification"
                       : "Verification in progress"}
                   </p>
                 </div>
-                <div className="p-5 space-y-3">
+                <div className="p-4 space-y-2.5">
                   {[
                     { label: "Registration Verified",  ok: !!seller.kybData?.cac_verified       },
                     { label: "Factory Inspected",       ok: !!seller.kybData?.factory_inspected  },
                     { label: "ISO / Quality Certified", ok: !!seller.kybData?.iso_certified      },
                     { label: "Escrow-Eligible",         ok: seller.isVerified                    },
                   ].map(({ label, ok }) => (
-                    <div key={label} className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        ok ? "bg-emerald-500" : "bg-slate-200 dark:bg-slate-700"
+                    <div key={label} className="flex items-center gap-2.5">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        ok ? "bg-emerald-500" : "bg-muted"
                       }`}>
                         {ok
-                          ? <CheckCircle2 size={12} className="text-white" />
-                          : <Clock size={10} className="text-slate-400" />}
+                          ? <CheckCircle2 size={11} className="text-white" />
+                          : <Clock size={9} className="text-muted-foreground" />}
                       </div>
-                      <span className={`text-sm font-bold ${ok ? "text-slate-900 dark:text-white" : "text-slate-400"}`}>
+                      <span className={`text-xs font-medium ${ok ? "text-foreground font-semibold" : "text-muted-foreground"}`}>
                         {label}
                       </span>
                     </div>
@@ -701,8 +701,8 @@ export default function StorefrontPage() {
               </div>
 
               {/* Quick stats */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 space-y-4">
-                <h3 className="font-black text-slate-900 dark:text-white">Quick Facts</h3>
+              <div className="bg-card rounded-2xl border border-border p-4 space-y-3 shadow-sm">
+                <h3 className="font-bold text-foreground text-xs uppercase tracking-wider">Quick Facts</h3>
                 {[
                   { icon: MapPin,     label: "Location",       value: `${flag} ${countryName}` },
                   { icon: Clock,      label: "Response Time",  value: seller.responseTime       },
@@ -710,39 +710,39 @@ export default function StorefrontPage() {
                   { icon: Leaf,       label: "Default Terms",  value: seller.defaultIncoterms   },
                   { icon: Globe,      label: "Language",       value: seller.preferredLanguage?.toUpperCase() || "EN" },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
-                      <Icon size={15} className="text-muted-foreground" />
+                  <div key={label} className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 text-muted-foreground">
+                      <Icon size={14} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{label}</p>
-                      <p className="font-black text-slate-900 dark:text-white text-sm truncate">{value}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{label}</p>
+                      <p className="font-bold text-foreground text-xs truncate">{value}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* CTA card */}
-              <div className="bg-gradient-to-br from-primary to-blue-700 rounded-3xl p-6 text-white">
-                <h3 className="font-black text-lg mb-2">Ready to Order?</h3>
-                <p className="text-sm text-white/80 mb-5 leading-relaxed">
+              <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-3">
+                <h3 className="font-bold text-foreground text-sm">Ready to Order?</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   All orders are 100% escrow-protected. Your payment is only released when goods are delivered and approved.
                 </p>
                 <button
                   onClick={() => setRfqTarget({ name: "Bulk Order Inquiry", id: null })}
-                  className="w-full py-4 bg-white text-primary rounded-2xl font-black text-sm hover:bg-white/90 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl"
+                  className="w-full py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                  <MessageSquare size={16} /> Start with an RFQ
-                  <ChevronRight size={16} />
+                  <MessageSquare size={14} /> Start with an RFQ
+                  <ChevronRight size={14} />
                 </button>
               </div>
 
               {/* All suppliers link */}
               <Link
                 href="/manufacturers"
-                className="flex items-center justify-center gap-2 py-3 text-muted-foreground text-sm font-bold hover:text-primary transition-colors"
+                className="flex items-center justify-center gap-1.5 py-2 text-muted-foreground text-xs font-bold hover:text-primary transition-colors"
               >
-                <Users size={15} /> Browse All Suppliers
+                <Users size={14} /> Browse All Suppliers
               </Link>
             </div>
           </div>

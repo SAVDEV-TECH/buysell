@@ -54,7 +54,7 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image Stage */}
-      <div className="aspect-square glass rounded-[2.5rem] md:rounded-[3rem] border border-borderline overflow-hidden flex items-center justify-center relative bg-muted/20 group">
+      <div className="aspect-square bg-card rounded-2xl border border-border overflow-hidden flex items-center justify-center relative shadow-sm group">
         {activeImage && !imageErrors[selectedIndex] ? (
           <Image
             src={activeImage}
@@ -66,7 +66,7 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
-            <Package size={72} className="text-muted-foreground opacity-20" />
+            <Package size={64} className="text-muted-foreground opacity-30" />
             <span className="text-xs text-muted-foreground font-medium">No Image Preview</span>
           </div>
         )}
@@ -77,22 +77,22 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
             <button
               onClick={handlePrev}
               type="button"
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border text-foreground flex items-center justify-center shadow-md hover:bg-background transition-all z-10"
               aria-label="Previous Image"
             >
-              <ChevronLeft size={20} />
+              <ChevronLeft size={18} />
             </button>
             <button
               onClick={handleNext}
               type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border text-foreground flex items-center justify-center shadow-md hover:bg-background transition-all z-10"
               aria-label="Next Image"
             >
-              <ChevronRight size={20} />
+              <ChevronRight size={18} />
             </button>
 
             {/* Counter Pill */}
-            <div className="absolute bottom-4 right-4 px-3.5 py-1 rounded-full glass text-[11px] font-black text-slate-900 dark:text-white border border-white/20 shadow-md">
+            <div className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-[11px] font-bold text-foreground border border-border shadow-sm">
               {selectedIndex + 1} / {images.length}
             </div>
           </>
@@ -103,17 +103,17 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
           <button
             onClick={() => setIsFullscreen(true)}
             type="button"
-            className="absolute top-4 right-4 w-9 h-9 rounded-full glass border border-white/20 text-slate-900 dark:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-110"
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:scale-105"
             title="View Fullscreen"
           >
-            <Maximize2 size={15} />
+            <Maximize2 size={14} />
           </button>
         )}
       </div>
 
       {/* Thumbnails Row */}
       {images.length > 1 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
           {images.map((img, idx) => {
             const isSelected = idx === selectedIndex;
             const hasError = imageErrors[idx];
@@ -122,10 +122,10 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
                 key={idx}
                 type="button"
                 onClick={() => setSelectedIndex(idx)}
-                className={`relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all ${
+                className={`relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
                   isSelected
-                    ? "border-primary ring-4 ring-primary/20 scale-105 shadow-md"
-                    : "border-borderline opacity-60 hover:opacity-100 hover:scale-100"
+                    ? "border-primary ring-2 ring-primary/20 scale-105 shadow-sm"
+                    : "border-border opacity-70 hover:opacity-100"
                 }`}
               >
                 {!hasError ? (
@@ -133,13 +133,13 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
                     src={img}
                     alt={`Thumbnail ${idx + 1}`}
                     fill
-                    sizes="80px"
+                    sizes="64px"
                     onError={() => setImageErrors((prev) => ({ ...prev, [idx]: true }))}
                     className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <Package size={20} className="opacity-30" />
+                    <Package size={18} className="opacity-30" />
                   </div>
                 )}
               </button>
@@ -154,9 +154,9 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
           <button
             onClick={() => setIsFullscreen(false)}
             type="button"
-            className="absolute top-6 right-6 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all z-50"
+            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all z-50"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
 
           <div className="relative max-w-5xl max-h-[85vh] w-full h-full flex items-center justify-center">
@@ -164,7 +164,7 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
               src={activeImage}
               alt={title}
               fill
-              className="object-contain rounded-2xl shadow-2xl"
+              className="object-contain rounded-xl shadow-2xl"
             />
 
             {images.length > 1 && (
@@ -172,16 +172,16 @@ function ProductImageGallery({ images, title }: { images: string[]; title: strin
                 <button
                   onClick={handlePrev}
                   type="button"
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all"
                 >
-                  <ChevronLeft size={24} />
+                  <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={handleNext}
                   type="button"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full glass text-white flex items-center justify-center hover:bg-white/20 transition-all"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all"
                 >
-                  <ChevronRight size={24} />
+                  <ChevronRight size={20} />
                 </button>
               </>
             )}
@@ -250,44 +250,44 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-        <Package size={64} className="text-muted-foreground mb-4 opacity-20" />
-        <h2 className="text-2xl font-black mb-2">Product Not Found</h2>
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-background text-foreground">
+        <Package size={64} className="text-muted-foreground mb-4 opacity-30" />
+        <h2 className="text-2xl font-bold mb-2">Product Not Found</h2>
         <button 
           onClick={() => router.back()}
-          className="px-8 py-3 bg-primary text-white rounded-2xl font-bold flex items-center gap-2"
+          className="px-6 py-2.5 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all text-sm"
         >
-          <ArrowLeft size={20} /> Go Back
+          <ArrowLeft size={16} /> Go Back
         </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen pt-12 pb-20 bg-background text-foreground">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <button 
           onClick={() => router.back()}
-          className="mb-8 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-bold group"
+          className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-semibold text-sm group"
         >
-          <ArrowLeft size={20} /> Back to Marketplace
+          <ArrowLeft size={16} /> Back to Marketplace
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           <ProductImageGallery images={product.images || []} title={product.name} />
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-black rounded-full ring-1 ring-emerald-500/20 flex items-center gap-1">
-                <CheckCircle2 size={13} /> Verified Export Grade
+              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/20 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Verified Export Grade
               </span>
-              <span className="px-3 py-1 bg-blue-500/10 text-blue-500 text-xs font-black rounded-full ring-1 ring-blue-500/20">
+              <span className="px-2.5 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full border border-blue-500/20">
                 SGS / ISO 9001
               </span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black mb-4">{product.name}</h1>
-            <p className="text-3xl font-black text-primary mb-6">${product.price.toLocaleString()} USD <span className="text-xs font-bold text-muted-foreground">/ unit</span></p>
+            <h1 className="text-2xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">{product.name}</h1>
+            <p className="text-2xl font-bold text-primary mb-4">${product.price.toLocaleString()} USD <span className="text-xs font-medium text-muted-foreground">/ unit</span></p>
             
             {/* AI Translation Toolbar */}
             <div className="mb-3">
@@ -304,7 +304,7 @@ export default function ProductDetailPage() {
               />
             </div>
 
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
               {translatedDesc ? (
                 <>
                   <span className="inline-block px-2 py-0.5 mb-2 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[11px] font-bold">
@@ -319,22 +319,22 @@ export default function ProductDetailPage() {
             </p>
 
             {/* Incoterms & Export Specs */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-borderline text-xs mb-8">
+            <div className="grid grid-cols-2 gap-3 p-4 rounded-xl bg-card border border-border text-xs mb-6 shadow-sm">
               <div>
-                <span className="text-muted-foreground font-bold">Incoterm Terms:</span>
-                <p className="font-black text-slate-900 dark:text-white mt-0.5">FOB / CIF Available</p>
+                <span className="text-muted-foreground font-semibold">Incoterm Terms:</span>
+                <p className="font-bold text-foreground mt-0.5">FOB / CIF Available</p>
               </div>
               <div>
-                <span className="text-muted-foreground font-bold">Nearest Departure Port:</span>
-                <p className="font-black text-slate-900 dark:text-white mt-0.5">Lagos / Tema / Mombasa</p>
+                <span className="text-muted-foreground font-semibold">Nearest Departure Port:</span>
+                <p className="font-bold text-foreground mt-0.5">Lagos / Tema / Mombasa</p>
               </div>
               <div>
-                <span className="text-muted-foreground font-bold">Min. Bulk Order (MOQ):</span>
-                <p className="font-black text-slate-900 dark:text-white mt-0.5">100 Units</p>
+                <span className="text-muted-foreground font-semibold">Min. Bulk Order (MOQ):</span>
+                <p className="font-bold text-foreground mt-0.5">100 Units</p>
               </div>
               <div>
-                <span className="text-muted-foreground font-bold">Export Lead Time:</span>
-                <p className="font-black text-slate-900 dark:text-white mt-0.5">7-14 Days</p>
+                <span className="text-muted-foreground font-semibold">Export Lead Time:</span>
+                <p className="font-bold text-foreground mt-0.5">7-14 Days</p>
               </div>
             </div>
 
@@ -349,12 +349,12 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button 
                 onClick={() => addToCart(product, quantity)} 
-                className="flex-1 px-8 py-5 bg-primary text-white rounded-2xl font-black text-base hover:bg-primary/90 flex items-center justify-center gap-3 shadow-xl hover:scale-105 active:scale-95 transition-all"
+                className="flex-1 px-6 py-3.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 flex items-center justify-center gap-2 shadow-md transition-all"
               >
-                <ShoppingCart size={22} /> Add Bulk Order to Cart
+                <ShoppingCart size={18} /> Add Bulk Order to Cart
               </button>
 
               <button 
@@ -366,13 +366,13 @@ export default function ProductDetailPage() {
                   }, 1);
                   router.push("/checkout");
                 }}
-                className="flex-1 px-6 py-5 glass border border-primary/40 text-primary rounded-2xl font-black text-base hover:bg-primary/10 flex items-center justify-center gap-2 transition-all"
+                className="flex-1 px-5 py-3.5 bg-card border border-border text-foreground hover:bg-muted rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
               >
-                <Package size={22} /> Order Sample Unit ($15)
+                <Package size={18} className="text-primary" /> Order Sample Unit ($15)
               </button>
             </div>
 
-            <p className="text-[10px] text-muted-foreground text-center sm:text-left mt-3 font-bold">
+            <p className="text-[11px] text-muted-foreground text-center sm:text-left mt-3 font-medium">
               💡 Sample costs are 100% credited back toward your first container order.
             </p>
           </div>

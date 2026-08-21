@@ -272,35 +272,35 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       {/* ── Breadcrumb & Action Header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <Link href="/dashboard/orders" className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors">
-          <ArrowLeft size={16} /> Back to All Orders
+          <ArrowLeft size={15} /> Back to All Orders
         </Link>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowInvoiceModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 glass border border-borderline rounded-2xl text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="flex items-center gap-2 px-3.5 py-2 bg-card border border-border rounded-xl text-xs font-bold text-foreground hover:bg-muted transition-all shadow-sm"
           >
-            <Printer size={16} /> Commercial Invoice
+            <Printer size={15} /> Commercial Invoice
           </button>
         </div>
       </div>
 
       {/* ── Title Banner ── */}
-      <div className="glass rounded-3xl border border-borderline p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="bg-card rounded-2xl border border-border p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-xs font-mono font-black text-primary uppercase tracking-widest">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <span className="text-xs font-mono font-bold text-primary uppercase tracking-wider">
               ORDER REF: #{order.id.slice(0, 8).toUpperCase()}
             </span>
-            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
+            <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
               {order.status}
             </span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">
             Trade Contract: ${Number(order.total_amount || 0).toLocaleString()} {order.currency || "USD"}
           </h1>
           <p className="text-xs text-muted-foreground mt-1 font-medium">
-            Buyer: <strong>{order.buyer_organization?.company_name || "B2B Buyer"}</strong> · Supplier: <strong>{order.supplier_organization?.company_name || "Verified Supplier"}</strong>
+            Buyer: <strong className="text-foreground">{order.buyer_organization?.company_name || "B2B Buyer"}</strong> · Supplier: <strong className="text-foreground">{order.supplier_organization?.company_name || "Verified Supplier"}</strong>
           </p>
         </div>
 
@@ -308,9 +308,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         {isSupplier && order.status !== "shipped" && order.status !== "delivered" && (
           <button
             onClick={() => setShowTrackingModal(true)}
-            className="flex items-center gap-2 px-6 py-3.5 bg-primary text-white rounded-2xl font-bold text-xs shadow-xl shadow-primary/20 hover:bg-primary/90 transition-all"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs shadow-sm hover:bg-primary/90 transition-all"
           >
-            <Truck size={16} /> Update Shipment & Tracking
+            <Truck size={15} /> Update Shipment & Tracking
           </button>
         )}
 
@@ -318,9 +318,9 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           <button
             onClick={handleConfirmDelivery}
             disabled={updating}
-            className="flex items-center gap-2 px-6 py-3.5 bg-emerald-600 text-white rounded-2xl font-bold text-xs shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-emerald-700 transition-all disabled:opacity-50"
           >
-            {updating ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+            {updating ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
             Confirm Delivery & Release Escrow
           </button>
         )}
@@ -338,31 +338,31 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
       <OrderEscrowTracker order={order} />
 
       {/* ── Details Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Items List (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="glass rounded-3xl border border-borderline p-6 space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-              <Package size={16} className="text-primary" /> Contract Line Items
+          <div className="bg-card rounded-2xl border border-border p-6 space-y-4 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <Package size={15} className="text-primary" /> Contract Line Items
             </h3>
 
             {items.length === 0 ? (
-              <div className="p-8 text-center text-xs text-muted-foreground italic bg-slate-50 dark:bg-slate-900/40 rounded-2xl">
+              <div className="p-6 text-center text-xs text-muted-foreground italic bg-muted/40 rounded-xl">
                 Single trade order contract (${Number(order.total_amount).toLocaleString()} USD).
               </div>
             ) : (
-              <div className="divide-y divide-borderline">
+              <div className="divide-y divide-border">
                 {items.map((item) => (
-                  <div key={item.id} className="py-4 flex items-center justify-between gap-4">
+                  <div key={item.id} className="py-3 flex items-center justify-between gap-4">
                     <div>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">
+                      <p className="font-bold text-xs text-foreground">
                         {item.product?.title || "B2B Product Item"}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
                         Quantity: <strong>{item.quantity.toLocaleString()} pcs</strong> · Unit Price: <strong>${item.unit_price}</strong>
                       </p>
                     </div>
-                    <p className="font-black text-sm text-slate-900 dark:text-white">
+                    <p className="font-bold text-xs text-foreground">
                       ${Number(item.total_price || item.unit_price * item.quantity).toLocaleString()}
                     </p>
                   </div>
@@ -375,27 +375,27 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         {/* Right: Escrow & Shipping Info (1 col) */}
         <div className="space-y-6">
           {/* Escrow Status Card */}
-          <div className="glass rounded-3xl border border-borderline p-6 space-y-4">
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-              <Lock size={16} className="text-emerald-500" /> Escrow Protection
+          <div className="bg-card rounded-2xl border border-border p-5 space-y-3 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <Lock size={15} className="text-emerald-500" /> Escrow Protection
             </h3>
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
-              <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-1">
+              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                 Payment Status: {order.payment_status.toUpperCase()}
               </p>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
                 Funds are held securely in BuySell Escrow until buyer confirms satisfactory delivery.
               </p>
             </div>
           </div>
 
           {/* Courier Details */}
-          <div className="glass rounded-3xl border border-borderline p-6 space-y-3">
-            <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-              <Truck size={16} className="text-primary" /> Logistics Courier
+          <div className="bg-card rounded-2xl border border-border p-5 space-y-2.5 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+              <Truck size={15} className="text-primary" /> Logistics Courier
             </h3>
             <p className="text-xs text-muted-foreground">
-              Carrier: <strong className="text-slate-900 dark:text-white">{order.courier_name || "Express Logistics"}</strong>
+              Carrier: <strong className="text-foreground">{order.courier_name || "Express Logistics"}</strong>
             </p>
             {order.tracking_number && (
               <p className="text-xs font-mono font-bold text-primary">
@@ -405,12 +405,12 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {/* Export Documentation Vault */}
-          <div className="glass rounded-3xl border border-borderline p-6 space-y-4">
+          <div className="bg-card rounded-2xl border border-border p-5 space-y-3 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
-                <FileText size={16} className="text-primary" /> Export Document Vault
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                <FileText size={15} className="text-primary" /> Export Document Vault
               </h3>
-              <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-500 text-[10px] font-black rounded-full">
+              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-500/20">
                 Customs Cleared
               </span>
             </div>
@@ -419,24 +419,24 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               {/* Document 1: Commercial Invoice */}
               <button
                 onClick={() => setShowInvoiceModal(true)}
-                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-borderline flex items-center justify-between text-xs transition-all text-left"
+                className="w-full p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border flex items-center justify-between text-xs transition-all text-left"
               >
-                <div className="flex items-center gap-2.5">
-                  <FileText size={15} className="text-primary" />
+                <div className="flex items-center gap-2">
+                  <FileText size={14} className="text-primary" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">Commercial Invoice & Packing List</p>
+                    <p className="font-bold text-xs text-foreground">Commercial Invoice & Packing List</p>
                     <p className="text-[10px] text-muted-foreground">PDF · HSN/HS Code Included</p>
                   </div>
                 </div>
-                <Printer size={14} className="text-muted-foreground" />
+                <Printer size={13} className="text-muted-foreground" />
               </button>
 
               {/* Document 2: Certificate of Origin */}
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-borderline flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
-                  <Globe size={15} className="text-emerald-500" />
+              <div className="p-2.5 rounded-xl bg-muted/40 border border-border flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Globe size={14} className="text-emerald-500" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">Certificate of Origin (AfCFTA / ECOWAS)</p>
+                    <p className="font-bold text-xs text-foreground">Certificate of Origin (AfCFTA / ECOWAS)</p>
                     <p className="text-[10px] text-muted-foreground">Chamber of Commerce Verified</p>
                   </div>
                 </div>
@@ -444,11 +444,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </div>
 
               {/* Document 3: SGS / Quality Inspection Certificate */}
-              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-borderline flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck size={15} className="text-blue-500" />
+              <div className="p-2.5 rounded-xl bg-muted/40 border border-border flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={14} className="text-blue-500" />
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white">Quality Inspection (SGS / ISO 9001)</p>
+                    <p className="font-bold text-xs text-foreground">Quality Inspection (SGS / ISO 9001)</p>
                     <p className="text-[10px] text-muted-foreground">Pre-Shipment Compliance</p>
                   </div>
                 </div>

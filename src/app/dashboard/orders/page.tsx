@@ -369,11 +369,11 @@ export default function OrdersPage() {
 
       {/* ── Summary KPI Strip ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass p-5 rounded-3xl border border-borderline">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+        <div className="bg-card p-5 rounded-2xl border border-border shadow-sm">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
             Total Trade Volume
           </p>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">
+          <p className="text-2xl font-bold text-foreground">
             {formatCurrency(stats.totalVolume)}
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
@@ -381,11 +381,11 @@ export default function OrdersPage() {
           </p>
         </div>
 
-        <div className="glass p-5 rounded-3xl border border-borderline">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+        <div className="bg-card p-5 rounded-2xl border border-border shadow-sm">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
             Active In Production
           </p>
-          <p className="text-2xl font-black text-purple-600 dark:text-purple-400">
+          <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
             {stats.pendingCount}
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
@@ -393,11 +393,11 @@ export default function OrdersPage() {
           </p>
         </div>
 
-        <div className="glass p-5 rounded-3xl border border-borderline">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+        <div className="bg-card p-5 rounded-2xl border border-border shadow-sm">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
             In Transit / Shipped
           </p>
-          <p className="text-2xl font-black text-blue-600 dark:text-blue-400">
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {stats.inTransitCount}
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
@@ -405,11 +405,11 @@ export default function OrdersPage() {
           </p>
         </div>
 
-        <div className="glass p-5 rounded-3xl border border-borderline">
-          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">
+        <div className="bg-card p-5 rounded-2xl border border-border shadow-sm">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
             Delivered & Fulfilled
           </p>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {stats.completedCount}
           </p>
           <p className="text-[10px] text-muted-foreground mt-1">
@@ -419,9 +419,9 @@ export default function OrdersPage() {
       </div>
 
       {/* ── Search & Filter Controls ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass p-3 rounded-3xl border border-borderline">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-3 rounded-2xl border border-border shadow-sm">
         {/* Tab Filters */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl overflow-x-auto w-full md:w-auto">
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-xl overflow-x-auto w-full md:w-auto">
           {STATUS_FILTERS.map((tab) => (
             <button
               key={tab.id}
@@ -429,9 +429,9 @@ export default function OrdersPage() {
                 setActiveTab(tab.id);
                 setPage(0);
               }}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "bg-white dark:bg-slate-900 text-primary shadow-sm"
+                  ? "bg-card text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -454,27 +454,27 @@ export default function OrdersPage() {
               setSearch(e.target.value);
               setPage(0);
             }}
-            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full pl-9 pr-4 py-2 bg-background border border-border rounded-xl text-xs font-medium outline-none focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
       {/* ── Orders Table ── */}
-      <div className="glass rounded-3xl border border-borderline overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
         {loading ? (
-          <div className="p-24 flex flex-col items-center justify-center space-y-3">
-            <Loader2 size={36} className="text-primary animate-spin" />
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+          <div className="p-20 flex flex-col items-center justify-center space-y-3">
+            <Loader2 size={32} className="text-primary animate-spin" />
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               Retrieving B2B trade records…
             </p>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="p-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-3xl flex items-center justify-center mx-auto text-slate-400">
-              <Package size={36} />
+          <div className="p-16 text-center space-y-4">
+            <div className="w-14 h-14 bg-muted rounded-2xl flex items-center justify-center mx-auto text-muted-foreground">
+              <Package size={28} />
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-foreground">
                 {emptyState.title}
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
@@ -484,7 +484,7 @@ export default function OrdersPage() {
             {emptyState.showCta && (
               <Link
                 href="/marketplace"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white text-xs font-bold rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-sm hover:bg-primary/90 transition-all"
               >
                 Explore Marketplace Products
               </Link>
@@ -495,28 +495,28 @@ export default function OrdersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-borderline bg-slate-50/50 dark:bg-slate-900/50">
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  <tr className="border-b border-border bg-muted/40">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Order Ref
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Buyer / Supplier
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Trade Amount
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Escrow Status
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       Fulfillment Phase
                     </th>
-                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground text-right">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-borderline">
+                <tbody className="divide-y divide-border">
                   <AnimatePresence mode="popLayout">
                     {filteredOrders.map((order) => {
                       const buyerName =
@@ -536,16 +536,16 @@ export default function OrdersPage() {
                           onClick={() =>
                             router.push(`/dashboard/orders/${order.id}`)
                           }
-                          className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                          className="hover:bg-muted/40 transition-colors group cursor-pointer"
                         >
                           {/* Order Ref */}
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
-                                <ShoppingBag size={18} />
+                              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
+                                <ShoppingBag size={16} />
                               </div>
                               <div>
-                                <p className="font-mono font-bold text-xs text-slate-900 dark:text-white">
+                                <p className="font-mono font-bold text-xs text-foreground">
                                   #{order.id.slice(0, 8).toUpperCase()}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
@@ -558,10 +558,10 @@ export default function OrdersPage() {
                           {/* Buyer / Supplier */}
                           <td className="px-6 py-4">
                             <div className="space-y-0.5">
-                              <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1">
+                              <p className="text-xs font-bold text-foreground flex items-center gap-1">
                                 <Building2
                                   size={12}
-                                  className="text-slate-400"
+                                  className="text-muted-foreground"
                                 />{" "}
                                 {buyerName}
                               </p>
@@ -575,7 +575,7 @@ export default function OrdersPage() {
                           {/* Amount */}
                           <td className="px-6 py-4">
                             <div>
-                              <p className="font-black text-sm text-slate-900 dark:text-white">
+                              <p className="font-bold text-xs text-foreground">
                                 {formatCurrency(
                                   Number(order.total_amount || 0),
                                   order.currency
@@ -604,9 +604,9 @@ export default function OrdersPage() {
                             <Link
                               href={`/dashboard/orders/${order.id}`}
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-xl text-xs font-extrabold transition-all"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg text-xs font-bold transition-all"
                             >
-                              Track Order <ArrowUpRight size={14} />
+                              Track <ArrowUpRight size={13} />
                             </Link>
                           </td>
                         </motion.tr>
@@ -619,7 +619,7 @@ export default function OrdersPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t border-borderline bg-slate-50/50 dark:bg-slate-900/50">
+              <div className="flex items-center justify-between px-6 py-3.5 border-t border-border bg-muted/20">
                 <p className="text-[10px] text-muted-foreground font-medium">
                   Showing {page * PAGE_SIZE + 1}–
                   {Math.min((page + 1) * PAGE_SIZE, totalCount)} of{" "}
@@ -629,9 +629,9 @@ export default function OrdersPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={14} />
                   </button>
                   <span className="text-xs font-bold text-muted-foreground px-2">
                     {page + 1} / {totalPages}
@@ -641,9 +641,9 @@ export default function OrdersPage() {
                       setPage((p) => Math.min(totalPages - 1, p + 1))
                     }
                     disabled={page >= totalPages - 1}
-                    className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="p-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={14} />
                   </button>
                 </div>
               </div>
