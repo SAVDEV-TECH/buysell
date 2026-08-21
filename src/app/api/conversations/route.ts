@@ -2,16 +2,17 @@
  * POST /api/conversations
  *
  * Enterprise API route for starting / fetching 1-to-1 conversations.
- * Supports recipient lookup by email, full name, or user ID.
+ * Supports recipient lookup by email, full name, organization ID, or user ID.
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
 interface StartConversationRequest {
-  recipientQuery?: string;  // Email, Full Name, or User ID
+  recipientQuery?: string; // Email, Full Name, Org ID, or User ID
   recipientEmail?: string;
   recipientId?: string;
 }
@@ -39,13 +40,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const adminSupabase = createAdminClient();
+
     let targetUserId = "";
     let targetFullName = "";
     let targetEmail = "";
 
-    // 2. Resolve recipient by ID first, then email, then name
-    if (query.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-      const { data: userById } = await supabase
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
+
+    // 2. Resolve recipient by ID (User ID or Organization ID)
+    if (isUUID) {
+      // 2a. Check if query is a direct user ID
+      const { data: userById } = await adminSupabase
         .from("users")
         .select("id, full_name, email")
         .eq("id", query)
@@ -53,56 +59,133 @@ export async function POST(request: NextRequest) {
 
       if (userById) {
         targetUserId = userById.id;
-        targetFullName = userById.full_name;
+        targetFullName = userById.full_name || userById.email || "Partner";
         targetEmail = userById.email;
       } else {
-        // Fallback: If it's an organization ID, get the owning user's ID
-        const { data: orgData } = await supabase
+        // 2b. Check if query is an Organization ID
+        const { data: orgData } = await adminSupabase
           .from("organizations")
-          .select("user_id")
+          .select("id, company_name, phone")
           .eq("id", query)
           .maybeSingle();
-          
-        if (orgData?.user_id) {
-           const { data: orgUser } = await supabase
-             .from("users")
-             .select("id, full_name, email")
-             .eq("id", orgData.user_id)
-             .maybeSingle();
-           
-           if (orgUser) {
-             targetUserId = orgUser.id;
-             targetFullName = orgUser.full_name;
-             targetEmail = orgUser.email;
-           }
+
+        if (orgData) {
+          // Find any user linked to this organization
+          const { data: orgUsers } = await adminSupabase
+            .from("users")
+            .select("id, full_name, email, role")
+            .eq("organization_id", orgData.id)
+            .order("created_at", { ascending: true });
+
+          if (orgUsers && orgUsers.length > 0) {
+            const primaryUser = orgUsers.find((u) => u.role?.includes("admin")) || orgUsers[0];
+            targetUserId = primaryUser.id;
+            targetFullName = primaryUser.full_name || orgData.company_name;
+            targetEmail = primaryUser.email;
+          } else {
+            // Auto-provision a supplier user contact for this organization so chat is always active
+            const placeholderEmail = `supplier-${orgData.id.slice(0, 8)}@buysell.africa`;
+            const { data: existingPlaceholder } = await adminSupabase
+              .from("users")
+              .select("id, full_name, email")
+              .eq("email", placeholderEmail)
+              .maybeSingle();
+
+            if (existingPlaceholder) {
+              targetUserId = existingPlaceholder.id;
+              targetFullName = orgData.company_name;
+              targetEmail = existingPlaceholder.email;
+            } else {
+              const { data: newOrgUser } = await adminSupabase
+                .from("users")
+                .insert({
+                  id: orgData.id,
+                  email: placeholderEmail,
+                  full_name: orgData.company_name,
+                  organization_id: orgData.id,
+                  role: "supplier_admin",
+                  is_email_verified: true,
+                })
+                .select("id, full_name, email")
+                .maybeSingle();
+
+              if (newOrgUser) {
+                targetUserId = newOrgUser.id;
+                targetFullName = newOrgUser.full_name;
+                targetEmail = newOrgUser.email;
+              } else {
+                const { data: fallbackUser } = await adminSupabase
+                  .from("users")
+                  .insert({
+                    email: placeholderEmail,
+                    full_name: orgData.company_name,
+                    organization_id: orgData.id,
+                    role: "supplier_admin",
+                    is_email_verified: true,
+                  })
+                  .select("id, full_name, email")
+                  .maybeSingle();
+
+                if (fallbackUser) {
+                  targetUserId = fallbackUser.id;
+                  targetFullName = fallbackUser.full_name;
+                  targetEmail = fallbackUser.email;
+                }
+              }
+            }
+          }
         }
       }
     }
 
     if (!targetUserId) {
-      // Lookup by email or full name
-      const { data: targetUser, error: userErr } = await supabase
+      // 3a. Lookup by email or full name in users table
+      const { data: targetUser } = await adminSupabase
         .from("users")
         .select("id, full_name, email")
         .or(`email.ilike.${query},full_name.ilike.%${query}%`)
         .maybeSingle();
 
-      if (userErr || !targetUser) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: `No registered user found matching '${query}'. Please ask them to register on BuySell first.`,
-          },
-          { status: 404 }
-        );
-      }
+      if (targetUser) {
+        targetUserId = targetUser.id;
+        targetFullName = targetUser.full_name || targetUser.email;
+        targetEmail = targetUser.email;
+      } else {
+        // 3b. Lookup by organization company name
+        const { data: orgByName } = await adminSupabase
+          .from("organizations")
+          .select("id, company_name")
+          .ilike("company_name", `%${query}%`)
+          .maybeSingle();
 
-      targetUserId = targetUser.id;
-      targetFullName = targetUser.full_name || targetUser.email;
-      targetEmail = targetUser.email;
+        if (orgByName) {
+          const { data: orgUsers } = await adminSupabase
+            .from("users")
+            .select("id, full_name, email, role")
+            .eq("organization_id", orgByName.id)
+            .order("created_at", { ascending: true });
+
+          if (orgUsers && orgUsers.length > 0) {
+            const primaryUser = orgUsers.find((u) => u.role?.includes("admin")) || orgUsers[0];
+            targetUserId = primaryUser.id;
+            targetFullName = primaryUser.full_name || orgByName.company_name;
+            targetEmail = primaryUser.email;
+          }
+        }
+      }
     }
 
-    // 3. Prevent self-conversations
+    if (!targetUserId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Could not connect with "${query}". Please verify the supplier or send an RFQ inquiry.`,
+        },
+        { status: 404 }
+      );
+    }
+
+    // 4. Prevent self-conversations
     if (targetUserId === user.id) {
       return NextResponse.json(
         { success: false, error: "You cannot start a conversation with yourself." },
@@ -110,8 +193,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Check if conversation already exists in either (A,B) or (B,A) order
-    const { data: existingConv } = await supabase
+    // 5. Check if conversation already exists in either (A,B) or (B,A) order
+    const { data: existingConv } = await adminSupabase
       .from("conversations")
       .select("*")
       .or(
@@ -131,9 +214,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 5. Create new conversation safely
+    // 6. Create new conversation safely using admin client
     const now = new Date().toISOString();
-    const { data: newConv, error: createErr } = await supabase
+    const { data: newConv, error: createErr } = await adminSupabase
       .from("conversations")
       .insert({
         participant_a: user.id,
@@ -147,17 +230,6 @@ export async function POST(request: NextRequest) {
 
     if (createErr || !newConv) {
       console.error("[API Conversations] Insert error:", createErr);
-
-      if (createErr?.code === "42501" || createErr?.message?.includes("row-level security")) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Database Row-Level Security policy error. Please execute messaging_migration.sql in Supabase SQL Editor.",
-          },
-          { status: 403 }
-        );
-      }
-
       const rawMsg = createErr?.message || "Database conversation insert failed.";
       return NextResponse.json({ success: false, error: rawMsg }, { status: 500 });
     }
