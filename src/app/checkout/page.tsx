@@ -184,12 +184,14 @@ export default function CheckoutPage() {
       try {
         const { error: escrowErr } = await supabase.from("escrow_transactions").insert({
           order_id: dbOrderInserted ? createdOrderId : null,
+          user_id: user.id,
           amount: finalTotal,
           currency: "USD",
           type: "deposit",
           status: "held",
           reference: reference,
-          metadata: { paymentMethod, user_id: user.id, order_ref: createdOrderId }
+          description: `Escrow deposit for order ${createdOrderId} via ${paymentMethod}`,
+          metadata: { paymentMethod, order_ref: createdOrderId, cart_items: cartItems.length }
         });
         if (escrowErr) {
           console.warn("[Checkout] Escrow insert notice:", escrowErr.message);
