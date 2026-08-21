@@ -7,7 +7,7 @@ const isDev = process.env.NODE_ENV === "development";
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://accounts.google.com https://js.stripe.com;
+  script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""} https://accounts.google.com https://js.stripe.com https://www.clarity.ms https://c.clarity.ms;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
   img-src 'self' blob: data: https://*.supabase.co https://images.unsplash.com https://*.googleusercontent.com https://lh3.googleusercontent.com;
   font-src 'self' https://fonts.gstatic.com data:;

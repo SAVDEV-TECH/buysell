@@ -24,15 +24,15 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone size={16} className="text-primary" />
-                <span>09037624245</span>
+                <span suppressHydrationWarning>09037624245</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail size={16} className="text-primary" />
-                <span>savde388@gmail.com</span>
+                <span suppressHydrationWarning>savde388@gmail.com</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <MapPin size={16} className="text-primary" />
-                <span>Choba, behind Ankor Hotel, Port Harcourt, Rivers State</span>
+                <span suppressHydrationWarning>Choba, behind Ankor Hotel, Port Harcourt, Rivers State</span>
               </div>
             </div>
           </div>
