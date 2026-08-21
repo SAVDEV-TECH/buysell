@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Users,
@@ -16,9 +15,8 @@ import {
   XCircle,
   ArrowUpRight,
   Activity,
-  DollarSign,
-  Building2,
   Lock,
+  RefreshCw,
 } from "lucide-react";
 import BuySellLoader from "@/components/BuySellLoader";
 
@@ -52,44 +50,14 @@ interface RecentOrder {
   created_at: string;
 }
 
-function StatCard({
-  label,
-  value,
-  icon,
-  color,
-  href,
-  delay,
-}: {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  href: string;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-    >
-      <Link
-        href={href}
-        className="group block p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all hover:scale-[1.02] shadow-xl"
-      >
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl ${color}`}>{icon}</div>
-          <ArrowUpRight
-            size={16}
-            className="text-slate-600 group-hover:text-slate-400 transition-colors"
-          />
-        </div>
-        <p className="text-3xl font-black text-white mb-1">{value}</p>
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</p>
-      </Link>
-    </motion.div>
-  );
-}
+const statusColor: Record<string, string> = {
+  processing:  "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  completed:   "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
+  delivered:   "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
+  pending:     "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  cancelled:   "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  refunded:    "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+};
 
 export default function AdminCommandCenter() {
   const { role } = useAuth();
@@ -106,13 +74,13 @@ export default function AdminCommandCenter() {
     recentOrders: [],
   });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchStats = useCallback(async () => {
     if (role !== "super_admin") return;
-    setLoading(true);
 
     try {
-      // 1. Fetch server API route /api/admin/stats (Industry Standard Server RLS Bypass)
+      // 1. Try server API route
       let apiSuccess = false;
       try {
         const res = await fetch("/api/admin/stats");
@@ -125,7 +93,7 @@ export default function AdminCommandCenter() {
         console.warn("[Admin Dashboard] Server stats API notice, running client fallback:", apiErr);
       }
 
-      // 2. Client query fallback if server API route is unavailable
+      // 2. Client fallback
       if (!apiSuccess) {
         const [
           usersRes,
@@ -154,7 +122,6 @@ export default function AdminCommandCenter() {
         const verifiedCount = verifiedRes.count ?? 0;
 
         let dbOrders = (rawOrdersRes.data as any[]) || [];
-
         let localOrders: any[] = [];
         try {
           for (let i = 0; i < localStorage.length; i++) {
@@ -210,7 +177,6 @@ export default function AdminCommandCenter() {
               : "new",
         }));
 
-        // Query escrow balance directly from client (anon key with RLS)
         let escrowBalance = 0;
         try {
           const { data: escrowData } = await supabase
@@ -245,6 +211,7 @@ export default function AdminCommandCenter() {
       console.error("Admin stats fetch error:", err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [role, supabase]);
 
@@ -252,336 +219,260 @@ export default function AdminCommandCenter() {
     fetchStats();
   }, [fetchStats]);
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchStats();
+  };
+
   if (loading) {
-    return <BuySellLoader message="Loading platform telemetry…" fullScreen={false} />;
+    return <BuySellLoader message="Loading dashboard…" fullScreen={false} />;
   }
 
-  const statCards = [
+  const kpiCards = [
     {
       label: "Registered Users",
       value: stats.totalUsers.toLocaleString(),
-      icon: <Users size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <Users size={18} className="text-primary" />,
       href: "/admin/users",
+      sub: "Total accounts",
     },
     {
       label: "Active Products",
       value: stats.totalProducts.toLocaleString(),
-      icon: <Package size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <Package size={18} className="text-primary" />,
       href: "/admin/products",
+      sub: "Listed on marketplace",
     },
     {
       label: "Total Orders",
       value: stats.totalOrders.toLocaleString(),
-      icon: <ShoppingCart size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <ShoppingCart size={18} className="text-primary" />,
       href: "/admin/orders",
+      sub: "All-time",
     },
     {
       label: "Pending Approvals",
       value: stats.pendingVerifications,
-      icon: <Clock size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <Clock size={18} className="text-amber-500" />,
       href: "/admin/verifications",
+      sub: "Awaiting KYB review",
+      highlight: stats.pendingVerifications > 0,
     },
     {
       label: "Verified Businesses",
       value: stats.verifiedOrgs.toLocaleString(),
-      icon: <ShieldCheck size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <ShieldCheck size={18} className="text-green-500" />,
       href: "/admin/verifications",
+      sub: "Approved organisations",
     },
     {
       label: "Platform Revenue",
       value: `$${stats.totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-      icon: <TrendingUp size={20} className="text-slate-400 group-hover:text-primary transition-colors" />,
-      color: "bg-slate-800",
+      icon: <TrendingUp size={18} className="text-primary" />,
       href: "/admin/payouts",
+      sub: "Cumulative trade volume",
     },
     {
       label: "Escrow Balance",
       value: `$${(stats.escrowBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-      icon: <Lock size={20} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />,
-      color: "bg-slate-800",
+      icon: <Lock size={18} className="text-emerald-500" />,
       href: "/admin/escrow-ledger",
+      sub: "Funds currently held",
     },
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-6">
+    <div className="max-w-6xl mx-auto pb-16 space-y-8 px-1">
+
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            Admin Command Center
-            <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-              Super Admin
-            </span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1 font-bold">
-            Real-time platform telemetry, merchant approvals, trade volume, and system governance
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={20} className="text-primary" />
+            <h1 className="text-xl font-bold text-foreground">Super Admin Dashboard</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Platform overview · {new Date().toLocaleDateString("en-NG", { weekday: "long", day: "numeric", month: "long" })}
           </p>
         </div>
-
-        <Link
-          href="/admin/verifications"
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-black hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-        >
-          Review Verification Queue ({stats.pendingVerifications})
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors"
+          >
+            <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+            Refresh
+          </button>
+          {stats.pendingVerifications > 0 && (
+            <Link
+              href="/admin/verifications"
+              className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 transition-colors"
+            >
+              <Clock size={13} />
+              {stats.pendingVerifications} Pending
+            </Link>
+          )}
+        </div>
       </div>
 
-      {/* Action Banner if Pending Verifications */}
-      {stats.pendingVerifications > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-5 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
-        >
-          <div className="flex items-center gap-3">
-            <Clock size={24} className="text-amber-400 shrink-0" />
-            <div>
-              <p className="text-sm font-black text-amber-300">
-                {stats.pendingVerifications} Organization Application{stats.pendingVerifications > 1 ? "s" : ""} Awaiting Review
-              </p>
-              <p className="text-xs text-slate-400 font-medium">
-                Verify business registration & tax IDs to grant selling permissions on BuySell.
-              </p>
-            </div>
-          </div>
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {kpiCards.map((card) => (
           <Link
-            href="/admin/verifications"
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl transition-all whitespace-nowrap"
+            key={card.label}
+            href={card.href}
+            className={`group flex flex-col gap-3 p-4 rounded-xl border transition-all hover:shadow-md ${
+              card.highlight
+                ? "bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800"
+                : "bg-card border-border hover:border-primary/30"
+            }`}
           >
-            Review Now →
+            <div className="flex items-center justify-between">
+              <div className="p-2 rounded-lg bg-muted">{card.icon}</div>
+              <ArrowUpRight size={14} className="text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-foreground leading-none">{card.value}</p>
+              <p className="text-xs font-semibold text-muted-foreground mt-1">{card.label}</p>
+              <p className="text-[11px] text-muted-foreground/70 mt-0.5">{card.sub}</p>
+            </div>
           </Link>
-        </motion.div>
-      )}
-
-      {/* Stat Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {statCards.map((card, i) => (
-          <StatCard key={card.label} {...card} delay={i * 0.07} />
         ))}
       </div>
 
-      {/* Live Recent Trade Orders Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="bg-slate-900 rounded-2xl border border-slate-800 p-6"
-      >
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-sm font-black text-white flex items-center gap-2">
-            <ShoppingCart size={16} className="text-cyan-400" />
-            Recent Platform Trade Orders & Escrow Log
-          </h3>
-          <Link
-            href="/admin/orders"
-            className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1"
-          >
-            View all orders ({stats.totalOrders}) <ArrowUpRight size={12} />
-          </Link>
-        </div>
+      {/* ── Main Content: Orders + Activity ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {stats.recentOrders.length === 0 ? (
-          <div className="py-10 text-center text-slate-600 text-sm font-bold">
-            No platform trade orders recorded yet.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <th className="pb-3">Order ID</th>
-                  <th className="pb-3">Buyer / Supplier</th>
-                  <th className="pb-3">Trade Amount</th>
-                  <th className="pb-3">Method</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50 text-xs">
-                {stats.recentOrders.map((ord) => (
-                  <tr key={ord.id} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="py-3 font-mono font-bold text-white">
-                      #{ord.id.slice(0, 8).toUpperCase()}
-                    </td>
-                    <td className="py-3">
-                      <p className="font-bold text-white">{ord.buyer_name}</p>
-                      <p className="text-[10px] text-slate-500">Supplier: {ord.supplier_name}</p>
-                    </td>
-                    <td className="py-3 font-black text-white">
-                      ${ord.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-3 text-slate-400 uppercase text-[10px] font-bold">
-                      {ord.payment_method}
-                    </td>
-                    <td className="py-3">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-                        {ord.status}
-                      </span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <Link
-                        href={`/dashboard/orders/${ord.id}`}
-                        className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-0.5"
-                      >
-                        Inspect <ArrowUpRight size={12} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Two-column lower section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Org Activity Feed */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-slate-900 rounded-2xl border border-slate-800 p-6"
-        >
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-sm font-black text-white flex items-center gap-2">
-              <Activity size={16} className="text-primary" />
-              Recent Organization Activity
-            </h3>
+        {/* Recent Orders — takes 2/3 width */}
+        <div className="lg:col-span-2 rounded-xl border border-border bg-card">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <ShoppingCart size={15} className="text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Recent Orders</h2>
+            </div>
             <Link
-              href="/admin/verifications"
-              className="text-xs font-bold text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
+              href="/admin/orders"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             >
               View all <ArrowUpRight size={12} />
             </Link>
           </div>
 
-          {stats.recentActivity.length === 0 ? (
-            <div className="py-12 text-center text-slate-600 text-sm font-bold">
-              No recent activity
+          {stats.recentOrders.length === 0 ? (
+            <div className="py-16 text-center text-muted-foreground text-sm">
+              No orders yet
             </div>
           ) : (
-            <div className="space-y-3">
-              {stats.recentActivity.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50"
-                >
-                  <div className="flex-shrink-0">
-                    {item.type === "approved" ? (
-                      <CheckCircle2 size={16} className="text-slate-400" />
-                    ) : item.type === "rejected" ? (
-                      <XCircle size={16} className="text-slate-400" />
-                    ) : (
-                      <Clock size={16} className="text-slate-400" />
-                    )}
-                  </div>
+            <div className="divide-y divide-border">
+              {stats.recentOrders.map((ord) => (
+                <div key={ord.id} className="flex items-center gap-3 px-5 py-3 hover:bg-muted/40 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-white truncate">{item.org_name}</p>
-                    <p className="text-[11px] text-slate-500 font-bold">{item.action}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-foreground">
+                        #{ord.id?.slice(0, 8).toUpperCase()}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusColor[ord.status] ?? "bg-muted text-muted-foreground"}`}>
+                        {ord.status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                      {ord.buyer_name} → {ord.supplier_name}
+                    </p>
                   </div>
-                  <span className="text-[10px] text-slate-600 font-bold whitespace-nowrap">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-foreground">
+                      ${ord.total_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground uppercase">{ord.payment_method}</p>
+                  </div>
+                  <Link
+                    href={`/dashboard/orders/${ord.id}`}
+                    className="ml-2 text-xs text-primary hover:underline shrink-0 flex items-center gap-0.5"
+                  >
+                    View <ArrowUpRight size={11} />
+                  </Link>
                 </div>
               ))}
             </div>
           )}
-        </motion.div>
+        </div>
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-slate-900 rounded-2xl border border-slate-800 p-6"
-        >
-          <h3 className="text-sm font-black text-white flex items-center gap-2 mb-5">
-            <TrendingUp size={16} className="text-primary" />
-            Quick Actions
-          </h3>
+        {/* Sidebar: Activity + Quick Actions */}
+        <div className="space-y-6">
 
-          <div className="space-y-3">
-            {[
-              {
-                label: "Review Pending Verifications",
-                desc: `${stats.pendingVerifications} organizations awaiting KYB approval`,
-                href: "/admin/verifications",
-                icon: <ShieldCheck size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
-                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
-              },
-              {
-                label: "Manage All Orders",
-                desc: `${stats.totalOrders} commercial B2B orders logged`,
-                href: "/admin/orders",
-                icon: <ShoppingCart size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
-                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
-              },
-              {
-                label: "Manage All Users",
-                desc: `${stats.totalUsers} registered accounts on the platform`,
-                href: "/admin/users",
-                icon: <Users size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
-                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
-              },
-              {
-                label: "Review Marketplace Products",
-                desc: `${stats.totalProducts} live products on the marketplace`,
-                href: "/admin/products",
-                icon: <Package size={18} className="text-slate-400 group-hover:text-primary transition-colors" />,
-                bg: "bg-slate-800/50 hover:bg-slate-800 border-slate-700/50",
-              },
-            ].map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all group ${action.bg}`}
-              >
-                <div className="p-2 rounded-lg bg-slate-800 flex-shrink-0">{action.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-black text-white group-hover:text-primary transition-colors">
-                    {action.label}
-                  </p>
-                  <p className="text-[11px] text-slate-500 font-bold truncate">{action.desc}</p>
-                </div>
-                <ArrowUpRight
-                  size={14}
-                  className="text-slate-600 group-hover:text-slate-400 transition-colors flex-shrink-0"
-                />
-              </Link>
-            ))}
+          {/* Org Activity */}
+          <div className="rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+              <Activity size={14} className="text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Organisation Activity</h2>
+            </div>
+            {stats.recentActivity.length === 0 ? (
+              <div className="py-10 text-center text-muted-foreground text-xs">No recent activity</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {stats.recentActivity.map((item) => (
+                  <div key={item.id} className="flex items-start gap-3 px-4 py-3">
+                    <div className="mt-0.5">
+                      {item.type === "approved" ? (
+                        <CheckCircle2 size={14} className="text-green-500" />
+                      ) : item.type === "rejected" ? (
+                        <XCircle size={14} className="text-red-500" />
+                      ) : (
+                        <Clock size={14} className="text-amber-500" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{item.org_name}</p>
+                      <p className="text-[11px] text-muted-foreground">{item.action}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {new Date(item.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </motion.div>
+
+          {/* Quick Actions */}
+          <div className="rounded-xl border border-border bg-card">
+            <div className="px-4 py-3 border-b border-border">
+              <h2 className="text-sm font-semibold text-foreground">Quick Actions</h2>
+            </div>
+            <div className="p-3 space-y-2">
+              {[
+                { label: "Verify Businesses", href: "/admin/verifications", icon: <ShieldCheck size={14} className="text-primary" />, count: stats.pendingVerifications },
+                { label: "Manage Orders", href: "/admin/orders", icon: <ShoppingCart size={14} className="text-primary" />, count: stats.totalOrders },
+                { label: "Escrow Ledger", href: "/admin/escrow-ledger", icon: <Lock size={14} className="text-emerald-500" /> },
+                { label: "All Users", href: "/admin/users", icon: <Users size={14} className="text-primary" />, count: stats.totalUsers },
+                { label: "All Products", href: "/admin/products", icon: <Package size={14} className="text-primary" />, count: stats.totalProducts },
+              ].map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-muted transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    {action.icon}
+                    <span className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">
+                      {action.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {action.count !== undefined && (
+                      <span className="text-[10px] font-semibold text-muted-foreground">
+                        {action.count.toLocaleString()}
+                      </span>
+                    )}
+                    <ArrowUpRight size={12} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* System Status Bar */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="p-5 rounded-2xl bg-slate-900 border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-ping" />
-          <div>
-            <p className="text-sm font-black text-white">All Systems Operational</p>
-            <p className="text-xs text-slate-400 font-bold">
-              Supabase realtime · PostgreSQL · Server API RLS Bypass — all online
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-500">
-          <span>DB: ✓ Connected</span>
-          <span>Server API: ✓ Active</span>
-          <span>RLS Bypass: ✓ Enabled</span>
-        </div>
-      </motion.div>
     </div>
   );
 }
