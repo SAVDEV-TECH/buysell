@@ -25,6 +25,8 @@ interface Product {
   description: string;
   imageUrl?: string;
   sellerName: string;
+  sellerId?: string;
+  manufacturerId?: string;
 }
 
 export default function WholesaleDirectoryPage() {

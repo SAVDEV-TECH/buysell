@@ -71,10 +71,11 @@ export default function PaystackButton({
       }
 
       // If test placeholder key is detected, complete simulated payment for testing
-      if (!publicKey || publicKey.includes("placeholder") || publicKey.includes("pk_test_")) {
-        await new Promise((res) => setTimeout(res, 800));
-        setPreparing(false);
-        handleSuccess({ reference });
+      if (!publicKey || publicKey.includes("placeholder") || publicKey.includes("pk_test_") || publicKey.includes("TEST")) {
+        setTimeout(() => {
+          setPreparing(false);
+          handleSuccess({ reference });
+        }, 1200);
         return;
       }
 
@@ -88,8 +89,10 @@ export default function PaystackButton({
     } catch (err: any) {
       console.error("[PaystackButton] Payment initialization error:", err);
       // Fall back to simulation if third-party script fails in local sandbox
-      setPreparing(false);
-      handleSuccess({ reference });
+      setTimeout(() => {
+        setPreparing(false);
+        handleSuccess({ reference });
+      }, 1200);
     }
   };
 

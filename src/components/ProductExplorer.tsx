@@ -14,6 +14,7 @@ import {
   MessageCircle,
   BadgeCheck,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -159,10 +160,12 @@ function MoqLeadTimeRows({ product, compact = false }: { product: Product; compa
 function MobileProductCard({
   product,
   user,
+  onAddToCart,
   onContactSupplier,
 }: {
   product: Product;
   user: any;
+  onAddToCart: (product: Product) => void;
   onContactSupplier: (sellerId: string, sellerName: string) => void;
 }) {
   const isGold = product.isSellerVerified === true;
@@ -675,6 +678,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                 <MobileProductCard
                   product={product}
                   user={user}
+                  onAddToCart={handleAddToCart}
                   onContactSupplier={(sellerId, name) => setActiveChat({ id: sellerId, name })}
                 />
               </div>

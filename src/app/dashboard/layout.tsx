@@ -57,7 +57,7 @@ export default function DashboardLayout({
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
-  const adminNavItems = (role === "admin" || role === "super_admin") ? [
+  const adminNavItems = (role === "super_admin") ? [
     { name: "Super Admin", href: "/admin", icon: ShieldCheck },
     { name: "Escrow Ledger", href: "/admin/escrow-ledger", icon: Layers },
   ] : [];

@@ -24,15 +24,15 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone size={16} className="text-primary" />
-                <span>+234 (0) 800 123 4567</span>
+                <span>09037624245</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail size={16} className="text-primary" />
-                <span>support@buysell.b2b</span>
+                <span>savde388@gmail.com</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <MapPin size={16} className="text-primary" />
-                <span>123 Enterprise Way, Lagos, Nigeria</span>
+                <span>Choba, behind Ankor Hotel, Port Harcourt, Rivers State</span>
               </div>
             </div>
           </div>

@@ -140,7 +140,7 @@ const Navbar = () => {
                         <span>Go to Dashboard</span>
                       </Link>
 
-                      {(role === "admin" || role === "super_admin") && (
+                      {role === "super_admin" && (
                         <Link
                           href="/admin"
                           onClick={() => setIsUserMenuOpen(false)}

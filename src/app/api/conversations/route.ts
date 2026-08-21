@@ -55,6 +55,27 @@ export async function POST(request: NextRequest) {
         targetUserId = userById.id;
         targetFullName = userById.full_name;
         targetEmail = userById.email;
+      } else {
+        // Fallback: If it's an organization ID, get the owning user's ID
+        const { data: orgData } = await supabase
+          .from("organizations")
+          .select("user_id")
+          .eq("id", query)
+          .maybeSingle();
+          
+        if (orgData?.user_id) {
+           const { data: orgUser } = await supabase
+             .from("users")
+             .select("id, full_name, email")
+             .eq("id", orgData.user_id)
+             .maybeSingle();
+           
+           if (orgUser) {
+             targetUserId = orgUser.id;
+             targetFullName = orgUser.full_name;
+             targetEmail = orgUser.email;
+           }
+        }
       }
     }
 

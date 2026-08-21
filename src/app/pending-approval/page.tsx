@@ -293,7 +293,7 @@ function PendingApprovalContent() {
         className="space-y-2"
       >
         <Link
-          href="mailto:support@buysell.com"
+          href="mailto:savde388@gmail.com"
           className="w-full px-4 py-3 glass border border-borderline rounded-2xl hover:bg-muted transition-all font-bold text-sm flex items-center justify-center gap-2"
         >
           <Mail size={16} /> Contact Support
