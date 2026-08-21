@@ -177,21 +177,25 @@ export default function CheckoutPage() {
         } catch (itemsErr) {
           console.warn("[Checkout] Could not insert order_items (table optional):", itemsErr);
         }
+      }
 
-        // Add to escrow_transactions so Super Admin sees the funds held
-        try {
-          await supabase.from("escrow_transactions").insert({
-            order_id: createdOrderId,
-            amount: finalTotal,
-            currency: "USD",
-            type: "deposit",
-            status: "held",
-            reference: reference,
-            metadata: { paymentMethod, user_id: user.id }
-          });
-        } catch (escrowErr) {
-          console.warn("[Checkout] Escrow insert notice:", escrowErr);
+      // ALWAYS record escrow deposit — even if DB order insert failed
+      // This ensures Super Admin always sees funds held in escrow
+      try {
+        const { error: escrowErr } = await supabase.from("escrow_transactions").insert({
+          order_id: dbOrderInserted ? createdOrderId : null,
+          amount: finalTotal,
+          currency: "USD",
+          type: "deposit",
+          status: "held",
+          reference: reference,
+          metadata: { paymentMethod, user_id: user.id, order_ref: createdOrderId }
+        });
+        if (escrowErr) {
+          console.warn("[Checkout] Escrow insert notice:", escrowErr.message);
         }
+      } catch (escrowErr) {
+        console.warn("[Checkout] Escrow insert exception:", escrowErr);
       }
 
       // 4. Resolve supplier user ID for live real-time notification & supplier local persistence

@@ -210,6 +210,25 @@ export default function AdminCommandCenter() {
               : "new",
         }));
 
+        // Query escrow balance directly from client (anon key with RLS)
+        let escrowBalance = 0;
+        try {
+          const { data: escrowData } = await supabase
+            .from("escrow_transactions")
+            .select("amount, type, status");
+          if (escrowData) {
+            for (const tx of escrowData) {
+              if (tx.type === "deposit" || tx.type === "hold") {
+                escrowBalance += Number(tx.amount || 0);
+              } else if (tx.type === "release" || tx.type === "partial_release" || tx.type === "refund") {
+                escrowBalance -= Number(tx.amount || 0);
+              }
+            }
+          }
+        } catch (escrowQueryErr) {
+          console.warn("[Admin] Escrow balance fallback query notice:", escrowQueryErr);
+        }
+
         setStats({
           totalUsers: uCount,
           totalProducts: pCount,
@@ -217,7 +236,7 @@ export default function AdminCommandCenter() {
           pendingVerifications: pendingCount,
           verifiedOrgs: verifiedCount,
           totalRevenue,
-          escrowBalance: 0,
+          escrowBalance: Math.max(0, escrowBalance),
           recentActivity: activity,
           recentOrders: formattedOrders,
         });
