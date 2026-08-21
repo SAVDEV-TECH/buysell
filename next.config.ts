@@ -79,6 +79,7 @@ const webhookHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
+    unoptimized: isDev,
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],

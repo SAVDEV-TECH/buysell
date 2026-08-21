@@ -63,10 +63,12 @@ export async function GET(req: NextRequest) {
       // Insert transaction ledger record
       await supabaseAdmin.from("escrow_transactions").insert({
         order_id: order.id,
+        user_id: order.buyer_id || order.user_id || null,
         amount,
         currency: order.currency || "USD",
         type: "release",
         status: "completed",
+        description: `Automated escrow release (72h inspection window) for order #${order.id.slice(0, 8).toUpperCase()}`,
         metadata: {
           triggered_by: "cron_auto_release_72h",
           inspection_period_hours: 72,

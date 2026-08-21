@@ -100,10 +100,12 @@ export async function POST(req: NextRequest) {
     try {
       await supabaseAdmin.from("escrow_transactions").insert({
         order_id: orderId,
+        user_id: order.buyer_id || order.user_id || null,
         amount,
         currency: order.currency || "USD",
         type: txType,
         status: txStatus,
+        description: `Escrow ${action} executed by Super Admin for order #${orderId.slice(0, 8).toUpperCase()}`,
         metadata: {
           action_by: "super_admin",
           idempotency_key: idempotencyKey,
