@@ -16,12 +16,10 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight,
-  Bell,
-  AlertCircle,
   Lock,
+  ExternalLink,
 } from "lucide-react";
-import BuySellLogo from "@/components/BuySellLogo";
+import { BuySellLogo } from "@/components/BuySellLogo";
 import BuySellLoader from "@/components/BuySellLoader";
 import NotificationPopover from "@/components/NotificationPopover";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -38,15 +36,15 @@ interface NavGroup {
   items: NavItem[];
 }
 
-const navItems: NavGroup[] = [
+const navGroups: NavGroup[] = [
   {
-    section: "OVERVIEW",
+    section: "Overview",
     items: [
-      { name: "Command Center", href: "/admin/dashboard", icon: LayoutDashboard },
+      { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     ],
   },
   {
-    section: "PLATFORM",
+    section: "Platform",
     items: [
       { name: "Verifications", href: "/admin/verifications", icon: ShieldCheck, badge: "pending" },
       { name: "Users", href: "/admin/users", icon: Users },
@@ -54,7 +52,7 @@ const navItems: NavGroup[] = [
     ],
   },
   {
-    section: "COMMERCE",
+    section: "Commerce",
     items: [
       { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
       { name: "Escrow Ledger", href: "/admin/escrow-ledger", icon: Lock },
@@ -62,7 +60,7 @@ const navItems: NavGroup[] = [
     ],
   },
   {
-    section: "AUDIT",
+    section: "Audit",
     items: [
       { name: "Activity Log", href: "/admin/activity", icon: Activity },
     ],
@@ -77,17 +75,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [pendingCount, setPendingCount] = useState(0);
   const supabase = createClient();
 
-  // Role gate — only super_admin allowed
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-    if (!loading && user && role !== "super_admin") {
-      router.push("/dashboard");
-    }
+    if (!loading && !user) router.push("/login");
+    if (!loading && user && role !== "super_admin") router.push("/dashboard");
   }, [user, loading, role, router]);
 
-  // Fetch pending verification count for badge
   useEffect(() => {
     if (role !== "super_admin") return;
     const fetchPending = async () => {
@@ -98,13 +90,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setPendingCount(count || 0);
     };
     fetchPending();
-
-    // Subscribe to org changes to keep badge live
     const channel = supabase
       .channel("admin-pending-badge")
       .on("postgres_changes", { event: "*", schema: "public", table: "organizations" }, fetchPending)
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [role, supabase]);
 
@@ -114,46 +103,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (loading || !user || role !== "super_admin") {
-    return <BuySellLoader message="Verifying admin credentials…" fullScreen />;
+    return <BuySellLoader message="Verifying credentials…" fullScreen />;
   }
 
+  const initials = profile?.full_name
+    ? profile.full_name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "SA";
+
   return (
-    <div className="min-h-screen bg-background dark:bg-slate-950 flex text-foreground">
+    <div className="min-h-screen bg-background flex text-foreground">
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 dark:bg-slate-900 border-r border-border dark:border-slate-800 flex flex-col transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-56 bg-card border-r border-border flex flex-col transition-transform duration-200 lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-border dark:border-slate-800 flex items-center gap-3">
-          <BuySellLogo size="sm" />
-          <div>
-            <p className="font-black text-base leading-none text-slate-900 dark:text-white">BuySell</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-0.5">Admin</p>
+        <div className="h-14 flex items-center px-4 border-b border-border shrink-0">
+          <BuySellLogo size="sm" showTagline={false} />
+          <div className="ml-2.5">
+            <span className="font-bold text-sm text-foreground">BuySell</span>
+            <span className="ml-1.5 text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">Admin</span>
           </div>
         </div>
 
-        {/* Admin Identity */}
-        <div className="px-4 py-3 mx-4 mt-4 rounded-2xl bg-white dark:bg-slate-800/60 border border-border dark:border-slate-700/50 flex items-center gap-3 shadow-sm">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
-            {profile?.full_name?.[0] || "A"}
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-black truncate text-slate-900 dark:text-white">{profile?.full_name || "Admin"}</p>
-            <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-              Super Admin
-            </p>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-6 scrollbar-none">
-          {navItems.map((group) => (
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+          {navGroups.map((group) => (
             <div key={group.section}>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 px-2 mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2 mb-1">
                 {group.section}
               </p>
               <div className="space-y-0.5">
@@ -165,20 +144,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       key={item.name}
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all relative group ${
+                      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-colors ${
                         isActive
-                          ? "bg-primary/10 dark:bg-primary/15 text-primary border border-primary/20"
-                          : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80"
+                          ? "bg-primary text-white font-semibold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted font-medium"
                       }`}
                     >
-                      <item.icon size={18} className={isActive ? "text-primary" : ""} />
-                      <span className="flex-1">{item.name}</span>
+                      <item.icon size={16} />
+                      <span className="flex-1 truncate">{item.name}</span>
                       {showBadge && (
-                        <span className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-black rounded-full animate-pulse">
+                        <span className="text-[10px] font-bold bg-amber-500 text-white px-1.5 py-0.5 rounded-full leading-none">
                           {pendingCount}
                         </span>
                       )}
-                      {isActive && <ChevronRight size={14} className="text-primary" />}
                     </Link>
                   );
                 })}
@@ -187,66 +165,70 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
 
-        {/* Bottom actions */}
-        <div className="p-4 border-t border-border dark:border-slate-800 space-y-1">
+        {/* User + Actions */}
+        <div className="border-t border-border px-3 py-3 space-y-1 shrink-0">
+          {/* Profile pill */}
+          <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-muted">
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || "Admin"}</p>
+              <p className="text-[10px] text-emerald-500 font-medium">● Super Admin</p>
+            </div>
+          </div>
+
           <Link
             href="/"
             target="_blank"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors font-medium"
           >
-            <Package size={18} />
-            View Live Site ↗
+            <ExternalLink size={15} />
+            <span>View Live Site</span>
           </Link>
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-950/30 transition-all rounded-xl text-sm font-bold"
+            className="flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors font-medium"
           >
-            <LogOut size={18} />
-            Sign Out
+            <LogOut size={15} />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* Mobile sidebar overlay */}
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* ── Main Content Area ── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* ── Main Area ── */}
+      <div className="flex-1 flex flex-col min-w-0">
 
-        {/* Top Header */}
-        <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-border dark:border-slate-800 h-16 flex items-center justify-between px-4 lg:px-8 shrink-0 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+        {/* Top bar */}
+        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 sticky top-0 z-30">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
+              className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
-
-            {/* Breadcrumb indicator */}
-            <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500">
-              <span className="text-primary font-black">ADMIN</span>
-              <ChevronRight size={14} />
-              <span className="text-slate-600 dark:text-slate-300 capitalize">
-                {pathname.split("/").pop()?.replace("-", " ") || "dashboard"}
-              </span>
-            </div>
+            <span className="text-sm font-semibold text-foreground capitalize hidden sm:block">
+              {pathname.split("/").pop()?.replace(/-/g, " ") || "Dashboard"}
+            </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Pending alert pill */}
+          <div className="flex items-center gap-2">
             {pendingCount > 0 && (
               <Link
                 href="/admin/verifications"
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-black hover:bg-amber-500/20 transition-all"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
               >
-                <AlertCircle size={14} className="animate-pulse" />
-                {pendingCount} pending approval{pendingCount !== 1 ? "s" : ""}
+                {pendingCount} pending
               </Link>
             )}
             <ThemeToggle />
@@ -255,7 +237,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 pb-24 lg:p-8 lg:pb-10 bg-background dark:bg-slate-950">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24">
           {children}
         </main>
       </div>
