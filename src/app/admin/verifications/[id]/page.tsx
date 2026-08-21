@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { safeHref } from "@/lib/security";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -24,6 +23,7 @@ import {
   ExternalLink,
   AlertTriangle,
 } from "lucide-react";
+import BuySellLoader from "@/components/BuySellLoader";
 
 interface OrgDetail {
   id: string;
@@ -53,7 +53,7 @@ interface AuditEntry {
 
 export default function VerificationDetailPage() {
   const { id } = useParams();
-  const { user, role } = useAuth();
+  const { role } = useAuth();
   const router = useRouter();
   const supabase = createClient();
 
@@ -100,7 +100,6 @@ export default function VerificationDetailPage() {
 
         setOrg(orgData as OrgDetail);
 
-        // Fetch audit trail entries
         if (orgData) {
           let { data: actions } = await supabase
             .from("approval_actions")
@@ -187,21 +186,17 @@ export default function VerificationDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Loader2 size={32} className="text-primary animate-spin" />
-        <p className="text-slate-500 text-sm font-bold">Loading organization profile…</p>
-      </div>
-    );
+    return <BuySellLoader message="Loading business profile..." fullScreen={false} />;
   }
 
   if (!org) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <AlertTriangle size={40} className="text-amber-400" />
-        <p className="text-white font-black text-lg">Organization not found</p>
-        <Link href="/admin/verifications" className="text-primary text-sm font-bold hover:underline">
-          ← Back to queue
+      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3 bg-card border border-border rounded-xl p-8 max-w-xl mx-auto text-center">
+        <AlertTriangle size={36} className="text-amber-500" />
+        <p className="text-base font-bold text-foreground">Organization not found</p>
+        <p className="text-xs text-muted-foreground">The requested organization profile does not exist or has been removed.</p>
+        <Link href="/admin/verifications" className="mt-2 text-xs font-semibold text-primary hover:underline">
+          ← Back to Verification Queue
         </Link>
       </div>
     );
@@ -209,10 +204,10 @@ export default function VerificationDetailPage() {
 
   const statusColor =
     org.verification_level === "verified"
-      ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+      ? "text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
       : org.verification_level === "rejected"
-      ? "text-red-400 bg-red-500/10 border-red-500/20"
-      : "text-amber-400 bg-amber-500/10 border-amber-500/20 animate-pulse";
+      ? "text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-950/40 border-red-200 dark:border-red-800"
+      : "text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800";
 
   const kybChecklist = [
     { label: "Company Name Provided", done: !!org.company_name },
@@ -226,55 +221,48 @@ export default function VerificationDetailPage() {
   const kybScore = kybChecklist.filter((c) => c.done).length;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-
-      {/* Back + header */}
-      <div className="flex items-center gap-4">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+      {/* Back + Header */}
+      <div className="flex items-center gap-3">
         <Link
           href="/admin/verifications"
-          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all border border-slate-700"
+          className="p-2 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
         </Link>
         <div>
-          <h1 className="text-xl font-black text-white">{org.company_name}</h1>
-          <p className="text-slate-500 text-xs font-bold">Organization Verification Profile</p>
+          <h1 className="text-xl font-bold text-foreground">{org.company_name}</h1>
+          <p className="text-xs text-muted-foreground">KYB Verification Profile</p>
         </div>
-        <span className={`ml-auto px-3 py-1.5 rounded-xl border text-xs font-black uppercase tracking-wider ${statusColor}`}>
+        <span className={`ml-auto px-2.5 py-0.5 rounded-full border text-xs font-semibold uppercase tracking-wider ${statusColor}`}>
           {org.verification_level}
         </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: Org Details */}
-        <div className="lg:col-span-2 space-y-5">
-
+        <div className="lg:col-span-2 space-y-4">
           {/* Business Info Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4"
-          >
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-4 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Building2 size={14} className="text-primary" />
-              Business Details
+              Business Information
             </h3>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-2 gap-4 text-xs">
               {[
-                { label: "Company Name", value: org.company_name, icon: <Building2 size={14} /> },
-                { label: "Company Type", value: org.company_type || "—", icon: <FileText size={14} /> },
-                { label: "Reg. Number", value: org.legal_registration_number || "Not provided", icon: <FileText size={14} /> },
-                { label: "Location", value: [org.city, org.country].filter(Boolean).join(", ") || "—", icon: <MapPin size={14} /> },
-                { label: "Website", value: org.website || "—", icon: <Globe size={14} /> },
-                { label: "Applied On", value: new Date(org.created_at).toLocaleDateString(), icon: <Calendar size={14} /> },
+                { label: "Company Name", value: org.company_name, icon: <Building2 size={13} /> },
+                { label: "Company Type", value: org.company_type || "—", icon: <FileText size={13} /> },
+                { label: "Reg. Number", value: org.legal_registration_number || "Not provided", icon: <FileText size={13} /> },
+                { label: "Location", value: [org.city, org.country].filter(Boolean).join(", ") || "—", icon: <MapPin size={13} /> },
+                { label: "Website", value: org.website || "—", icon: <Globe size={13} /> },
+                { label: "Applied On", value: new Date(org.created_at).toLocaleDateString(), icon: <Calendar size={13} /> },
               ].map((field) => (
-                <div key={field.label} className="space-y-1">
-                  <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                <div key={field.label} className="space-y-0.5">
+                  <div className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase">
                     {field.icon} {field.label}
                   </div>
-                  <p className="font-bold text-slate-200 text-xs">
+                  <p className="font-semibold text-foreground text-xs">
                     {field.label === "Website" && org.website ? (
                       <a href={safeHref(org.website)} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
                         {org.website} <ExternalLink size={10} />
@@ -288,176 +276,151 @@ export default function VerificationDetailPage() {
             </div>
 
             {org.description && (
-              <div className="pt-3 border-t border-slate-800">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1.5">Business Description</p>
-                <p className="text-xs text-slate-400 leading-relaxed">{org.description}</p>
+              <div className="pt-3 border-t border-border">
+                <p className="text-[10px] font-semibold uppercase text-muted-foreground mb-1">Description</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{org.description}</p>
               </div>
             )}
-          </motion.div>
+          </div>
 
           {/* Owner Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4"
-          >
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-xl p-5 space-y-3 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <User size={14} className="text-primary" />
               Account Owner
             </h3>
             {(org.owner as any)?.email ? (
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center text-white font-black text-lg flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-sm shrink-0">
                   {(org.owner as any).full_name?.[0] || "?"}
                 </div>
                 <div>
-                  <p className="font-black text-white text-sm">{(org.owner as any).full_name || "Unknown"}</p>
-                  <p className="text-xs text-slate-400 font-bold flex items-center gap-1">
+                  <p className="font-bold text-foreground text-xs">{(org.owner as any).full_name || "Account Admin"}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <Mail size={11} /> {(org.owner as any).email}
                   </p>
                   {(org.owner as any).created_at && (
-                    <p className="text-[11px] text-slate-600 font-bold mt-0.5">
-                      Joined {new Date((org.owner as any).created_at).toLocaleDateString()}
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Registered on {new Date((org.owner as any).created_at).toLocaleDateString()}
                     </p>
                   )}
                 </div>
               </div>
             ) : (
-              <p className="text-slate-600 text-sm font-bold">No owner linked to this organization.</p>
+              <p className="text-muted-foreground text-xs">No owner profile attached.</p>
             )}
-          </motion.div>
+          </div>
 
-          {/* Decision Panel (only for pending) */}
+          {/* Action Decision Panel */}
           {org.verification_level === "pending" && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-slate-900 border border-amber-500/20 rounded-2xl p-6 space-y-4"
-            >
-              <h3 className="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center gap-2">
-                <AlertTriangle size={14} /> Admin Decision Required
+            <div className="bg-card border border-amber-200 dark:border-amber-800 rounded-xl p-5 space-y-3 shadow-sm">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                <AlertTriangle size={14} /> Review Decision Required
               </h3>
 
               {!showRejectForm ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={handleApprove}
                     disabled={processingAction !== null}
-                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-60"
+                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                   >
-                    {processingAction === "approve" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                    Approve & Verify
+                    {processingAction === "approve" ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                    Approve Business
                   </button>
                   <button
                     onClick={() => setShowRejectForm(true)}
                     disabled={processingAction !== null}
-                    className="flex-1 py-3 bg-red-600/15 hover:bg-red-600/25 text-red-400 border border-red-600/20 rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+                    className="flex-1 py-2 border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                   >
-                    <XCircle size={16} />
+                    <XCircle size={14} />
                     Reject Application
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <label className="text-xs font-black text-slate-300 uppercase tracking-widest">
-                    Rejection Reason <span className="text-red-400">*</span>
-                  </label>
                   <textarea
                     rows={3}
-                    placeholder="Explain why this application is being rejected. The applicant will receive this message."
+                    placeholder="Provide reason for rejection. This feedback will be sent directly to the applicant."
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
-                    className="w-full p-3.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-red-500/40 resize-none"
+                    className="w-full p-2.5 bg-background border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 resize-none"
                   />
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       onClick={handleReject}
                       disabled={!rejectReason.trim() || processingAction !== null}
-                      className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                      className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                     >
-                      {processingAction === "reject" ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                      {processingAction === "reject" ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                       Confirm Rejection
                     </button>
                     <button
                       onClick={() => { setShowRejectForm(false); setRejectReason(""); }}
-                      className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl font-bold text-sm transition-all"
+                      className="px-4 py-2 border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg font-semibold text-xs transition-colors"
                     >
-                      Back
+                      Cancel
                     </button>
                   </div>
                 </div>
               )}
-            </motion.div>
+            </div>
           )}
         </div>
 
         {/* Right column: KYB Checklist + Audit */}
-        <div className="space-y-5">
-
+        <div className="space-y-4">
           {/* KYB Checklist */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.15 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4"
-          >
+          <div className="bg-card border border-border rounded-xl p-4 space-y-3 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <ShieldCheck size={14} className="text-primary" /> KYB Checklist
               </h3>
-              <span className={`text-xs font-black ${kybScore >= 5 ? "text-emerald-400" : kybScore >= 3 ? "text-amber-400" : "text-red-400"}`}>
+              <span className={`text-xs font-bold ${kybScore >= 5 ? "text-emerald-600 dark:text-emerald-400" : kybScore >= 3 ? "text-amber-600 dark:text-amber-400" : "text-red-500"}`}>
                 {kybScore}/{kybChecklist.length}
               </span>
             </div>
 
-            {/* Progress bar */}
-            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${kybScore >= 5 ? "bg-emerald-400" : kybScore >= 3 ? "bg-amber-400" : "bg-red-400"}`}
+                className={`h-full rounded-full transition-all ${kybScore >= 5 ? "bg-emerald-500" : kybScore >= 3 ? "bg-amber-500" : "bg-red-500"}`}
                 style={{ width: `${(kybScore / kybChecklist.length) * 100}%` }}
               />
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2 pt-1">
               {kybChecklist.map((item) => (
-                <div key={item.label} className="flex items-center gap-2.5">
+                <div key={item.label} className="flex items-center gap-2 text-xs">
                   {item.done ? (
-                    <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0" />
+                    <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
                   ) : (
-                    <XCircle size={14} className="text-red-500/60 flex-shrink-0" />
+                    <XCircle size={13} className="text-muted-foreground/50 shrink-0" />
                   )}
-                  <span className={`text-xs font-bold ${item.done ? "text-slate-300" : "text-slate-600"}`}>
+                  <span className={item.done ? "text-foreground font-medium" : "text-muted-foreground"}>
                     {item.label}
                   </span>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Mini Audit Log */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.25 }}
-            className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4"
-          >
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-              <Clock size={14} className="text-primary" /> Recent Actions
+          <div className="bg-card border border-border rounded-xl p-4 space-y-3 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Clock size={14} className="text-primary" /> History Log
             </h3>
 
             {auditLog.length === 0 ? (
-              <p className="text-[11px] text-slate-600 font-bold">No admin actions recorded yet.</p>
+              <p className="text-[11px] text-muted-foreground">No recent administrative actions recorded.</p>
             ) : (
-              <div className="space-y-3">
-                {auditLog.slice(0, 5).map((entry) => (
-                  <div key={entry.id} className="flex flex-col gap-0.5">
-                    <p className="text-[11px] font-black text-slate-300 capitalize">{entry.action}</p>
+              <div className="space-y-2.5">
+                {auditLog.slice(0, 4).map((entry) => (
+                  <div key={entry.id} className="text-xs border-b border-border pb-2 last:border-b-0 last:pb-0">
+                    <p className="font-semibold text-foreground capitalize">{entry.action}</p>
                     {entry.notes && (
-                      <p className="text-[10px] text-slate-600 line-clamp-2">{entry.notes}</p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">{entry.notes}</p>
                     )}
-                    <p className="text-[10px] text-slate-700 font-bold">
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">
                       {new Date(entry.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -467,11 +430,11 @@ export default function VerificationDetailPage() {
 
             <Link
               href="/admin/activity"
-              className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+              className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 pt-1"
             >
               Full audit log <ExternalLink size={10} />
             </Link>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

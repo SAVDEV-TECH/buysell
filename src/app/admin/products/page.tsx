@@ -13,11 +13,11 @@ import {
   ExternalLink,
   RefreshCw,
   Loader2,
-  AlertTriangle,
   Building2,
   DollarSign,
 } from "lucide-react";
 import Link from "next/link";
+import BuySellLoader from "@/components/BuySellLoader";
 
 interface ProductRecord {
   id: string;
@@ -114,158 +114,159 @@ export default function AdminProductsPage() {
 
   const publishedCount = products.filter((p) => p.is_published).length;
 
+  if (loading) {
+    return <BuySellLoader message="Loading catalog products..." fullScreen={false} />;
+  }
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-3">
-            <Package size={22} className="text-primary" /> Product Management
-          </h1>
-          <p className="text-slate-500 text-sm font-bold mt-1">
-            {publishedCount} published · {products.length - publishedCount} unpublished
+          <div className="flex items-center gap-2">
+            <Package size={20} className="text-primary" />
+            <h1 className="text-xl font-bold text-foreground">Product Management</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {publishedCount} live · {products.length - publishedCount} unlisted / hidden
           </p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors self-start sm:self-auto"
         >
-          <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+          <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
           Refresh
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex items-center gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+      {/* Filters & Search */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border">
           {(["all", "published", "unpublished"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setPublishFilter(f)}
-              className={`px-4 py-2 text-[11px] font-black rounded-xl capitalize transition-all ${
-                publishFilter === f ? "bg-primary text-white" : "text-slate-500 hover:text-slate-300"
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md capitalize transition-all ${
+                publishFilter === f
+                  ? "bg-card text-foreground shadow-sm font-bold border border-border"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {f}
             </button>
           ))}
         </div>
+
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by product name or supplier…"
+            placeholder="Search by product name or supplier..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-slate-200 placeholder:text-slate-600 outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+            className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-24 gap-3">
-            <Loader2 size={28} className="text-primary animate-spin" />
-            <p className="text-slate-500 text-sm font-bold">Loading products…</p>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Package size={36} className="text-slate-700" />
-            <p className="text-slate-500 font-bold">No products found</p>
+      <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-2 text-center p-6">
+            <Package size={32} className="text-muted-foreground/50" />
+            <p className="text-sm font-semibold text-foreground">No products found</p>
+            <p className="text-xs text-muted-foreground">Try adjusting your search query or filter.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80">
-                  {["Product", "Supplier", "Category", "Price", "Status", "Actions"].map((h) => (
-                    <th key={h} className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-600">
-                      {h}
-                    </th>
-                  ))}
+                <tr className="border-b border-border bg-muted/50 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3">Product</th>
+                  <th className="px-4 py-3">Supplier</th>
+                  <th className="px-4 py-3">Category</th>
+                  <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                <AnimatePresence>
-                  {filtered.map((p, i) => (
-                    <motion.tr
-                      key={p.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.02 }}
-                      className="hover:bg-slate-800/30 transition-colors"
-                    >
-                      <td className="px-5 py-4">
-                        <p className="text-xs font-black text-white line-clamp-1">{p.name}</p>
-                        <p className="text-[10px] text-slate-600 font-mono">{p.id.slice(0, 8)}</p>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                          <Building2 size={11} />
-                          {(p.supplier as any)?.company_name || "—"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-[11px] text-slate-500 font-bold">
-                          {(p.category as any)?.name || "—"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="text-xs font-black text-white flex items-center gap-0.5">
-                          <DollarSign size={11} />{p.price?.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${
-                          p.is_published
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                        }`}>
-                          {p.is_published ? "Live" : "Hidden"}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/marketplace/${p.id}`}
-                            target="_blank"
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
-                            title="View on marketplace"
-                          >
-                            <ExternalLink size={12} />
-                          </Link>
-                          <button
-                            onClick={() => togglePublish(p)}
-                            disabled={processingId === p.id}
-                            className={`p-1.5 rounded-lg transition-all ${
-                              p.is_published
-                                ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400"
-                                : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400"
-                            }`}
-                            title={p.is_published ? "Unpublish" : "Publish"}
-                          >
-                            {processingId === p.id ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : p.is_published ? (
-                              <EyeOff size={12} />
-                            ) : (
-                              <Eye size={12} />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => deleteProduct(p.id)}
-                            disabled={processingId === p.id}
-                            className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"
-                            title="Delete product"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
+              <tbody className="divide-y divide-border text-xs">
+                {filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-4 py-3">
+                      <p className="font-bold text-foreground line-clamp-1">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">#{p.id.slice(0, 8)}</p>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span className="font-medium text-foreground flex items-center gap-1.5">
+                        <Building2 size={13} className="text-muted-foreground" />
+                        {(p.supplier as any)?.company_name || "—"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {(p.category as any)?.name || "General"}
+                    </td>
+
+                    <td className="px-4 py-3 font-bold text-foreground">
+                      ${Number(p.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                        p.is_published
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
+                          : "bg-muted text-muted-foreground border-border"
+                      }`}>
+                        {p.is_published ? "Published" : "Hidden"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/marketplace/${p.id}`}
+                          target="_blank"
+                          className="p-1.5 rounded-lg border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                          title="View on marketplace"
+                        >
+                          <ExternalLink size={13} />
+                        </Link>
+
+                        <button
+                          onClick={() => togglePublish(p)}
+                          disabled={processingId === p.id}
+                          className={`p-1.5 rounded-lg border transition-colors ${
+                            p.is_published
+                              ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100"
+                              : "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+                          }`}
+                          title={p.is_published ? "Hide from marketplace" : "Publish to marketplace"}
+                        >
+                          {processingId === p.id ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : p.is_published ? (
+                            <EyeOff size={13} />
+                          ) : (
+                            <Eye size={13} />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => deleteProduct(p.id)}
+                          disabled={processingId === p.id}
+                          className="p-1.5 rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 hover:bg-red-100 transition-colors"
+                          title="Delete product"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

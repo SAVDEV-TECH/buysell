@@ -12,10 +12,8 @@ import {
   ArrowUpRight,
   Building2,
   DollarSign,
-  ShieldCheck,
   CheckCircle2,
   XCircle,
-  Lock,
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,16 +38,16 @@ interface OrderRecord {
 }
 
 const statusBadgeMap: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  processing: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  confirmed: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  shipped: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  delivered: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  escrow_released: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  refunded: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  disputed: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
+  pending: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  processing: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  confirmed: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  shipped: "bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800",
+  delivered: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  completed: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  escrow_released: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  refunded: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+  disputed: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  cancelled: "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300 border-red-200 dark:border-red-800",
 };
 
 export default function AdminOrdersPage() {
@@ -65,7 +63,6 @@ export default function AdminOrdersPage() {
     try {
       let fetchedOrders: OrderRecord[] = [];
 
-      // 1. Fetch server API route /api/admin/orders
       try {
         const res = await fetch("/api/admin/orders");
         const json = await res.json();
@@ -76,7 +73,6 @@ export default function AdminOrdersPage() {
         console.warn("[Admin Orders] Server API route notice:", apiErr);
       }
 
-      // 2. Direct query fallback if server API route returned empty
       if (fetchedOrders.length === 0) {
         const { data: dbData } = await supabase
           .from("orders")
@@ -86,7 +82,6 @@ export default function AdminOrdersPage() {
         fetchedOrders = (dbData as OrderRecord[]) || [];
       }
 
-      // 3. Client storage backup merge
       let localOrders: OrderRecord[] = [];
       try {
         for (let i = 0; i < localStorage.length; i++) {
@@ -132,7 +127,6 @@ export default function AdminOrdersPage() {
     setRefreshing(false);
   };
 
-  // Execute Escrow Control Action (Release, Refund, Dispute Hold)
   const handleEscrowAction = async (orderId: string, action: "release" | "refund" | "dispute_hold") => {
     if (!confirm(`Are you sure you want to execute '${action.toUpperCase()}' for Order #${orderId.slice(0, 8).toUpperCase()}?`)) {
       return;
@@ -178,58 +172,65 @@ export default function AdminOrdersPage() {
     return true;
   });
 
+  if (loading) {
+    return <BuySellLoader message="Loading platform orders..." fullScreen={false} />;
+  }
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-3">
-            <ShoppingCart size={22} className="text-primary" /> Platform Orders & Escrow Control Center
-          </h1>
-          <p className="text-xs text-slate-400 mt-1 font-bold">
-            Real-time audit log and Super Admin escrow disbursement controls across BuySell
+          <div className="flex items-center gap-2">
+            <ShoppingCart size={20} className="text-primary" />
+            <h1 className="text-xl font-bold text-foreground">Orders & Escrow Management</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Audit commercial trade orders and control escrow fund releases
           </p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-black transition-all border border-slate-700 disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors self-start sm:self-auto"
         >
-          <RefreshCw size={14} className={refreshing ? "animate-spin text-primary" : ""} />
-          Refresh Orders
+          <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+          Refresh
         </button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: "Total Platform Orders", value: orders.length, icon: <Package size={18} className="text-blue-400" />, color: "bg-blue-500/10" },
-          { label: "Gross Trade Volume (GMV)", value: `$${gmv.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={18} className="text-emerald-400" />, color: "bg-emerald-500/10" },
-          { label: "Average Order Value", value: `$${avgOrderValue.toFixed(2)}`, icon: <DollarSign size={18} className="text-purple-400" />, color: "bg-purple-500/10" },
-          { label: "Pending Fulfillment", value: orders.filter(o => o.status === "pending" || o.status === "processing").length, icon: <Clock size={18} className="text-amber-400" />, color: "bg-amber-500/10" },
+          { label: "Total Orders", value: orders.length.toLocaleString(), icon: <Package size={16} className="text-primary" /> },
+          { label: "Gross Trade Volume", value: `$${gmv.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={16} className="text-emerald-500" /> },
+          { label: "Avg Order Value", value: `$${avgOrderValue.toFixed(2)}`, icon: <DollarSign size={16} className="text-primary" /> },
+          { label: "Pending Fulfillment", value: orders.filter(o => o.status === "pending" || o.status === "processing").length.toLocaleString(), icon: <Clock size={16} className="text-amber-500" /> },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Escrow</span>
+          <div key={kpi.label} className="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-2">
+              <div className="p-2 rounded-lg bg-muted">{kpi.icon}</div>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase">Escrow Live</span>
             </div>
-            <p className="text-2xl font-black text-white">{kpi.value}</p>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{kpi.label}</p>
+            <div>
+              <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{kpi.label}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+      {/* Filters & Search */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border overflow-x-auto">
           {statuses.map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black capitalize transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold capitalize transition-all whitespace-nowrap ${
                 statusFilter === st
-                  ? "bg-primary text-white shadow-md shadow-primary/20"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  ? "bg-card text-foreground shadow-sm font-bold border border-border"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {st.replace("_", " ")}
@@ -237,105 +238,108 @@ export default function AdminOrdersPage() {
           ))}
         </div>
 
-        <div className="relative w-full sm:w-64">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+        <div className="relative flex-1 max-w-sm">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search Order ID, company…"
+            placeholder="Search Order ID, company..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white outline-none focus:border-primary transition-colors"
+            className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
           />
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
-        {loading ? (
-          <BuySellLoader message="Fetching platform trade logs via server API…" fullScreen={false} />
-        ) : filtered.length === 0 ? (
-          <div className="p-16 text-center text-slate-500 text-sm font-bold">
-            No platform orders match your criteria.
+      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+        {filtered.length === 0 ? (
+          <div className="p-16 text-center text-muted-foreground text-xs font-medium">
+            No platform orders match your filter criteria.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/50 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <th className="px-6 py-4">Order ID</th>
-                  <th className="px-6 py-4">Buyer / Supplier</th>
-                  <th className="px-6 py-4">Amount</th>
-                  <th className="px-6 py-4">Escrow Status</th>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4 text-right">Admin Escrow Actions</th>
+                <tr className="border-b border-border bg-muted/50 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <th className="px-4 py-3">Order ID</th>
+                  <th className="px-4 py-3">Parties</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Escrow Status</th>
+                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3 text-right">Escrow Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-xs">
+              <tbody className="divide-y divide-border text-xs">
                 {filtered.map((o) => {
                   const currentPaymentSt = (o.payment_status || o.status || "pending").toLowerCase();
                   const isReleased = currentPaymentSt === "escrow_released" || o.escrow_status === "released";
                   const isRefunded = currentPaymentSt === "refunded" || o.escrow_status === "refunded";
 
                   return (
-                    <tr key={o.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-white">
+                    <tr key={o.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-foreground">
                         #{o.id.slice(0, 8).toUpperCase()}
                       </td>
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-white flex items-center gap-1">
-                          <Building2 size={12} className="text-slate-400" />
+
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-foreground flex items-center gap-1.5">
+                          <Building2 size={13} className="text-muted-foreground" />
                           {o.buyer_organization?.company_name || o.buyer?.full_name || "B2B Buyer"}
                         </p>
-                        <p className="text-[10px] text-slate-500 font-medium">
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
                           Supplier: {o.supplier_organization?.company_name || "Verified Supplier"}
                         </p>
                       </td>
-                      <td className="px-6 py-4 font-black text-white">
+
+                      <td className="px-4 py-3 font-bold text-foreground">
                         ${Number(o.total_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadgeMap[currentPaymentSt] || statusBadgeMap.pending}`}>
-                          {isReleased ? "Escrow Released" : isRefunded ? "Refunded to Buyer" : currentPaymentSt}
+
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${statusBadgeMap[currentPaymentSt] || statusBadgeMap.pending}`}>
+                          {isReleased ? "Escrow Released" : isRefunded ? "Refunded" : currentPaymentSt.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-500 font-bold">
+
+                      <td className="px-4 py-3 text-muted-foreground">
                         {new Date(o.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
                           {actionLoadingId === o.id ? (
-                            <span className="text-xs font-bold text-primary flex items-center gap-1">
-                              <Loader2 size={14} className="animate-spin" /> Processing…
+                            <span className="text-xs font-semibold text-primary flex items-center gap-1">
+                              <Loader2 size={13} className="animate-spin" /> Processing...
                             </span>
                           ) : isReleased ? (
-                            <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-                              ✓ Payout Complete
+                            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                              ✓ Paid Out
                             </span>
                           ) : isRefunded ? (
-                            <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-lg border border-rose-500/20">
-                              ✓ Buyer Refunded
+                            <span className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                              ✓ Refunded
                             </span>
                           ) : (
                             <>
                               <button
                                 onClick={() => handleEscrowAction(o.id, "release")}
-                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1"
+                                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded transition-colors flex items-center gap-1"
                               >
-                                <CheckCircle2 size={12} /> Release to Supplier
+                                <CheckCircle2 size={12} /> Release
                               </button>
                               <button
                                 onClick={() => handleEscrowAction(o.id, "refund")}
-                                className="px-2.5 py-1.5 bg-rose-600/80 hover:bg-rose-600 text-white font-bold text-[10px] rounded-lg transition-all shadow-sm flex items-center gap-1"
+                                className="px-2.5 py-1 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 border border-red-200 dark:border-red-900 font-semibold text-xs rounded transition-colors flex items-center gap-1"
                               >
-                                <XCircle size={12} /> Refund Buyer
+                                <XCircle size={12} /> Refund
                               </button>
                             </>
                           )}
                           <Link
                             href={`/dashboard/orders/${o.id}`}
-                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-bold text-[10px] transition-all flex items-center gap-0.5"
+                            className="px-2 py-1 border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground rounded text-xs font-semibold transition-colors flex items-center gap-0.5"
                           >
-                            Inspect <ArrowUpRight size={12} />
+                            Details <ArrowUpRight size={11} />
                           </Link>
                         </div>
                       </td>

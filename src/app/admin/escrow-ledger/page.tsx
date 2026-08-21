@@ -8,14 +8,10 @@ import {
   TrendingUp,
   DollarSign,
   Lock,
-  ArrowUpRight,
   CheckCircle2,
-  XCircle,
   FileText,
 } from "lucide-react";
-import Link from "next/link";
 import BuySellLoader from "@/components/BuySellLoader";
-
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 interface LedgerRecord {
@@ -37,13 +33,13 @@ interface LedgerRecord {
 }
 
 const typeBadgeMap: Record<string, string> = {
-  deposit: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  hold: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  release: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  partial_release: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-  refund: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-  fee: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  dispute_hold: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  deposit: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+  hold: "bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+  release: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+  partial_release: "bg-teal-100 text-teal-700 dark:bg-teal-950/40 dark:text-teal-300 border-teal-200 dark:border-teal-800",
+  refund: "bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+  fee: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+  dispute_hold: "bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300 border-orange-200 dark:border-orange-800",
 };
 
 export default function EscrowLedgerPage() {
@@ -102,57 +98,60 @@ export default function EscrowLedgerPage() {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      <div className="space-y-6 max-w-6xl mx-auto pb-12">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black text-white flex items-center gap-3">
-              <ShieldCheck size={22} className="text-emerald-400" /> Escrow Financial Audit Ledger
-            </h1>
-            <p className="text-xs text-slate-400 mt-1 font-bold">
-              Immutable financial transaction log recording every cent deposit, hold, release, and refund across BuySell
+            <div className="flex items-center gap-2">
+              <Lock size={20} className="text-emerald-500" />
+              <h1 className="text-xl font-bold text-foreground">Escrow Financial Ledger</h1>
+            </div>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Financial transaction audit log recording every deposit, hold, release, and refund
             </p>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-black transition-all border border-slate-700 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors self-start sm:self-auto"
           >
-            <RefreshCw size={14} className={refreshing ? "animate-spin text-primary" : ""} />
+            <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
             Refresh Ledger
           </button>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
-            { label: "Total Ledger Entries", value: records.length, icon: <FileText size={18} className="text-blue-400" />, color: "bg-blue-500/10" },
-            { label: "Total Monitored Volume", value: `$${totalVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={18} className="text-emerald-400" />, color: "bg-emerald-500/10" },
-            { label: "Total Released Payouts", value: `$${releasedVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <DollarSign size={18} className="text-teal-400" />, color: "bg-teal-500/10" },
-            { label: "Compliance Status", value: "100% Audited", icon: <Lock size={18} className="text-purple-400" />, color: "bg-purple-500/10" },
+            { label: "Ledger Entries", value: records.length.toLocaleString(), icon: <FileText size={16} className="text-primary" /> },
+            { label: "Monitored Volume", value: `$${totalVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <TrendingUp size={16} className="text-emerald-500" /> },
+            { label: "Released Payouts", value: `$${releasedVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: <DollarSign size={16} className="text-primary" /> },
+            { label: "Audit Status", value: "Verified & Protected", icon: <ShieldCheck size={16} className="text-emerald-500" /> },
           ].map((kpi) => (
-            <div key={kpi.label} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2.5 rounded-xl ${kpi.color}`}>{kpi.icon}</div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Immutable</span>
+            <div key={kpi.label} className="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <div className="p-2 rounded-lg bg-muted">{kpi.icon}</div>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase">Ledger</span>
               </div>
-              <p className="text-2xl font-black text-white">{kpi.value}</p>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">{kpi.label}</p>
+              <div>
+                <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{kpi.label}</p>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Filter Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-3 rounded-2xl">
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border overflow-x-auto">
             {types.map((t) => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black capitalize transition-all whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold capitalize transition-all whitespace-nowrap ${
                   typeFilter === t
-                    ? "bg-primary text-white shadow-md shadow-primary/20"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    ? "bg-card text-foreground shadow-sm font-bold border border-border"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {t.replace("_", " ")}
@@ -160,62 +159,62 @@ export default function EscrowLedgerPage() {
             ))}
           </div>
 
-          <div className="relative w-full sm:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <div className="relative flex-1 max-w-sm">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search Ledger ID, Order ID…"
+              placeholder="Search Ledger ID, Order ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white outline-none focus:border-primary transition-colors"
+              className="w-full pl-9 pr-3 py-2 bg-card border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
             />
           </div>
         </div>
 
-        {/* Ledger Table */}
-        <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+        {/* Table */}
+        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
           {loading ? (
-            <BuySellLoader message="Loading immutable financial audit ledger…" fullScreen={false} />
+            <BuySellLoader message="Loading financial ledger..." fullScreen={false} />
           ) : filtered.length === 0 ? (
-            <div className="p-16 text-center text-slate-500 text-sm font-bold">
+            <div className="p-16 text-center text-muted-foreground text-xs font-medium">
               No financial ledger records match your filter criteria.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950/50 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <th className="px-6 py-4">Transaction ID</th>
-                    <th className="px-6 py-4">Order Ref</th>
-                    <th className="px-6 py-4">Type</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Timestamp</th>
+                  <tr className="border-b border-border bg-muted/50 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <th className="px-4 py-3">Transaction ID</th>
+                    <th className="px-4 py-3">Order Ref</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Amount</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Timestamp</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-xs">
+                <tbody className="divide-y divide-border text-xs">
                   {filtered.map((r) => (
-                    <tr key={r.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-white">
+                    <tr key={r.id} className="hover:bg-muted/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-foreground">
                         #{r.id.slice(0, 8).toUpperCase()}
                       </td>
-                      <td className="px-6 py-4 font-mono text-slate-400">
-                        {r.order_id ? `#${r.order_id.slice(0, 8).toUpperCase()}` : "N/A"}
+                      <td className="px-4 py-3 font-mono text-muted-foreground">
+                        {r.order_id ? `#${r.order_id.slice(0, 8).toUpperCase()}` : "—"}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${typeBadgeMap[r.type] || typeBadgeMap.hold}`}>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${typeBadgeMap[r.type] || typeBadgeMap.hold}`}>
                           {r.type.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-black text-white">
+                      <td className="px-4 py-3 font-bold text-foreground">
                         ${Number(r.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} {r.currency || "USD"}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1 text-emerald-400 font-bold text-[11px]">
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
                           <CheckCircle2 size={12} /> {r.status || "completed"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-500 font-bold">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {new Date(r.created_at).toLocaleString()}
                       </td>
                     </tr>
