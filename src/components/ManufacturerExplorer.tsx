@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { Search, Filter, MapPin, Calendar, Users, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
+import { Search, Filter, MapPin, Calendar, Users, MessageSquare, ArrowRight, Loader2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
@@ -87,55 +87,76 @@ export default function ManufacturerExplorer() {
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 mb-8">
-          <div className="relative flex-1 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={20} />
-            <input 
-              type="text" 
-              placeholder="Search for companies, products, or keywords..."
-              className="w-full pl-11 pr-4 py-3.5 sm:py-4 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-sm sm:text-base"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className={`h-[48px] sm:h-[56px] px-6 rounded-lg transition-all border flex items-center justify-center gap-2 font-medium text-sm ${showFilters ? 'bg-primary text-primary-foreground border-primary' : 'bg-background border-input hover:bg-accent text-muted-foreground'}`}
-          >
-            <Filter size={18} />
-            <span>Filters</span>
-          </button>
-        </div>
+        {/* ── Sticky Top Search & Filter Bar ── */}
+        <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-4 mb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border shadow-sm transition-all">
+          <div className="flex flex-col lg:flex-row gap-3">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search for companies, products, or keywords..."
+                className="w-full pl-11 pr-10 py-3 bg-card rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+                  title="Clear search"
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
 
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mb-8"
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`h-11 px-5 rounded-xl transition-all border flex items-center justify-center gap-2 font-bold text-xs sm:text-sm shadow-sm whitespace-nowrap ${
+                showFilters 
+                  ? 'bg-primary text-primary-foreground border-primary' 
+                  : 'bg-card border-border hover:bg-muted text-foreground'
+              }`}
             >
-              <div className="bg-card text-card-foreground p-6 rounded-lg border border-border shadow-sm">
-                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Industry</h4>
-                 <div className="flex flex-wrap gap-2">
-                   {INDUSTRIES.map(industry => (
-                     <button
-                       key={industry}
-                       onClick={() => setActiveIndustry(industry)}
-                       className={`px-4 py-2 rounded-md text-sm font-medium transition-all border ${
-                         activeIndustry === industry 
-                           ? "bg-primary text-primary-foreground border-primary" 
-                           : "bg-background border-input hover:bg-accent text-muted-foreground"
-                       }`}
-                     >
-                       {industry}
-                     </button>
-                   ))}
-                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <Filter size={15} />
+              <span>Filters</span>
+              {activeIndustry !== "All Industries" && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+              )}
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showFilters && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mt-3"
+              >
+                <div className="bg-card text-card-foreground p-5 rounded-xl border border-border shadow-sm">
+                   <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Industry</h4>
+                   <div className="flex flex-wrap gap-2">
+                     {INDUSTRIES.map(industry => (
+                       <button
+                         key={industry}
+                         onClick={() => setActiveIndustry(industry)}
+                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                           activeIndustry === industry 
+                             ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+                             : 'bg-background border-border hover:bg-muted text-muted-foreground hover:text-foreground'
+                         }`}
+                       >
+                         {industry}
+                       </button>
+                     ))}
+                   </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {loading ? (
           <BuySellLoader message="Searching BuySell verified manufacturers..." fullScreen={false} />

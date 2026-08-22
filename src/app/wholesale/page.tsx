@@ -15,7 +15,8 @@ import {
   ShieldCheck, 
   ArrowRight,
   ShoppingCart,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
 
 interface Product {
@@ -99,21 +100,30 @@ export default function WholesaleDirectoryPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-           <h2 className="text-2xl font-bold text-foreground">Wholesale Directory</h2>
-           
-           <div className="flex gap-4 w-full md:w-auto">
-             <div className="flex-1 md:w-80 relative">
-               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-               <input 
-                 type="text" 
-                 placeholder="Search wholesale products..."
-                 className="w-full pl-10 pr-4 py-2.5 bg-card rounded-xl border border-border focus:ring-1 focus:ring-primary outline-none text-xs text-foreground placeholder:text-muted-foreground"
-                 value={search}
-                 onChange={(e) => setSearch(e.target.value)}
-               />
-             </div>
-           </div>
+        {/* ── Sticky Top Search Bar ── */}
+        <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-3 mb-6 border-b border-border shadow-sm -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <h2 className="text-xl sm:text-2xl font-black text-foreground">Wholesale Directory</h2>
+          
+          <div className="w-full sm:w-80 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search wholesale products..."
+              className="w-full pl-10 pr-9 py-2.5 bg-card rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-xs text-foreground placeholder:text-muted-foreground font-medium shadow-sm"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+                title="Clear search"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (

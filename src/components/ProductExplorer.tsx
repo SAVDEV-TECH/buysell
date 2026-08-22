@@ -15,6 +15,7 @@ import {
   BadgeCheck,
   Sparkles,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -518,113 +519,140 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-clip">
-      {/* Search + Sort */}
-      <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-6 mb-6 sm:mb-8 lg:mb-12 w-full min-w-0 max-w-full">
-        <div className="flex-1 relative group min-w-0 max-w-full overflow-hidden">
-          <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
-          />
-          <input
-            type="text"
-            placeholder={t("market_search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-4 py-2.5 sm:py-3.5 bg-background rounded-lg border border-input focus:ring-2 focus:ring-ring outline-none transition-all font-medium text-base sm:text-sm"
-          />
-        </div>
-        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0 overflow-hidden">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex-1 sm:flex-none h-10 sm:h-12 px-3 sm:px-4 rounded-lg border flex items-center justify-center gap-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-              showFilters
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background border-input hover:bg-accent text-muted-foreground"
-            }`}
-          >
-            <Filter size={14} className="sm:hidden" />
-            <Filter size={16} className="hidden sm:block" />
-            <span className="hidden sm:inline">{t("market_filters")}</span>
-          </button>
-          <div className="flex-1 sm:flex-none relative min-w-0 shrink">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-10 sm:h-12 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-background border border-input rounded-lg font-medium outline-none cursor-pointer hover:bg-accent transition-all text-base sm:text-sm appearance-none truncate"
-            >
-              <option value="Newest">{t("market_sort_newest")}</option>
-              <option value="Price: Low to High">{t("market_sort_low")}</option>
-              <option value="Price: High to Low">{t("market_sort_high")}</option>
-              <option value="Top Rated">{t("market_sort_rated")}</option>
-            </select>
-            <ArrowUpRight
-              size={14}
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-40 rotate-45"
+      {/* ── Sticky Top Search & Filter Bar ── */}
+      <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-3 mb-6 -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 border-b border-border shadow-sm transition-all">
+        {/* Search + Sort + Filter row */}
+        <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4 w-full min-w-0 max-w-full">
+          <div className="flex-1 relative group min-w-0 max-w-full">
+            <Search
+              size={18}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
             />
+            <input
+              type="text"
+              placeholder={t("market_search")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-10 py-2.5 sm:py-3 bg-card rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-colors"
+                title="Clear search"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex-1 sm:flex-none h-10 sm:h-11 px-3 sm:px-4 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-sm ${
+                showFilters
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-card border-border hover:bg-muted text-foreground"
+              }`}
+            >
+              <Filter size={15} />
+              <span>{t("market_filters")}</span>
+              {(minPrice > 0 || maxPrice < 1000000) && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+              )}
+            </button>
+
+            <div className="flex-1 sm:flex-none relative min-w-0 shrink">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full h-10 sm:h-11 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-card border border-border rounded-xl font-bold outline-none cursor-pointer hover:bg-muted transition-all text-xs sm:text-sm text-foreground appearance-none truncate shadow-sm"
+              >
+                <option value="Newest">{t("market_sort_newest")}</option>
+                <option value="Price: Low to High">{t("market_sort_low")}</option>
+                <option value="Price: High to Low">{t("market_sort_high")}</option>
+                <option value="Top Rated">{t("market_sort_rated")}</option>
+              </select>
+              <ArrowUpRight
+                size={14}
+                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 rotate-45 text-muted-foreground"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Filters panel */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden mb-8"
-          >
-            <div className="bg-card p-3 sm:p-5 md:p-8 rounded-lg border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
-                  Price Range (₦)
-                </p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={minPrice || ""}
-                    onChange={(e) => setMinPrice(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
-                  />
-                  <span className="opacity-30 font-black">—</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={maxPrice === 1000000 ? "" : maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value) || 1000000)}
-                    className="w-full px-4 py-2.5 bg-background rounded-lg border border-input outline-none text-sm font-bold"
-                  />
+        {/* Filters panel */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden mt-3"
+            >
+              <div className="bg-card p-3 sm:p-5 rounded-xl border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
+                    Price Range (USD $)
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      placeholder="Min ($)"
+                      value={minPrice || ""}
+                      onChange={(e) => setMinPrice(Number(e.target.value))}
+                      className="w-full px-4 py-2 bg-background rounded-lg border border-border outline-none text-xs font-bold text-foreground"
+                    />
+                    <span className="opacity-30 font-black">—</span>
+                    <input
+                      type="number"
+                      placeholder="Max ($)"
+                      value={maxPrice === 1000000 ? "" : maxPrice}
+                      onChange={(e) => setMaxPrice(Number(e.target.value) || 1000000)}
+                      className="w-full px-4 py-2 bg-background rounded-lg border border-border outline-none text-xs font-bold text-foreground"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={resetFilters}
+                    className="w-full sm:w-auto px-6 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                  >
+                    Reset Filters
+                  </button>
                 </div>
               </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={resetFilters}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      {/* Categories */}
-      <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-2 sm:pb-3 mb-4 sm:mb-6 lg:mb-10 scrollbar-hide snap-x w-full">
-        {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-semibold text-[10px] sm:text-[11px] whitespace-nowrap border transition-all snap-start flex-shrink-0 ${
-              activeCategory === cat
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background border-input hover:bg-accent"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {/* Categories Pills */}
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pt-2.5 pb-0.5 scrollbar-hide snap-x w-full items-center">
+          {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-bold text-[10px] sm:text-xs whitespace-nowrap border transition-all snap-start flex-shrink-0 ${
+                activeCategory === cat
+                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                  : "bg-card border-border hover:bg-muted text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+
+          {/* Active Search / Filter Indicator */}
+          {(search || activeCategory !== "All Products" || minPrice > 0 || maxPrice < 1000000) && (
+            <button
+              onClick={resetFilters}
+              className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-red-600 px-2 py-1 rounded-md hover:bg-red-500/10 transition-colors shrink-0 ml-auto flex items-center gap-1"
+            >
+              <X size={11} /> Reset All
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Grid */}
