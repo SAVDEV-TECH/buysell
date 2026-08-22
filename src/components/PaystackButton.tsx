@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
@@ -101,7 +101,7 @@ export default function PaystackButton({
       <button
         onClick={handleClick}
         disabled={preparing}
-        className="w-full h-full py-1.5 px-1 bg-slate-900 dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-0.5 sm:gap-1 disabled:opacity-60 overflow-hidden min-w-0"
+        className="w-full h-full py-1.5 px-1 bg-card dark:bg-primary text-white rounded-lg text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-0.5 sm:gap-1 disabled:opacity-60 overflow-hidden min-w-0"
       >
         {preparing ? (
           <>
@@ -123,7 +123,7 @@ export default function PaystackButton({
       <button
         onClick={handleClick}
         disabled={preparing}
-        className="w-full py-4 bg-slate-900 dark:bg-primary text-white rounded-2xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-60 disabled:scale-100"
+        className="w-full py-4 bg-card dark:bg-primary text-white rounded-2xl font-bold text-base hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-60 disabled:scale-100"
       >
         {preparing ? (
           <>

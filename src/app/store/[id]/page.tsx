@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -268,8 +268,8 @@ export default function StorefrontPage() {
   if (!seller) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center p-8 gap-6">
-        <div className="w-24 h-24 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-          <Factory size={48} className="text-slate-300 dark:text-slate-600" />
+        <div className="w-24 h-24 rounded-3xl bg-muted flex items-center justify-center">
+          <Factory size={48} className="text-muted-foreground/40" />
         </div>
         <div>
           <h1 className="text-2xl font-black mb-2">Supplier Not Found</h1>
@@ -332,7 +332,7 @@ export default function StorefrontPage() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-primary flex items-center justify-center text-white text-3xl font-black shadow-xl border-2 border-white/20 flex-shrink-0"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-primary flex items-center justify-center text-white text-3xl font-black shadow-xl border-2 border-border/30 flex-shrink-0"
               >
                 {seller.businessName?.[0] || "S"}
               </motion.div>
@@ -384,7 +384,7 @@ export default function StorefrontPage() {
                 </button>
                 <Link
                   href={`/dashboard/messages`}
-                  className="px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-bold text-xs hover:bg-white/20 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-border/30 text-white rounded-xl font-bold text-xs hover:bg-white/20 transition-all flex items-center gap-1.5"
                 >
                   <Mail size={15} /> Message
                 </Link>

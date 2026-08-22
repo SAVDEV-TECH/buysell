@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Send, Search, MoreVertical, Image as ImageIcon, Paperclip, CheckCircle2, Video } from "lucide-react";
@@ -77,15 +77,15 @@ export default function ChatInterface() {
     <div className="flex h-[calc(100vh-140px)] bg-white border border-border rounded-lg shadow-sm overflow-hidden mt-6">
       
       {/* Sidebar - Conversations List */}
-      <div className="w-full md:w-80 border-r border-border flex flex-col bg-slate-50/50">
+      <div className="w-full md:w-80 border-r border-border flex flex-col bg-muted/30">
         <div className="p-4 border-b border-border">
-          <h2 className="font-bold text-lg mb-4 text-[#0f172a]">Messages</h2>
+          <h2 className="font-bold text-lg mb-4 text-foreground">Messages</h2>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
             <input 
               type="text" 
               placeholder="Search messages..."
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#0f172a] transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all"
             />
           </div>
         </div>
@@ -95,19 +95,19 @@ export default function ChatInterface() {
             <button 
               key={conv.id}
               onClick={() => setActiveConversation(conv.id)}
-              className={`w-full text-left p-4 border-b border-border transition-colors hover:bg-slate-100 ${activeConversation === conv.id ? 'bg-slate-100 border-l-4 border-l-[#0f172a]' : 'border-l-4 border-l-transparent'}`}
+              className={`w-full text-left p-4 border-b border-border transition-colors hover:bg-muted ${activeConversation === conv.id ? 'bg-muted border-l-4 border-l-foreground' : 'border-l-4 border-l-transparent'}`}
             >
               <div className="flex justify-between items-start mb-1">
-                <h3 className="font-bold text-sm text-[#0f172a] truncate pr-2 flex items-center gap-1">
+                <h3 className="font-bold text-sm text-foreground truncate pr-2 flex items-center gap-1">
                   {conv.participantName}
                   {conv.isVerified && <VerifiedBadge />}
                 </h3>
-                <span className="text-xs text-slate-500 whitespace-nowrap">{conv.lastMessageTime}</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">{conv.lastMessageTime}</span>
               </div>
               <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-500 truncate pr-4">{conv.lastMessage}</p>
+                <p className="text-xs text-muted-foreground truncate pr-4">{conv.lastMessage}</p>
                 {conv.unreadCount > 0 && (
-                  <span className="bg-[#0f172a] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                  <span className="bg-foreground text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
                     {conv.unreadCount}
                   </span>
                 )}
@@ -123,11 +123,11 @@ export default function ChatInterface() {
         {activeParticipant && (
           <div className="p-4 border-b border-border flex justify-between items-center bg-white">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-bold text-lg">
+              <div className="h-10 w-10 bg-foreground text-background rounded-full flex items-center justify-center font-bold text-lg">
                 {activeParticipant.participantName.charAt(0)}
               </div>
               <div>
-                <h3 className="font-bold text-[#0f172a] flex items-center gap-2">
+                <h3 className="font-bold text-foreground flex items-center gap-2">
                   {activeParticipant.participantName}
                   {activeParticipant.isVerified && <VerifiedBadge />}
                 </h3>
@@ -144,7 +144,7 @@ export default function ChatInterface() {
               >
                 <Video size={16} /> <span className="hidden sm:inline">Virtual Meeting</span>
               </Link>
-              <button className="p-2 text-slate-400 hover:text-[#0f172a] hover:bg-slate-100 rounded-md transition-colors">
+              <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors">
                 <MoreVertical size={20} />
               </button>
             </div>
@@ -152,15 +152,15 @@ export default function ChatInterface() {
         )}
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-muted/30/30">
           {activeMessages.map((msg) => {
             const isMe = msg.senderId === "wholesaler";
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm text-sm ${isMe ? 'bg-[#0f172a] text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'}`}>
+                <div className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-sm text-sm ${isMe ? 'bg-foreground text-white rounded-br-none' : 'bg-white border border-border text-foreground rounded-bl-none'}`}>
                   {msg.text}
                 </div>
-                <span className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
                   {msg.timestamp} {isMe && <CheckCircle2 size={10} className="text-blue-500" />}
                 </span>
               </div>
@@ -172,10 +172,10 @@ export default function ChatInterface() {
         <div className="p-4 bg-white border-t border-border">
           <div className="flex items-end gap-2">
             <div className="flex gap-1 pb-2">
-              <button className="p-2 text-slate-400 hover:text-[#0f172a] transition-colors"><Paperclip size={20} /></button>
-              <button className="p-2 text-slate-400 hover:text-[#0f172a] transition-colors"><ImageIcon size={20} /></button>
+              <button className="p-2 text-muted-foreground hover:text-foreground transition-colors"><Paperclip size={20} /></button>
+              <button className="p-2 text-muted-foreground hover:text-foreground transition-colors"><ImageIcon size={20} /></button>
             </div>
-            <div className="flex-1 relative bg-slate-50 rounded-lg border border-slate-200 focus-within:border-[#0f172a] transition-colors">
+            <div className="flex-1 relative bg-muted/30 rounded-lg border border-border focus-within:border-primary transition-colors">
               <textarea 
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
@@ -183,7 +183,7 @@ export default function ChatInterface() {
                 className="w-full bg-transparent p-3 text-sm focus:outline-none resize-none min-h-[60px] max-h-[120px]"
               />
             </div>
-            <button className="h-12 w-12 bg-[#0f172a] text-white rounded-lg flex items-center justify-center hover:bg-[#0f172a]/90 transition-colors shrink-0 mb-1">
+            <button className="h-12 w-12 bg-foreground text-white rounded-lg flex items-center justify-center hover:bg-foreground/90 transition-colors shrink-0 mb-1">
               <Send size={18} />
             </button>
           </div>

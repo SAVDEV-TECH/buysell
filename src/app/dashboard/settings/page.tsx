@@ -184,7 +184,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-3.5 bg-primary text-white rounded-2xl font-bold text-sm shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-3.5 bg-primary text-primary-foreground rounded-2xl font-bold text-sm shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
         >
           {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           Save Changes
@@ -232,7 +232,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2"
+            className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-2xl text-xs font-bold flex items-center gap-2"
           >
             <CheckCircle size={18} /> Settings saved successfully to Supabase!
           </motion.div>
@@ -242,7 +242,7 @@ export default function SettingsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 text-red-600 rounded-2xl text-xs font-bold flex items-center gap-2"
+            className="p-4 bg-red-500/10 border border-red-500/20 text-red-600 rounded-2xl text-xs font-bold flex items-center gap-2"
           >
             <AlertCircle size={18} /> {error}
           </motion.div>
@@ -252,14 +252,14 @@ export default function SettingsPage() {
       <form onSubmit={handleSave} className="space-y-8">
 
         {/* ── Section 1: User Profile Settings ── */}
-        <div className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
-          <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-borderline pb-4">
+        <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
+          <h2 className="text-base font-black text-foreground flex items-center gap-2 border-b border-border pb-4">
             <User size={18} className="text-primary" /> Personal Profile
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Full Name *</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Full Name *</label>
               <div className="relative">
                 <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -267,48 +267,48 @@ export default function SettingsPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   placeholder="e.g. John Doe"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Email Address (Account ID)</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Email Address (Account ID)</label>
               <div className="relative">
                 <Mail size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="email"
                   disabled
                   value={email}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium text-slate-500 cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-3 bg-muted/60 border border-border rounded-2xl text-xs font-medium text-muted-foreground cursor-not-allowed"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Phone Number</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Phone Number</label>
               <div className="relative">
                 <Phone size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   placeholder="+234 800 000 0000"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Assigned Role</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Assigned Role</label>
               <div className="relative">
                 <Briefcase size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   disabled
                   value={role || "Merchant"}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-bold text-primary capitalize cursor-not-allowed"
+                  className="w-full pl-11 pr-4 py-3 bg-muted/60 border border-border rounded-2xl text-xs font-bold text-primary capitalize cursor-not-allowed"
                 />
               </div>
             </div>
@@ -316,41 +316,41 @@ export default function SettingsPage() {
         </div>
 
         {/* ── Section 2: Organization Business Profile ── */}
-        <div className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
-          <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-borderline pb-4">
+        <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
+          <h2 className="text-base font-black text-foreground flex items-center gap-2 border-b border-border pb-4">
             <Building2 size={18} className="text-primary" /> B2B Organization Profile
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Company Legal Name *</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Company Legal Name *</label>
               <input
                 type="text"
                 required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
                 placeholder="e.g. Lagos Industrial Manufacturing Ltd"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Business Registration / RC Number</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Business Registration / RC Number</label>
               <input
                 type="text"
                 value={registrationNumber}
                 onChange={(e) => setRegistrationNumber(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-mono font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-mono font-medium outline-none focus:ring-2 focus:ring-primary/40"
                 placeholder="e.g. RC-1928371"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Business Type</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Business Type</label>
               <select
                 value={organizationType}
                 onChange={(e) => setOrganizationType(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
               >
                 <option value="manufacturer">Manufacturer / Factory Direct</option>
                 <option value="wholesaler">Wholesaler & Distributor</option>
@@ -360,36 +360,36 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Official Website URL</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Official Website URL</label>
               <div className="relative">
                 <Globe size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="url"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                  className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   placeholder="https://company.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Business Phone</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Business Phone</label>
               <input
                 type="text"
                 value={businessPhone}
                 onChange={(e) => setBusinessPhone(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                 placeholder="+234 1 234 5678"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Country Headquarters</label>
+              <label className="text-xs font-bold text-foreground block mb-1.5">Country Headquarters</label>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
               >
                 <option value="Nigeria">Nigeria</option>
                 <option value="Ghana">Ghana</option>
@@ -405,34 +405,34 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Headquarters Address</label>
+            <label className="text-xs font-bold text-foreground block mb-1.5">Headquarters Address</label>
             <div className="relative">
               <MapPin size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                 placeholder="10 Industrial Avenue, Ikeja, Lagos"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">Business Overview & Description</label>
+            <label className="text-xs font-bold text-foreground block mb-1.5">Business Overview & Description</label>
             <textarea
               rows={4}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               placeholder="Describe your manufacturing capacity, products offered, export experience, and factory standards..."
             />
           </div>
         </div>
 
         {/* ── Section 3: Notification Preferences ── */}
-        <div className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
-          <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2 border-b border-borderline pb-4">
+        <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
+          <h2 className="text-base font-black text-foreground flex items-center gap-2 border-b border-border pb-4">
             <Bell size={18} className="text-primary" /> Real-Time Notification Preferences
           </h2>
 
@@ -442,9 +442,9 @@ export default function SettingsPage() {
               { label: "Quotation Proposals & RFQs", desc: "Alerts when suppliers submit quotes for your RFQs or buyers request quotations.", state: notifyQuotes, setState: setNotifyQuotes },
               { label: "Direct B2B Messages", desc: "Push alerts when verified buyers or suppliers message you in the Chat Hub.", state: notifyMessages, setState: setNotifyMessages },
             ].map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-muted/40 border border-border">
                 <div>
-                  <p className="font-bold text-xs text-slate-900 dark:text-white">{item.label}</p>
+                  <p className="font-bold text-xs text-foreground">{item.label}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">{item.desc}</p>
                 </div>
                 <input
@@ -463,7 +463,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl font-black text-base shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-base shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
           >
             {saving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
             Save All Settings

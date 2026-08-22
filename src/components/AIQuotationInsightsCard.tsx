@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Sparkles, TrendingUp, ShieldAlert, ShieldCheck, CheckCircle2, Loader2, BarChart3 } from "lucide-react";
@@ -62,7 +62,7 @@ export default function AIQuotationInsightsCard({
 
   if (loading) {
     return (
-      <div className="glass rounded-3xl border border-borderline p-6 flex items-center justify-center gap-3">
+      <div className="bg-card rounded-3xl border border-border p-6 flex items-center justify-center gap-3">
         <Loader2 size={18} className="text-primary animate-spin" />
         <span className="text-xs font-bold text-muted-foreground">Calculating AI Deal & Risk Telemetry…</span>
       </div>
@@ -80,7 +80,7 @@ export default function AIQuotationInsightsCard({
   };
 
   return (
-    <div className="glass rounded-3xl border border-primary/20 p-6 space-y-4 bg-gradient-to-br from-primary/5 via-indigo-500/5 to-transparent">
+    <div className="bg-card rounded-3xl border border-primary/20 p-6 space-y-4 bg-gradient-to-br from-primary/5 via-indigo-500/5 to-transparent">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-2xl bg-primary/20 text-primary">
@@ -106,12 +106,12 @@ export default function AIQuotationInsightsCard({
         </span>
       </div>
 
-      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+      <p className="text-xs text-foreground leading-relaxed font-medium">
         {insights.dealAssessment}
       </p>
 
       {insights.KeyInsights?.length > 0 && (
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+        <div className="pt-2 border-t border-border space-y-1.5">
           <h4 className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
             Escrow Recommendations
           </h4>
@@ -119,7 +119,7 @@ export default function AIQuotationInsightsCard({
             {insights.KeyInsights.map((rec, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-600 dark:text-slate-400 flex items-start gap-1.5"
+                className="p-2.5 rounded-xl bg-card border border-border text-[11px] font-medium text-muted-foreground flex items-start gap-1.5"
               >
                 <CheckCircle2 size={13} className="text-emerald-500 flex-shrink-0 mt-0.5" />
                 <span>{rec}</span>

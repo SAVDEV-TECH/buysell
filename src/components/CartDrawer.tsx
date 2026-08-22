@@ -44,10 +44,10 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-slate-950 shadow-2xl z-[60] flex flex-col border-l border-borderline"
+            className="fixed top-0 right-0 h-full w-full max-w-md bg-card shadow-2xl z-[60] flex flex-col border-l border-border"
           >
             {/* Header */}
-            <div className="p-6 border-b border-borderline flex items-center justify-between">
+            <div className="p-6 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ShoppingBag className="text-primary" />
                 <h2 className="text-xl font-bold">Purchase Order</h2>
@@ -72,12 +72,12 @@ export default function CartDrawer() {
                 </div>
               ) : (
                 cartItems.map((item) => (
-                  <div key={item.id} className="flex gap-4 border-b border-borderline/50 pb-6 last:border-0">
+                   <div key={item.id} className="flex gap-4 border-b border-border/50 pb-6 last:border-0">
                     <div className="w-20 h-20 rounded-xl bg-muted overflow-hidden flex-shrink-0 relative">
                       {item.imageUrl ? (
                         <Image src={item.imageUrl} alt={item.name} fill sizes="80px" className="object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
                           {item.image || <ShoppingBag size={24} className="text-muted-foreground opacity-20" />}
                         </div>
                       )}
@@ -96,7 +96,7 @@ export default function CartDrawer() {
                         </div>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors"
+                          className="text-destructive hover:bg-destructive/10 p-1.5 rounded-md transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -105,14 +105,14 @@ export default function CartDrawer() {
                       <div className="flex items-center gap-3 mt-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-8 h-8 rounded-full border border-borderline flex items-center justify-center hover:bg-muted transition-colors"
+                          className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-muted transition-colors"
                         >
                           -
                         </button>
                         <span className="font-bold w-4 text-center">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 rounded-full border border-borderline flex items-center justify-center hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                          className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
                         >
                           +
                         </button>
@@ -125,7 +125,7 @@ export default function CartDrawer() {
 
             {/* Footer */}
             {cartItems.length > 0 && (
-              <div className="p-6 border-t border-borderline bg-slate-50 dark:bg-slate-900/50">
+              <div className="p-6 border-t border-border bg-muted/30">
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
@@ -135,7 +135,7 @@ export default function CartDrawer() {
                     <span>Shipping</span>
                     <span>Calculated upon PO submission</span>
                   </div>
-                  <div className="flex justify-between font-black text-xl pt-4 border-t border-borderline/50">
+                  <div className="flex justify-between font-black text-xl pt-4 border-t border-border/50">
                     <span>Total</span>
                     <span className="text-primary">₦{cartTotal.toLocaleString()}</span>
                   </div>
@@ -154,7 +154,7 @@ export default function CartDrawer() {
                     className={`w-full py-4 rounded-2xl font-black text-lg transition-all shadow-xl flex items-center justify-center gap-2 ${
                       cartItems.some(item => item.moq && item.quantity < item.moq)
                         ? "bg-muted text-muted-foreground cursor-not-allowed grayscale"
-                        : "bg-primary text-white hover:scale-105 active:scale-95 shadow-primary/20"
+                        : "bg-primary text-primary-foreground hover:opacity-90 hover:scale-105 active:scale-95 shadow-primary/20"
                     }`}
                   >
                     Submit Purchase Order <ArrowRight size={20} />
@@ -162,7 +162,7 @@ export default function CartDrawer() {
                   
                   <button 
                     onClick={clearCart}
-                    className="w-full py-3 text-red-500 font-medium hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                    className="w-full py-3 text-destructive font-medium hover:bg-destructive/10 rounded-xl transition-colors"
                   >
                     Clear Order
                   </button>

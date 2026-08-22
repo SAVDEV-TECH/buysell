@@ -336,7 +336,7 @@ export default function AnalyticsPage() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="glass p-6 rounded-3xl border border-borderline hover:border-primary/20 transition-all group"
+                className="bg-card p-6 rounded-3xl border border-border hover:border-primary/20 transition-all group"
               >
                 <div className="flex justify-between items-start mb-5">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${kpi.bg}`}>
@@ -360,7 +360,7 @@ export default function AnalyticsPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="glass rounded-3xl border border-borderline p-6 space-y-4"
+              className="bg-card rounded-3xl border border-border p-6 space-y-4"
             >
               <div className="flex justify-between items-center">
                 <div>
@@ -371,7 +371,7 @@ export default function AnalyticsPage() {
                   <TrendingUp size={13} /> {fmt(stats.revenue)} total
                 </span>
               </div>
-              <div className="h-44 text-slate-300 dark:text-slate-700">
+              <div className="h-44 text-muted-foreground">
                 <LineChart data={revenueByMonth} color="#6366f1" />
               </div>
               <div className="flex justify-between px-1">
@@ -386,7 +386,7 @@ export default function AnalyticsPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.42 }}
-              className="glass rounded-3xl border border-borderline p-6 space-y-4"
+              className="bg-card rounded-3xl border border-border p-6 space-y-4"
             >
               <div className="flex justify-between items-center">
                 <div>
@@ -397,7 +397,7 @@ export default function AnalyticsPage() {
                   <Package size={13} /> {stats.total} orders
                 </span>
               </div>
-              <div className="h-44 text-slate-300 dark:text-slate-700">
+              <div className="h-44 text-muted-foreground">
                 <BarChart data={ordersByMonth} labels={months.map((m) => m.label)} color="#3b82f6" />
               </div>
             </motion.div>
@@ -410,7 +410,7 @@ export default function AnalyticsPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="glass rounded-3xl border border-borderline p-6"
+              className="bg-card rounded-3xl border border-border p-6"
             >
               <h3 className="font-bold text-base mb-1">Order Status</h3>
               <p className="text-xs text-muted-foreground mb-4">Breakdown by fulfilment stage</p>
@@ -441,7 +441,7 @@ export default function AnalyticsPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
-              className="lg:col-span-2 glass rounded-3xl border border-borderline p-6 flex flex-col"
+              className="lg:col-span-2 bg-card rounded-3xl border border-border p-6 flex flex-col"
             >
               <div className="flex justify-between items-center mb-5">
                 <div>
@@ -475,7 +475,7 @@ export default function AnalyticsPage() {
                     return (
                       <div
                         key={i}
-                        className="flex items-center gap-4 p-3.5 rounded-2xl bg-white/30 dark:bg-slate-900/20 border border-borderline/10 hover:border-borderline/40 transition-all"
+                        className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/30 border border-border/10 hover:border-border/40 transition-all"
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
                           <StatusIcon size={18} className={cfg.color} />

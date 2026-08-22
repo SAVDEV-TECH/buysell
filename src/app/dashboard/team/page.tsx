@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -270,9 +270,9 @@ export default function TeamPage() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* Active Members Card */}
-          <div className="glass rounded-3xl p-6 lg:p-8 border border-borderline space-y-6">
-            <div className="flex justify-between items-center border-b border-borderline pb-4">
-              <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-card rounded-3xl p-6 lg:p-8 border border-border space-y-6">
+            <div className="flex justify-between items-center border-b border-border pb-4">
+              <h3 className="text-base font-black text-foreground flex items-center gap-2">
                 <Users size={18} className="text-primary" /> Active Team Members ({members.length})
               </h3>
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
@@ -293,14 +293,14 @@ export default function TeamPage() {
                   return (
                     <div
                       key={member.id}
-                      className="group flex items-center justify-between p-4 rounded-2xl border border-borderline bg-white dark:bg-slate-900 hover:border-primary/30 transition-all"
+                      className="group flex items-center justify-between p-4 rounded-2xl border border-border bg-card hover:border-primary/30 transition-all"
                     >
                       <div className="flex items-center gap-3.5">
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-primary/20 flex-shrink-0">
                           {(member.full_name || member.email)[0].toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <p className="font-bold text-sm text-foreground flex items-center gap-1.5">
                             {member.full_name || "Staff Member"}
                             {isSelf && <span className="text-[10px] text-primary font-black uppercase">(You)</span>}
                           </p>
@@ -318,14 +318,14 @@ export default function TeamPage() {
                             <button
                               onClick={() => { setEditingMember(member); setNewRole(member.role); }}
                               title="Edit Role"
-                              className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all"
+                              className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted rounded-lg transition-all"
                             >
                               <Edit size={14} />
                             </button>
                             <button
                               onClick={() => handleRemoveMember(member.id)}
                               title="Remove Member"
-                              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all"
+                              className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-destructive/10 rounded-lg transition-all"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -341,8 +341,8 @@ export default function TeamPage() {
 
           {/* Pending Invitations Card */}
           {invitations.length > 0 && (
-            <div className="glass rounded-3xl p-6 border border-borderline space-y-4">
-              <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+            <div className="bg-card rounded-3xl p-6 border border-border space-y-4">
+              <h3 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
                 <Clock size={16} className="text-amber-500" /> Pending Invitations ({invitations.length})
               </h3>
 
@@ -355,7 +355,7 @@ export default function TeamPage() {
                     <div className="flex items-center gap-3">
                       <Mail size={16} className="text-amber-500" />
                       <div>
-                        <p className="font-bold text-slate-900 dark:text-white">{invite.email}</p>
+                        <p className="font-bold text-foreground">{invite.email}</p>
                         <p className="text-[10px] text-muted-foreground">Role: {invite.role} · Expires in 7 days</p>
                       </div>
                     </div>
@@ -376,15 +376,15 @@ export default function TeamPage() {
 
         {/* Role Permissions Guide (1 col) */}
         <div className="lg:col-span-1">
-          <div className="glass rounded-3xl p-6 lg:p-8 border border-borderline space-y-6 sticky top-6">
-            <h3 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+          <div className="bg-card rounded-3xl p-6 lg:p-8 border border-border space-y-6 sticky top-6">
+            <h3 className="text-base font-black text-foreground flex items-center gap-2">
               <Shield size={18} className="text-primary" /> Role Permissions Matrix
             </h3>
 
             <div className="space-y-4">
               {ROLES.map((role) => (
-                <div key={role.id} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-1">
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                <div key={role.id} className="p-4 rounded-2xl bg-muted/40 border border-border space-y-1">
+                  <h4 className="font-bold text-xs text-foreground flex items-center gap-1.5">
                     <ShieldCheck size={14} className="text-primary" /> {role.label}
                   </h4>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -411,49 +411,49 @@ export default function TeamPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
+              className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-black">Invite Team Member</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Add staff members to your B2B organization.</p>
                 </div>
-                <button onClick={() => setShowInviteModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl">
+                <button onClick={() => setShowInviteModal(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl">
                   <X size={18} />
                 </button>
               </div>
 
               {inviteError && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 text-red-600 rounded-xl text-xs font-bold">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 rounded-xl text-xs font-bold">
                   {inviteError}
                 </div>
               )}
 
               {inviteSuccess && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 rounded-xl text-xs font-bold flex items-center gap-1.5">
                   <CheckCircle2 size={16} /> {inviteSuccess}
                 </div>
               )}
 
               <form onSubmit={handleSendInvite} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Email Address *</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Email Address *</label>
                   <input
                     type="email"
                     required
                     placeholder="colleague@company.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Assign Permission Role *</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Assign Permission Role *</label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
                   >
                     {ROLES.map((r) => (
                       <option key={r.id} value={r.id}>{r.label}</option>
@@ -465,7 +465,7 @@ export default function TeamPage() {
                   <button
                     type="button"
                     onClick={() => setShowInviteModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-100 transition-all"
+                    className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-all"
                   >
                     Cancel
                   </button>
@@ -496,11 +496,11 @@ export default function TeamPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
+              className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4"
             >
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-black">Edit Member Role</h3>
-                <button onClick={() => setEditingMember(null)} className="p-1 text-slate-400">
+                <button onClick={() => setEditingMember(null)} className="p-1 text-muted-foreground">
                   <X size={18} />
                 </button>
               </div>

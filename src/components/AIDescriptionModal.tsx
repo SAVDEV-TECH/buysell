@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Sparkles, X, Loader2, CheckCircle2, Wand2, RefreshCw } from "lucide-react";
@@ -84,10 +84,10 @@ export default function AIDescriptionModal({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-card rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-primary/10 via-purple-500/10 to-transparent">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-gradient-to-r from-primary/10 via-purple-500/10 to-transparent">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-primary/20 text-primary">
               <Sparkles size={20} />
@@ -99,7 +99,7 @@ export default function AIDescriptionModal({
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="p-2 rounded-xl text-muted-foreground hover:text-foreground dark:hover:text-slate-200 hover:bg-muted transition-all"
           >
             <X size={18} />
           </button>
@@ -123,7 +123,7 @@ export default function AIDescriptionModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Industrial Hydraulic Hose Pipe 100m Roll"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary/40 outline-none transition-all font-medium text-sm"
+              className="w-full px-4 py-3 rounded-2xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none transition-all font-medium text-sm"
             />
           </div>
 
@@ -137,7 +137,7 @@ export default function AIDescriptionModal({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="High pressure, oil resistant, ISO certified"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary/40 outline-none text-xs"
+                className="w-full px-4 py-2.5 rounded-2xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none text-xs"
               />
             </div>
 
@@ -150,7 +150,7 @@ export default function AIDescriptionModal({
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
                 placeholder="Mining contractors, factory buyers"
-                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 focus:ring-2 focus:ring-primary/40 outline-none text-xs"
+                className="w-full px-4 py-2.5 rounded-2xl border border-border bg-background focus:ring-2 focus:ring-primary/40 outline-none text-xs"
               />
             </div>
           </div>
@@ -180,13 +180,13 @@ export default function AIDescriptionModal({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-4"
+              className="mt-6 p-5 rounded-2xl bg-background border border-border space-y-4"
             >
               <div>
                 <h4 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
                   Generated B2B Description
                 </h4>
-                <p className="text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                <p className="text-xs text-foreground whitespace-pre-line leading-relaxed">
                   {result.description}
                 </p>
               </div>
@@ -196,7 +196,7 @@ export default function AIDescriptionModal({
                   <h4 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
                     Key Product Highlights
                   </h4>
-                  <ul className="list-disc list-inside text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                  <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
                     {result.keyFeatures.map((feat, idx) => (
                       <li key={idx}>{feat}</li>
                     ))}
@@ -226,10 +226,10 @@ export default function AIDescriptionModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 bg-muted/30">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="px-5 py-2.5 rounded-xl border border-border font-semibold text-xs text-muted-foreground hover:bg-muted transition-all"
           >
             Cancel
           </button>

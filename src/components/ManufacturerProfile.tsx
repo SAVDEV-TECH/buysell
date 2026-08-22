@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { MapPin, Calendar, Users, MessageSquare, ArrowLeft, Star, CheckCircle2, Video, Package, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +17,7 @@ function ProductCardImage({ product }: { product: any }) {
 
   if (!imgUrl || imgError) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+      <div className="w-full h-full flex items-center justify-center bg-muted">
         <Package size={32} className="text-muted-foreground opacity-20" />
       </div>
     );
@@ -89,7 +89,7 @@ export default function ManufacturerProfile({ id }: { id: string }) {
 
   if (!manufacturer) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/10 text-center p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-primary/5 text-center p-6">
         <h2 className="text-3xl font-black mb-4">Manufacturer Not Found</h2>
         <p className="text-muted-foreground mb-8">The requested manufacturer profile could not be found on BuySell.</p>
         <Link href="/manufacturers" className="px-8 py-3 bg-primary text-white rounded-xl font-bold">Return to Directory</Link>

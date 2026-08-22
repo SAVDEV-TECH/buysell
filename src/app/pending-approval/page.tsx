@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -126,7 +126,7 @@ function PendingApprovalContent() {
       >
         <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
           isRejected ? "bg-red-100 dark:bg-red-900/40" :
-          isSuspended ? "bg-orange-100 dark:bg-orange-900/40" :
+          isSuspended ? "bg-orange-500/10" :
           "bg-amber-100 dark:bg-amber-900/40"
         }`}>
           {isRejected ? (
@@ -138,12 +138,12 @@ function PendingApprovalContent() {
           )}
         </div>
 
-        <h1 className="text-xl font-black mb-1.5 text-slate-900 dark:text-white">
+        <h1 className="text-xl font-black mb-1.5 text-foreground">
           {isRejected ? "Application Not Approved" :
            isSuspended ? "Account Suspended" :
            "Verification In Progress"}
         </h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-sm mx-auto">
+        <p className="text-sm text-muted-foreground font-medium leading-relaxed max-w-sm mx-auto">
           {isRejected
             ? "Your application didn't pass review this time. You can update your documents and re-apply below."
             : isSuspended
@@ -155,7 +155,7 @@ function PendingApprovalContent() {
           <button
             onClick={handleRefreshStatus}
             disabled={refreshing}
-            className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-full text-xs font-black text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-all"
+            className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-card border border-amber-300 dark:border-amber-700 rounded-full text-xs font-black text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-all"
           >
             {refreshing ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
             Refresh Status
@@ -168,9 +168,9 @@ function PendingApprovalContent() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="glass rounded-3xl border border-borderline p-5"
+        className="bg-card rounded-3xl border border-border p-5"
       >
-        <h2 className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-2">
+        <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
           <ShieldCheck size={12} /> Verification Checklist
         </h2>
 
@@ -191,16 +191,16 @@ function PendingApprovalContent() {
                       ? "bg-emerald-500"
                       : isCurrent
                       ? "bg-primary"
-                      : "bg-slate-200 dark:bg-slate-700"
+                      : "bg-muted"
                   }`}>
                     {isDone ? (
                       <CheckCircle2 size={16} className="text-white" />
                     ) : (
-                      <Icon size={14} className={isCurrent ? "text-white" : "text-slate-400"} />
+                      <Icon size={14} className={isCurrent ? "text-white" : "text-muted-foreground"} />
                     )}
                   </div>
                   {i < ONBOARDING_STEPS.length - 1 && (
-                    <div className={`w-px h-8 mt-0.5 ${isDone ? "bg-emerald-400" : "bg-slate-200 dark:bg-slate-700"}`} />
+                    <div className={`w-px h-8 mt-0.5 ${isDone ? "bg-emerald-400" : "bg-muted"}`} />
                   )}
                 </div>
 
@@ -210,14 +210,14 @@ function PendingApprovalContent() {
                     <div>
                       <p className={`text-sm font-black ${
                         isDone ? "text-emerald-600 dark:text-emerald-400" :
-                        isCurrent ? "text-slate-900 dark:text-white" :
-                        "text-slate-400 dark:text-slate-500"
+                        isCurrent ? "text-foreground" :
+                        "text-muted-foreground"
                       }`}>
                         {step.label}
                         {isDone && <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-emerald-500">✓ Done</span>}
                         {isCurrent && <span className="ml-2 text-[10px] font-black uppercase tracking-wider text-primary animate-pulse">● Action needed</span>}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                         {step.description}
                       </p>
                     </div>
@@ -244,7 +244,7 @@ function PendingApprovalContent() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-3xl p-5"
+          className="bg-blue-500/10 border border-blue-500/20 dark:border-blue-800 rounded-3xl p-5"
         >
           <div className="flex items-start gap-3">
             <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />
@@ -277,9 +277,9 @@ function PendingApprovalContent() {
             { label: "Review Time", value: "1–2 Days", color: "text-amber-600" },
             { label: "Notification", value: "Via Email", color: "text-blue-600" },
           ].map((item) => (
-            <div key={item.label} className="glass rounded-2xl border border-borderline p-3 text-center">
+            <div key={item.label} className="bg-card rounded-2xl border border-border p-3 text-center">
               <p className={`text-sm font-black ${item.color}`}>{item.value}</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{item.label}</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">{item.label}</p>
             </div>
           ))}
         </motion.div>
@@ -294,13 +294,13 @@ function PendingApprovalContent() {
       >
         <Link
           href="mailto:savde388@gmail.com"
-          className="w-full px-4 py-3 glass border border-borderline rounded-2xl hover:bg-muted transition-all font-bold text-sm flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-card border border-border rounded-2xl hover:bg-muted transition-all font-bold text-sm flex items-center justify-center gap-2"
         >
           <Mail size={16} /> Contact Support
         </Link>
         <Link
           href="tel:+2348000000000"
-          className="w-full px-4 py-3 glass border border-borderline rounded-2xl hover:bg-muted transition-all font-bold text-sm flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 bg-card border border-border rounded-2xl hover:bg-muted transition-all font-bold text-sm flex items-center justify-center gap-2"
         >
           <Phone size={16} /> Call Support Line
         </Link>
@@ -317,7 +317,7 @@ function PendingApprovalContent() {
 
 export default function PendingApprovalPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -329,7 +329,7 @@ export default function PendingApprovalPage() {
             <span className="text-white">buy</span>
             <span className="text-orange-400">sell</span>
           </p>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mt-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
             Supplier Verification Portal
           </p>
         </div>

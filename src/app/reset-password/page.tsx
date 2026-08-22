@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -97,7 +97,7 @@ function ResetPasswordContent() {
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input type={showPassword ? "text" : "password"} required id="new-password" placeholder="Min. 12 characters"
-              className="w-full pl-10 pr-12 py-3 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none"
+              className="w-full pl-10 pr-12 py-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none"
               value={password} onChange={(e) => setPassword(e.target.value)} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -116,7 +116,7 @@ function ResetPasswordContent() {
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input type={showConfirm ? "text" : "password"} required id="confirm-new-password" placeholder="Re-enter new password"
-              className={`w-full pl-10 pr-12 py-3 bg-white/50 dark:bg-slate-900/50 border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none ${confirmPassword && confirmPassword !== password ? "border-destructive" : "border-borderline"}`}
+              className={`w-full pl-10 pr-12 py-3 bg-card/50 border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none ${confirmPassword && confirmPassword !== password ? "border-destructive" : "border-border"}`}
               value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">
               {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -136,13 +136,13 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md relative">
-        <div className="glass rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-white/10">
+        <div className="bg-card rounded-3xl p-8 shadow-2xl border border-border/30">
           <Suspense fallback={<div className="text-center py-8 text-muted-foreground">Loading...</div>}>
             <AnimatePresence mode="wait"><ResetPasswordContent /></AnimatePresence>
           </Suspense>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -48,7 +48,7 @@ function FieldLabel({ label, hint }: { label: string; hint?: string }) {
       {hint && (
         <span className="relative group">
           <Info size={12} className="text-muted-foreground cursor-help" />
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2 bg-slate-900 text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none shadow-xl">
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2 bg-foreground text-background text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none shadow-xl">
             {hint}
           </span>
         </span>
@@ -63,7 +63,7 @@ function Input({ icon: Icon, ...props }: any) {
       {Icon && <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />}
       <input
         {...props}
-        className={`w-full ${Icon ? "pl-11" : "px-4"} pr-4 py-3 glass rounded-2xl border border-borderline focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm transition-all ${props.className || ""}`}
+        className={`w-full ${Icon ? "pl-11" : "px-4"} pr-4 py-3 bg-card rounded-2xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm transition-all ${props.className || ""}`}
       />
     </div>
   );
@@ -75,7 +75,7 @@ function Select({ icon: Icon, children, ...props }: any) {
       {Icon && <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground z-10" />}
       <select
         {...props}
-        className={`w-full appearance-none ${Icon ? "pl-11" : "px-4"} pr-8 py-3 glass rounded-2xl border border-borderline focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm transition-all bg-transparent ${props.className || ""}`}
+        className={`w-full appearance-none ${Icon ? "pl-11" : "px-4"} pr-8 py-3 bg-card rounded-2xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm transition-all bg-transparent ${props.className || ""}`}
       >
         {children}
       </select>
@@ -134,7 +134,7 @@ function TieredPricingEditor({
                   type="number" min={1} placeholder="100"
                   value={tier.min_qty || ""}
                   onChange={(e) => update(idx, "min_qty", e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 glass rounded-xl border border-borderline text-xs outline-none focus:ring-2 focus:ring-primary/40 font-bold"
+                  className="w-full pl-9 pr-3 py-2.5 bg-card rounded-xl border border-border text-xs outline-none focus:ring-2 focus:ring-primary/40 font-bold"
                 />
               </div>
               <div className="relative">
@@ -143,13 +143,13 @@ function TieredPricingEditor({
                   type="number" min={0} step="0.01" placeholder="0.00"
                   value={tier.unit_price || ""}
                   onChange={(e) => update(idx, "unit_price", e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 glass rounded-xl border border-borderline text-xs outline-none focus:ring-2 focus:ring-primary/40 font-bold"
+                  className="w-full pl-9 pr-3 py-2.5 bg-card rounded-xl border border-border text-xs outline-none focus:ring-2 focus:ring-primary/40 font-bold"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-destructive/10 rounded-xl transition-all"
               >
                 <X size={14} />
               </button>
@@ -228,12 +228,12 @@ function ImageUploadPanel({
       {allPreviews.length > 0 && (
         <div className="grid grid-cols-4 gap-2">
           {allPreviews.map((src, i) => (
-            <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-borderline">
+            <div key={i} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt="" className="w-full h-full object-cover" />
               {i === primaryIndex && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
-                  <span className="text-[8px] font-black text-primary bg-white/90 dark:bg-slate-900/90 px-1.5 py-0.5 rounded-full">
+                  <span className="text-[8px] font-black text-primary bg-card/90 px-1.5 py-0.5 rounded-full">
                     PRIMARY
                   </span>
                 </div>
@@ -606,7 +606,7 @@ export default function NewProductPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass rounded-3xl p-16 text-center border border-emerald-500/20 shadow-xl"
+            className="bg-card rounded-3xl p-16 text-center border border-emerald-500/20 shadow-xl"
           >
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle size={32} />
@@ -627,7 +627,7 @@ export default function NewProductPage() {
               <div className="space-y-7">
 
                 {/* Section 1: Basic Info */}
-                <section className="glass rounded-3xl border border-borderline p-7 space-y-5">
+                <section className="bg-card rounded-3xl border border-border p-7 space-y-5">
                   <h2 className="text-base font-black flex items-center gap-2">
                     <Type size={16} className="text-primary" /> Basic Information
                   </h2>
@@ -663,7 +663,7 @@ export default function NewProductPage() {
                       placeholder="Detailed product specification, quality standards, packing, shipping & lead time details..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="w-full px-4 py-3 glass rounded-2xl border border-borderline focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm resize-none transition-all"
+                      className="w-full px-4 py-3 bg-card rounded-2xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm resize-none transition-all"
                     />
                   </div>
 
@@ -730,7 +730,7 @@ export default function NewProductPage() {
                 </section>
 
                 {/* Section 2: Tiered Pricing */}
-                <section className="glass rounded-3xl border border-borderline p-7 space-y-4">
+                <section className="bg-card rounded-3xl border border-border p-7 space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-base font-black flex items-center gap-2">
                       <TrendingUp size={16} className="text-primary" /> Volume Pricing *
@@ -752,7 +752,7 @@ export default function NewProductPage() {
                 </section>
 
                 {/* Section 3: Additional Details */}
-                <section className="glass rounded-3xl border border-borderline p-7 space-y-5">
+                <section className="bg-card rounded-3xl border border-border p-7 space-y-5">
                   <h2 className="text-base font-black flex items-center gap-2">
                     <Info size={16} className="text-primary" /> Additional Details
                   </h2>
@@ -797,7 +797,7 @@ export default function NewProductPage() {
               <div className="space-y-6 lg:sticky lg:top-6">
 
                 {/* Listing Status */}
-                <section className="glass rounded-3xl border border-borderline p-6 space-y-4">
+                <section className="bg-card rounded-3xl border border-border p-6 space-y-4">
                   <h2 className="text-base font-black">Listing Status</h2>
                   <div className="space-y-2">
                     {(["active", "draft", "inactive"] as const).map((s) => {
@@ -809,12 +809,12 @@ export default function NewProductPage() {
                       const colors: Record<string, string> = {
                         active: "border-emerald-400 bg-emerald-500/10",
                         draft: "border-amber-400 bg-amber-500/10",
-                        inactive: "border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800",
+                        inactive: "border-border bg-muted",
                       };
                       return (
                         <label
                           key={s}
-                          className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${status === s ? colors[s] : "border-borderline hover:border-muted-foreground/30"}`}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${status === s ? colors[s] : "border-border hover:border-muted-foreground/30"}`}
                         >
                           <input
                             type="radio"
@@ -832,7 +832,7 @@ export default function NewProductPage() {
                 </section>
 
                 {/* Product Images */}
-                <section className="glass rounded-3xl border border-borderline p-6 space-y-4">
+                <section className="bg-card rounded-3xl border border-border p-6 space-y-4">
                   <h2 className="text-base font-black">Product Images</h2>
                   <ImageUploadPanel
                     existingUrls={existingImageUrls}
@@ -851,7 +851,7 @@ export default function NewProductPage() {
                         </p>
                         <p className="text-xs font-black text-primary">{uploadProgress}%</p>
                       </div>
-                      <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-primary to-blue-500 rounded-full transition-all duration-300"
                           style={{ width: `${uploadProgress}%` }}
@@ -866,7 +866,7 @@ export default function NewProductPage() {
                   )}
                   {/* AI Vision Image Analysis Button */}
                   {(existingImageUrls.length > 0 || newImageFiles.length > 0) && (
-                    <div className="pt-2 border-t border-borderline">
+                    <div className="pt-2 border-t border-border">
                       <button
                         type="button"
                         onClick={handleAnalyzeImage}

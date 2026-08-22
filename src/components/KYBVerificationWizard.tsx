@@ -62,13 +62,13 @@ export function KYBVerificationWizard({
   };
 
   return (
-    <div className="w-full glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
-      <div className="flex items-center gap-3 border-b border-borderline pb-4">
+    <div className="w-full bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
+      <div className="flex items-center gap-3 border-b border-border pb-4">
         <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
           <ShieldCheck size={22} />
         </div>
         <div>
-          <h3 className="text-base font-black text-slate-900 dark:text-white">
+          <h3 className="text-base font-black text-foreground">
             Export Supplier Verification (KYB)
           </h3>
           <p className="text-xs text-muted-foreground">
@@ -87,7 +87,7 @@ export function KYBVerificationWizard({
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. West Africa Agricultural Exports Ltd"
-              className="w-full px-4 py-3 bg-background border border-borderline rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
+              className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
             />
           </div>
 
@@ -97,7 +97,7 @@ export function KYBVerificationWizard({
               <select
                 value={businessType}
                 onChange={(e) => setBusinessType(e.target.value)}
-                className="w-full px-4 py-3 bg-background border border-borderline rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
               >
                 <option value="cac">CAC (Nigeria)</option>
                 <option value="rccm">RCCM (Togo / Francophone)</option>
@@ -114,7 +114,7 @@ export function KYBVerificationWizard({
                 value={regNumber}
                 onChange={(e) => setRegNumber(e.target.value)}
                 placeholder="e.g. RC-1849204"
-                className="w-full px-4 py-3 bg-background border border-borderline rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
+                className="w-full px-4 py-3 bg-muted border border-border rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/50 outline-none"
               />
             </div>
           </div>
@@ -129,7 +129,7 @@ export function KYBVerificationWizard({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-primary text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider rounded-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : "Verify Registration via Government Registry"}
           </button>
@@ -145,7 +145,7 @@ export function KYBVerificationWizard({
             </p>
           </div>
 
-          <div className="p-8 border-2 border-dashed border-borderline rounded-2xl text-center space-y-2 cursor-pointer hover:border-primary/50 transition-all">
+          <div className="p-8 border-2 border-dashed border-border rounded-2xl text-center space-y-2 cursor-pointer hover:border-primary/50 transition-all">
             <Upload size={32} className="mx-auto text-muted-foreground" />
             <p className="text-sm font-bold">Upload Corporate Certificate (PDF/PNG)</p>
             <p className="text-xs text-muted-foreground">Max file size 10MB</p>
@@ -157,7 +157,7 @@ export function KYBVerificationWizard({
               setVerified(true);
               setStep(3);
             }}
-            className="w-full py-3.5 bg-primary text-white font-black text-xs uppercase tracking-wider rounded-xl hover:bg-primary/90 transition-all"
+            className="w-full py-3.5 bg-primary text-primary-foreground font-black text-xs uppercase tracking-wider rounded-xl hover:bg-primary/90 transition-all"
           >
             Submit Documents for Review
           </button>
@@ -176,7 +176,7 @@ export function KYBVerificationWizard({
           {onComplete && (
             <button
               onClick={onComplete}
-              className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs"
+              className="px-6 py-2.5 bg-foreground text-background rounded-xl font-bold text-xs hover:opacity-90 transition-all"
             >
               Return to Dashboard
             </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { ShieldCheck, Lock, Package, Truck, CheckCircle2, Clock } from "lucide-react";
@@ -63,15 +63,15 @@ export function OrderEscrowTracker({ order }: OrderEscrowTrackerProps) {
   const progressPercent = Math.min(100, Math.max(10, ((completedCount - 1) / (stages.length - 1)) * 100));
 
   return (
-    <div className="w-full glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
+    <div className="w-full bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
       
       {/* Tracker Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-borderline pb-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
         <div>
           <span className="text-[10px] font-mono font-black text-primary uppercase tracking-widest flex items-center gap-1.5">
             <Lock size={12} className="text-emerald-500" /> BUYSELL ESCROW PROTECTION ENFORCED
           </span>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">
+          <h2 className="text-xl font-black text-foreground mt-1">
             B2B Trade Fulfillment Timeline
           </h2>
         </div>
@@ -85,7 +85,7 @@ export function OrderEscrowTracker({ order }: OrderEscrowTrackerProps) {
       <div className="relative pt-6 pb-4">
         
         {/* Connector Line Background */}
-        <div className="absolute top-12 left-8 right-8 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full hidden md:block -z-0" />
+        <div className="absolute top-12 left-8 right-8 h-1.5 bg-muted rounded-full hidden md:block -z-0" />
 
         {/* Animated Active Progress Line */}
         <motion.div
@@ -110,7 +110,7 @@ export function OrderEscrowTracker({ order }: OrderEscrowTrackerProps) {
                       ? "bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-emerald-500/20 ring-4 ring-emerald-500/10"
                       : stage.active
                       ? "bg-gradient-to-br from-blue-600 to-sky-500 text-white shadow-blue-500/30 ring-4 ring-blue-500/20 animate-pulse"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700"
+                      : "bg-muted text-muted-foreground border border-border"
                   }`}
                 >
                   <Icon size={20} />
@@ -119,7 +119,7 @@ export function OrderEscrowTracker({ order }: OrderEscrowTrackerProps) {
                 {/* Node Details */}
                 <div>
                   <h4 className={`text-xs font-black tracking-tight ${
-                    stage.completed || stage.active ? "text-slate-900 dark:text-white" : "text-slate-400"
+                    stage.completed || stage.active ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     {stage.title}
                   </h4>

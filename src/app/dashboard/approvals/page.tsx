@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -244,21 +244,21 @@ export default function ApprovalsPage() {
       </div>
 
       {/* ── Active Spending Rules Banner ── */}
-      <div className="glass rounded-3xl border border-borderline p-6 space-y-4">
+      <div className="bg-card rounded-3xl border border-border p-6 space-y-4">
         <h3 className="text-xs font-black uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           <ShieldCheck size={16} className="text-primary" /> Active Organization Spending Rules
         </h3>
 
         {rules.length === 0 ? (
-          <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-900 text-xs font-bold text-muted-foreground flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-muted text-xs font-bold text-muted-foreground flex items-center justify-between">
             <span>No custom rules defined. Default threshold: Orders exceeding <strong>$5,000.00 USD</strong> require manager approval.</span>
             <button onClick={() => setShowRuleModal(true)} className="text-primary underline">Add Rule</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {rules.map((rule) => (
-              <div key={rule.id} className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-borderline shadow-sm space-y-1">
-                <div className="text-xs font-black text-slate-900 dark:text-white">{rule.rule_name}</div>
+              <div key={rule.id} className="p-4 rounded-2xl bg-card border border-border shadow-sm space-y-1">
+                <div className="text-xs font-black text-foreground">{rule.rule_name}</div>
                 <div className="text-lg font-black text-primary">${rule.min_amount.toLocaleString()} USD+</div>
                 <div className="text-[10px] text-muted-foreground uppercase font-bold">Role: {rule.approver_role}</div>
               </div>
@@ -269,14 +269,14 @@ export default function ApprovalsPage() {
 
       {/* ── Filter Tabs & Search Bar ── */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-borderline">
+        <div className="flex items-center gap-2 bg-muted p-1.5 rounded-2xl border border-border">
           {(["pending", "approved", "rejected", "all"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 text-xs font-bold rounded-xl capitalize transition-all ${
                 activeTab === tab
-                  ? "bg-white dark:bg-slate-800 text-primary shadow-sm"
+                  ? "bg-card text-primary shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -292,13 +292,13 @@ export default function ApprovalsPage() {
             placeholder="Search by Order ID or Buyer Name…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-borderline rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full pl-10 pr-4 py-2.5 bg-card border border-border rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>
 
       {/* ── Approvals List Table ── */}
-      <div className="glass rounded-3xl border border-borderline overflow-hidden">
+      <div className="bg-card rounded-3xl border border-border overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-muted-foreground space-y-3">
             <Loader2 size={28} className="animate-spin text-primary mx-auto" />
@@ -307,14 +307,14 @@ export default function ApprovalsPage() {
         ) : filteredApprovals.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground space-y-2">
             <CheckCircle2 size={32} className="text-emerald-500 mx-auto" />
-            <p className="text-sm font-bold text-slate-900 dark:text-white">No {activeTab !== "all" ? activeTab : ""} approvals found</p>
+            <p className="text-sm font-bold text-foreground">No {activeTab !== "all" ? activeTab : ""} approvals found</p>
             <p className="text-xs">All high-value orders meet authorization requirements.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-borderline bg-slate-50/50 dark:bg-slate-900/50">
+                <tr className="border-b border-border bg-muted/30">
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Order ID</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Requested By</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Amount</th>
@@ -323,9 +323,9 @@ export default function ApprovalsPage() {
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-borderline">
+              <tbody className="divide-y divide-border">
                 {filteredApprovals.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors">
+                  <tr key={item.id} className="hover:bg-muted/40 transition-colors">
                     <td className="px-6 py-4 text-xs font-mono font-bold text-primary">
                       <Link href={`/dashboard/orders/${item.order_id}`} className="hover:underline flex items-center gap-1">
                         #{item.order_id?.slice(0, 8)} <ArrowUpRight size={12} />
@@ -333,13 +333,13 @@ export default function ApprovalsPage() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <div className="text-xs font-bold text-slate-900 dark:text-white">
+                      <div className="text-xs font-bold text-foreground">
                         {item.requested_by_user?.full_name || "Procurement Staff"}
                       </div>
                       <div className="text-[10px] text-muted-foreground">{item.requested_by_user?.email}</div>
                     </td>
 
-                    <td className="px-6 py-4 text-sm font-black text-slate-900 dark:text-white">
+                    <td className="px-6 py-4 text-sm font-black text-foreground">
                       ${item.order?.total_amount?.toLocaleString() || "0.00"} {item.order?.currency || "USD"}
                     </td>
 
@@ -387,19 +387,19 @@ export default function ApprovalsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-borderline p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-6"
+              className="bg-card rounded-3xl border border-border p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-6"
             >
               <div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white">Authorize Order Request</h3>
+                <h3 className="text-xl font-black text-foreground">Authorize Order Request</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Order #{selectedApproval.order_id?.slice(0, 8)} · Total: <strong>${selectedApproval.order?.total_amount?.toLocaleString()} USD</strong>
                 </p>
               </div>
 
-              <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-borderline text-xs">
+              <div className="space-y-3 p-4 rounded-2xl bg-muted/40 border border-border text-xs">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground font-bold">Requested By:</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{selectedApproval.requested_by_user?.full_name || "Staff Member"}</span>
+                  <span className="font-bold text-foreground">{selectedApproval.requested_by_user?.full_name || "Staff Member"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground font-bold">Order Value:</span>
@@ -408,13 +408,13 @@ export default function ApprovalsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-900 dark:text-white">Rejection Notes (Optional for approval, required for rejection)</label>
+                <label className="text-xs font-bold text-foreground">Rejection Notes (Optional for approval, required for rejection)</label>
                 <textarea
                   rows={3}
                   placeholder="Enter reason if rejecting this purchase request…"
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-2xl text-xs font-bold outline-none"
+                  className="w-full p-3 bg-muted border border-border rounded-2xl text-xs font-bold outline-none"
                 />
               </div>
 
@@ -455,9 +455,9 @@ export default function ApprovalsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl border border-borderline p-6 md:p-8 max-w-md w-full shadow-2xl space-y-6"
+              className="bg-card rounded-3xl border border-border p-6 md:p-8 max-w-md w-full shadow-2xl space-y-6"
             >
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">Create Approval Rule</h3>
+              <h3 className="text-xl font-black text-foreground">Create Approval Rule</h3>
 
               <form onSubmit={handleSaveRule} className="space-y-4">
                 <div className="space-y-1">
@@ -467,7 +467,7 @@ export default function ApprovalsPage() {
                     required
                     value={newRuleName}
                     onChange={(e) => setNewRuleName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl text-xs font-bold outline-none"
+                    className="w-full px-3.5 py-2.5 bg-muted border border-border rounded-xl text-xs font-bold outline-none"
                   />
                 </div>
 
@@ -479,7 +479,7 @@ export default function ApprovalsPage() {
                     required
                     value={newMinAmount}
                     onChange={(e) => setNewMinAmount(parseFloat(e.target.value) || 0)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl text-xs font-bold outline-none"
+                    className="w-full px-3.5 py-2.5 bg-muted border border-border rounded-xl text-xs font-bold outline-none"
                   />
                 </div>
 
@@ -495,7 +495,7 @@ export default function ApprovalsPage() {
                   <button
                     type="button"
                     onClick={() => setShowRuleModal(false)}
-                    className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-xs"
+                    className="flex-1 py-3 bg-muted text-foreground rounded-xl font-bold text-xs"
                   >
                     Cancel
                   </button>

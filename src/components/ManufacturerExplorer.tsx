@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Search, Filter, MapPin, Calendar, Users, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -152,11 +152,11 @@ export default function ManufacturerExplorer() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                className="solid-card p-6 flex flex-col group hover:shadow-md transition-all"
+                className="bg-card rounded-2xl border border-border p-6 flex flex-col group hover:shadow-md transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/10 to-orange-500/10 dark:from-blue-600/20 dark:to-orange-500/20 border border-borderline flex items-center justify-center font-black text-lg text-primary flex-shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/10 to-orange-500/10 dark:from-blue-600/20 dark:to-orange-500/20 border border-border flex items-center justify-center font-black text-lg text-primary flex-shrink-0">
                       {mfg.name ? mfg.name.charAt(0).toUpperCase() : "B"}
                     </div>
                     <div>

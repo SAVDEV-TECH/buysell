@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
@@ -43,10 +43,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertTriangle size={28} />
           </div>
           <div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">
+            <h3 className="text-lg font-black text-foreground">
               Something went wrong
             </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {this.state.error?.message || "An unexpected error occurred in this view."}
             </p>
           </div>

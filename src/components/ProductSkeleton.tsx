@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 
 const ProductSkeleton = () => {
   return (
-    <div className="solid-card overflow-hidden flex flex-col h-full animate-pulse">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden flex flex-col h-full animate-pulse">
       {/* Image Skeleton */}
       <div className="aspect-[4/3] bg-muted/40 relative overflow-hidden" />
 

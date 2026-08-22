@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Sparkles, Building2, ShieldCheck, MapPin, Loader2, ArrowRight, CheckCircle2, Zap } from "lucide-react";
@@ -56,7 +56,7 @@ export default function AISupplierMatchmaker({
   };
 
   return (
-    <div className="glass rounded-3xl border border-primary/20 p-6 space-y-4 bg-gradient-to-br from-primary/5 via-purple-500/5 to-transparent">
+    <div className="bg-card rounded-3xl border border-primary/20 p-6 space-y-4 bg-gradient-to-br from-primary/5 via-purple-500/5 to-transparent">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-2xl bg-primary/20 text-primary">
@@ -107,11 +107,11 @@ export default function AISupplierMatchmaker({
             matches.map((m, idx) => (
               <div
                 key={idx}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-primary/40 transition-all"
+                className="p-4 rounded-2xl bg-card border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm hover:border-primary/40 transition-all"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span className="font-extrabold text-sm text-foreground flex items-center gap-1.5">
                       <Building2 size={15} className="text-primary" /> {m.supplierName}
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase flex items-center gap-1">
@@ -121,14 +121,14 @@ export default function AISupplierMatchmaker({
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {m.matchRationale}
                   </p>
-                  <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500 pt-0.5">
+                  <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground pt-0.5">
                     <span>Est. Lead Time: {m.estimatedLeadDays} days</span>
                   </div>
                 </div>
 
                 <a
                   href={`/marketplace`}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-primary hover:text-white transition-all flex items-center gap-1 self-start sm:self-center"
+                  className="px-4 py-2 rounded-xl bg-muted text-xs font-bold text-foreground hover:bg-primary hover:text-white transition-all flex items-center gap-1 self-start sm:self-center"
                 >
                   Send Direct Inquiry <ArrowRight size={12} />
                 </a>

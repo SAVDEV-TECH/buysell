@@ -59,22 +59,22 @@ export default function EscrowMilestones({
   const releasedPercent = Math.round((totalReleased / (totalAmount || 1)) * 100);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 space-y-6 shadow-xl">
+    <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6 shadow-xl">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border pb-5">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20 flex items-center gap-1">
               <ShieldCheck size={12} /> B2B Milestone Release Terms
             </span>
           </div>
-          <h3 className="text-lg font-black text-slate-900 dark:text-white mt-1">
+          <h3 className="text-lg font-black text-foreground mt-1">
             Escrow Payment Disbursements
           </h3>
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Total Released</p>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">Total Released</p>
           <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">
             ${totalReleased.toLocaleString(undefined, { minimumFractionDigits: 2 })} / ${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
@@ -84,10 +84,10 @@ export default function EscrowMilestones({
       {/* Progress Bar */}
       <div className="space-y-2">
         <div className="flex justify-between items-center text-xs font-bold">
-          <span className="text-slate-600 dark:text-slate-400">Escrow Milestone Progress</span>
+          <span className="text-muted-foreground">Escrow Milestone Progress</span>
           <span className="text-emerald-600 dark:text-emerald-400 font-black">{releasedPercent}% Released</span>
         </div>
-        <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
+        <div className="w-full h-3 bg-muted rounded-full overflow-hidden p-0.5 border border-border">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${releasedPercent}%` }}
@@ -105,25 +105,25 @@ export default function EscrowMilestones({
             className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
               m.status === "released"
                 ? "bg-emerald-500/5 border-emerald-500/30"
-                : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+                : "bg-muted/40 border-border"
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl ${m.status === "released" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-slate-200 dark:bg-slate-700 text-slate-500"}`}>
+              <div className={`p-2.5 rounded-xl ${m.status === "released" ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"}`}>
                 {m.status === "released" ? <CheckCircle2 size={18} /> : <Lock size={18} />}
               </div>
               <div>
-                <p className="text-xs font-black text-slate-900 dark:text-white">
+                <p className="text-xs font-black text-foreground">
                   Milestone #{idx + 1}: {m.title}
                 </p>
-                <p className="text-[11px] text-slate-500 font-bold mt-0.5">
+                <p className="text-[11px] text-muted-foreground font-bold mt-0.5">
                   Trigger: {m.trigger_event.replace("_", " ")}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-              <span className="text-sm font-black text-slate-900 dark:text-white">
+              <span className="text-sm font-black text-foreground">
                 ${m.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
 

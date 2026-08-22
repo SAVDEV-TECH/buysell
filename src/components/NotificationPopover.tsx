@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useNotifications, NotificationItem, NotificationType } from "@/context/NotificationContext";
@@ -109,11 +109,11 @@ export default function NotificationPopover() {
       <button
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Notifications"
-        className="p-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full relative transition-all active:scale-95"
+        className="p-2.5 text-muted-foreground hover:bg-muted rounded-full relative transition-all active:scale-95"
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 animate-pulse">
+          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center ring-2 ring-background animate-pulse">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -127,10 +127,10 @@ export default function NotificationPopover() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed inset-x-4 top-[72px] sm:inset-x-auto sm:top-auto sm:absolute sm:right-0 sm:mt-3 w-auto sm:w-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl z-[100] overflow-hidden flex flex-col max-h-[85vh] origin-top-right sm:origin-top-right"
+            className="fixed inset-x-4 top-[72px] sm:inset-x-auto sm:top-auto sm:absolute sm:right-0 sm:mt-3 w-auto sm:w-96 bg-card rounded-3xl border border-border shadow-2xl z-[100] overflow-hidden flex flex-col max-h-[85vh] origin-top-right sm:origin-top-right"
           >
             {/* Popover Header */}
-            <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-base flex items-center gap-2">
                   Notifications
@@ -154,7 +154,7 @@ export default function NotificationPopover() {
                 )}
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
+                  className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
                 >
                   <X size={16} />
                 </button>
@@ -162,13 +162,13 @@ export default function NotificationPopover() {
             </div>
 
             {/* Filter Tabs */}
-            <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2 bg-slate-50/30 dark:bg-slate-900/30 text-xs font-bold">
+            <div className="px-4 py-2 border-b border-border flex items-center gap-2 bg-muted/20 text-xs font-bold">
               <button
                 onClick={() => setFilter("all")}
                 className={`px-3 py-1 rounded-full transition-all ${
                   filter === "all"
                     ? "bg-primary text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 All ({notifications.length})
@@ -178,7 +178,7 @@ export default function NotificationPopover() {
                 className={`px-3 py-1 rounded-full transition-all ${
                   filter === "unread"
                     ? "bg-primary text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Unread ({unreadCount})
@@ -186,13 +186,13 @@ export default function NotificationPopover() {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+            <div className="flex-1 overflow-y-auto divide-y divide-border/60">
               {displayedNotifications.length === 0 ? (
                 <div className="py-12 px-4 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mx-auto mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground mx-auto mb-3">
                     <Inbox size={24} />
                   </div>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <p className="text-sm font-semibold text-foreground">
                     No {filter === "unread" ? "unread" : ""} notifications
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -206,7 +206,7 @@ export default function NotificationPopover() {
                     <div
                       key={notif.id}
                       onClick={() => handleItemClick(notif)}
-                      className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all cursor-pointer relative group flex items-start gap-3.5 ${
+                      className={`p-4 hover:bg-muted/60 transition-all cursor-pointer relative group flex items-start gap-3.5 ${
                         !notif.read ? "bg-primary/[0.03] dark:bg-primary/[0.05]" : ""
                       }`}
                     >
@@ -223,10 +223,10 @@ export default function NotificationPopover() {
                       {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <h4 className={`text-xs font-bold truncate ${!notif.read ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"}`}>
+                          <h4 className={`text-xs font-bold truncate ${!notif.read ? "text-foreground" : "text-foreground"}`}>
                             {notif.title}
                           </h4>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                             {formatTimeAgo(notif.created_at)}
                           </span>
                         </div>
@@ -237,7 +237,7 @@ export default function NotificationPopover() {
 
                       {/* Link indicator */}
                       {notif.link && (
-                        <ChevronRight size={14} className="text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 self-center" />
+                        <ChevronRight size={14} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 self-center" />
                       )}
                     </div>
                   );
@@ -246,7 +246,7 @@ export default function NotificationPopover() {
             </div>
 
             {/* Footer */}
-            <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 text-center">
+            <div className="p-3 border-t border-border bg-muted/60 text-center">
               <Link
                 href="/dashboard/notifications"
                 onClick={() => setOpen(false)}

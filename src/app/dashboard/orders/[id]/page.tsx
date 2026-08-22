@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useRef, use } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -473,11 +473,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
+              className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-black">Dispatch Shipment</h3>
-                <button onClick={() => setShowTrackingModal(false)} className="p-1 text-slate-400">
+                <button onClick={() => setShowTrackingModal(false)} className="p-1 text-muted-foreground">
                   <X size={18} />
                 </button>
               </div>
@@ -541,18 +541,18 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white text-slate-900 rounded-3xl p-8 max-w-2xl w-full shadow-2xl space-y-6"
+              className="bg-white text-foreground rounded-3xl p-8 max-w-2xl w-full shadow-2xl space-y-6"
             >
               <div className="flex justify-between items-start border-b pb-4">
                 <div>
                   <h2 className="text-2xl font-black uppercase tracking-tight text-primary">COMMERCIAL INVOICE</h2>
-                  <p className="text-xs text-slate-500">BuySell B2B Trade Network · Invoice #{order.id.slice(0, 8).toUpperCase()}</p>
+                  <p className="text-xs text-muted-foreground">BuySell B2B Trade Network · Invoice #{order.id.slice(0, 8).toUpperCase()}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => window.print()} className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+                  <button onClick={() => window.print()} className="px-4 py-2 bg-foreground text-background rounded-xl text-xs font-bold flex items-center gap-1.5">
                     <Printer size={14} /> Print PDF
                   </button>
-                  <button onClick={() => setShowInvoiceModal(false)} className="p-2 text-slate-400">
+                  <button onClick={() => setShowInvoiceModal(false)} className="p-2 text-muted-foreground">
                     <X size={20} />
                   </button>
                 </div>
@@ -560,20 +560,20 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 
               <div className="grid grid-cols-2 gap-6 text-xs">
                 <div>
-                  <p className="font-bold text-slate-400 uppercase tracking-wider mb-1">Seller (Exporter)</p>
-                  <p className="font-bold text-slate-900">{order.supplier_organization?.company_name || "Verified Supplier Ltd"}</p>
-                  <p className="text-slate-500">Verified BuySell Manufacturer</p>
+                  <p className="font-bold text-muted-foreground uppercase tracking-wider mb-1">Seller (Exporter)</p>
+                  <p className="font-bold text-foreground">{order.supplier_organization?.company_name || "Verified Supplier Ltd"}</p>
+                  <p className="text-muted-foreground">Verified BuySell Manufacturer</p>
                 </div>
                 <div>
-                  <p className="font-bold text-slate-400 uppercase tracking-wider mb-1">Buyer (Importer)</p>
-                  <p className="font-bold text-slate-900">{order.buyer_organization?.company_name || "B2B Importer Inc"}</p>
-                  <p className="text-slate-500">Destination: {order.shipping_address?.country || "Global"}</p>
+                  <p className="font-bold text-muted-foreground uppercase tracking-wider mb-1">Buyer (Importer)</p>
+                  <p className="font-bold text-foreground">{order.buyer_organization?.company_name || "B2B Importer Inc"}</p>
+                  <p className="text-muted-foreground">Destination: {order.shipping_address?.country || "Global"}</p>
                 </div>
               </div>
 
               <table className="w-full text-xs text-left border-collapse border-t border-b">
                 <thead>
-                  <tr className="bg-slate-100 font-bold">
+                  <tr className="bg-muted font-bold">
                     <th className="p-3">Description</th>
                     <th className="p-3">Qty</th>
                     <th className="p-3 text-right">Unit Price</th>
@@ -591,7 +591,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </table>
 
               <div className="flex justify-between items-center pt-4 text-xs">
-                <div className="text-slate-500">
+                <div className="text-muted-foreground">
                   <p>Escrow Status: <strong>{order.payment_status.toUpperCase()}</strong></p>
                   <p>Payment Reference: <strong>BUYSELL-{order.id.slice(0, 6)}</strong></p>
                 </div>

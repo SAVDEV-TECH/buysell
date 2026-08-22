@@ -64,11 +64,11 @@ export default function DisputeArbitrationModal({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 md:p-8 max-w-lg w-full shadow-2xl relative"
+          className="bg-card rounded-3xl border border-border p-6 md:p-8 max-w-lg w-full shadow-2xl relative"
         >
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors"
+            className="absolute top-5 right-5 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X size={20} />
           </button>
@@ -80,23 +80,23 @@ export default function DisputeArbitrationModal({
                   <ShieldAlert size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                  <h3 className="text-lg font-black text-foreground">
                     Open Formal Escrow Dispute
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-muted-foreground font-medium">
                     Order #{orderId.slice(0, 8).toUpperCase()} · Funds (${orderAmount.toLocaleString()} USD) will be frozen for admin arbitration
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">
                   Primary Dispute Reason
                 </label>
                 <select
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-rose-500"
+                  className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-bold text-foreground outline-none focus:border-rose-500"
                 >
                   <option value="Damaged Goods / Quality Defect">Damaged Goods / Quality Defect</option>
                   <option value="Quantity Mismatch / Missing Items">Quantity Mismatch / Missing Items</option>
@@ -106,7 +106,7 @@ export default function DisputeArbitrationModal({
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">
                   Detailed Claim & Inspection Summary
                 </label>
                 <textarea
@@ -115,12 +115,12 @@ export default function DisputeArbitrationModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe exact defects, missing quantities, or inspection discrepancies…"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-rose-500"
+                  className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium text-foreground outline-none focus:border-rose-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                <label className="block text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">
                   Evidence Photo / Lab Report URL (Optional)
                 </label>
                 <input
@@ -128,7 +128,7 @@ export default function DisputeArbitrationModal({
                   value={evidenceUrl}
                   onChange={(e) => setEvidenceUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-rose-500"
+                  className="w-full px-4 py-3 bg-muted border border-border rounded-2xl text-xs font-medium text-foreground outline-none focus:border-rose-500"
                 />
               </div>
 
@@ -136,7 +136,7 @@ export default function DisputeArbitrationModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-black hover:bg-slate-200 transition-all"
+                  className="flex-1 py-3 bg-muted text-foreground rounded-2xl text-xs font-black hover:bg-muted/70 transition-all"
                 >
                   Cancel
                 </button>
@@ -155,15 +155,15 @@ export default function DisputeArbitrationModal({
               <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 mx-auto flex items-center justify-center">
                 <CheckCircle2 size={36} />
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+              <h3 className="text-xl font-black text-foreground">
                 Dispute Submitted to Super Admin
               </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
                 Order #${orderId.slice(0, 8).toUpperCase()} funds have been frozen under dispute hold. A Super Admin compliance officer will inspect evidence and arbitrate within 48 hours.
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs rounded-xl"
+                className="px-6 py-2.5 bg-foreground text-background font-black text-xs rounded-xl hover:opacity-90 transition-all"
               >
                 Close
               </button>

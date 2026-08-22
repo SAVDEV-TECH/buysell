@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { MessageSquarePlus, Star, Send, X, CheckCircle2, Sparkles, MessageCircle } from "lucide-react";
@@ -53,7 +53,7 @@ export default function FloatingFeedbackModal() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Feedback & Support"
-        className="hidden sm:flex fixed bottom-20 right-6 z-40 items-center gap-2 px-3.5 h-10 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-slate-700 dark:border-slate-200"
+        className="hidden sm:flex fixed bottom-20 right-6 z-40 items-center gap-2 px-3.5 h-10 rounded-full bg-foreground text-background font-extrabold text-xs shadow-2xl hover:scale-105 transition-all duration-200 active:scale-95 group border border-border"
       >
         <MessageSquarePlus size={16} className="text-primary group-hover:rotate-12 transition-transform" />
         <span>Feedback & Support</span>
@@ -61,17 +61,17 @@ export default function FloatingFeedbackModal() {
 
       {/* ── Feedback Modal ────────────────────────────────────────────────── */}
       {open && (
-        <div className="fixed inset-0 z-[110] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[110] bg-background/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-card rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col">
             
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-2.5">
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                   <Sparkles size={20} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
+                  <h3 className="font-extrabold text-base text-foreground">
                     Share Your Feedback
                   </h3>
                   <p className="text-xs text-muted-foreground">Help us improve BuySell platform</p>
@@ -79,7 +79,7 @@ export default function FloatingFeedbackModal() {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-muted transition-colors"
               >
                 <X size={18} />
               </button>
@@ -91,10 +91,10 @@ export default function FloatingFeedbackModal() {
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
                   <CheckCircle2 size={32} />
                 </div>
-                <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
+                <h4 className="font-extrabold text-base text-foreground">
                   Thank You for Your Feedback!
                 </h4>
-                <p className="text-xs text-slate-600 dark:text-slate-400 max-w-xs mx-auto">
+                <p className="text-xs text-muted-foreground max-w-xs mx-auto">
                   Your insights help shape the future of BuySell B2B trading.
                 </p>
               </div>
@@ -103,7 +103,7 @@ export default function FloatingFeedbackModal() {
                 
                 {/* Category Pills */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-xs font-bold text-foreground mb-2">
                     Feedback Topic
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -119,7 +119,7 @@ export default function FloatingFeedbackModal() {
                         className={`h-9 px-3 rounded-xl text-xs font-bold transition-all border ${
                           category === cat.id
                             ? "bg-primary text-white border-primary shadow-sm"
-                            : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+                            : "bg-muted border-border text-foreground hover:bg-muted"
                         }`}
                       >
                         {cat.label}
@@ -130,7 +130,7 @@ export default function FloatingFeedbackModal() {
 
                 {/* Rating Stars */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Rate Your Experience
                   </label>
                   <div className="flex items-center gap-1.5">
@@ -146,7 +146,7 @@ export default function FloatingFeedbackModal() {
                           className={
                             star <= rating
                               ? "fill-amber-400 text-amber-400"
-                              : "text-slate-300 dark:text-slate-700"
+                              : "text-muted-foreground/40"
                           }
                         />
                       </button>
@@ -156,7 +156,7 @@ export default function FloatingFeedbackModal() {
 
                 {/* Message Input */}
                 <div>
-                  <label htmlFor="feedback-message" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label htmlFor="feedback-message" className="block text-xs font-bold text-foreground mb-1.5">
                     Message
                   </label>
                   <textarea
@@ -172,13 +172,13 @@ export default function FloatingFeedbackModal() {
                         ? "Tell us about your business or products to list..."
                         : "What do you think about BuySell?"
                     }
-                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none"
+                    className="w-full p-3 rounded-xl border border-border bg-muted/60 text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all resize-none"
                   />
                 </div>
 
                 {/* Optional Email */}
                 <div>
-                  <label htmlFor="feedback-email" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  <label htmlFor="feedback-email" className="block text-xs font-bold text-foreground mb-1.5">
                     Your Email (Optional)
                   </label>
                   <input
@@ -187,7 +187,7 @@ export default function FloatingFeedbackModal() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all"
+                    className="w-full h-9 px-3 rounded-xl border border-border bg-muted/60 text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none transition-all"
                   />
                 </div>
 

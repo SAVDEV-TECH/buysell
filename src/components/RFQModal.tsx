@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -141,7 +141,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto"
+            className="bg-card w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-border/30 max-h-[90vh] overflow-y-auto"
           >
             {success ? (
               <div className="p-12 text-center flex flex-col items-center">
@@ -154,7 +154,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
               </div>
             ) : (
               <>
-                <div className="p-8 border-b border-borderline flex items-center justify-between bg-primary/5">
+                <div className="p-8 border-b border-border flex items-center justify-between bg-primary/5">
                   <div>
                     <h2 className="text-xl font-black uppercase tracking-tighter text-primary">Request for Quotation</h2>
                     <p className="text-xs text-muted-foreground font-bold">Inquiry for {manufacturer?.name || "Supplier"} · Expires in 48 hrs</p>
@@ -166,7 +166,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                   {product && (
-                    <div className="p-4 bg-muted/30 rounded-2xl border border-borderline flex items-center gap-4">
+                    <div className="p-4 bg-muted/30 rounded-2xl border border-border flex items-center gap-4">
                       <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-primary font-bold shadow-sm">
                         {((product as any).title || product.name || "P").charAt(0)}
                       </div>
@@ -186,7 +186,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                       min={1}
                       value={quantity}
                       onChange={(e) => setQuantity(Number(e.target.value))}
-                      className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-borderline rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
+                      className="w-full px-6 py-4 bg-card border border-border rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
                       placeholder="e.g. 5000"
                     />
                   </div>
@@ -200,7 +200,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                       step="0.01"
                       value={targetPrice}
                       onChange={(e) => setTargetPrice(e.target.value)}
-                      className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-borderline rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
+                      className="w-full px-6 py-4 bg-card border border-border rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
                       placeholder="e.g. 2.50"
                     />
                   </div>
@@ -217,7 +217,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                           className={`p-3 rounded-2xl border text-left transition-all ${
                             incoterms === term.code
                               ? "bg-primary/10 border-primary text-primary"
-                              : "border-borderline hover:border-primary/40 bg-white dark:bg-slate-950"
+                              : "border-border hover:border-primary/40 bg-card"
                           }`}
                         >
                           <p className="text-xs font-black">{term.code}</p>
@@ -243,7 +243,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={4}
-                      className="w-full px-6 py-4 bg-white dark:bg-slate-950 border border-borderline rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none"
+                      className="w-full px-6 py-4 bg-card border border-border rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all resize-none"
                       placeholder="Specify product grade, packaging, delivery timeline, compliance certificates required..."
                     />
                   </div>
@@ -252,7 +252,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
                     <button
                       type="button"
                       onClick={onClose}
-                      className="flex-1 py-4 border border-borderline rounded-2xl font-bold hover:bg-muted transition-all"
+                      className="flex-1 py-4 border border-border rounded-2xl font-bold hover:bg-muted transition-all"
                     >
                       Cancel
                     </button>

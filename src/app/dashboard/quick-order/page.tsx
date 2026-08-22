@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -279,7 +279,7 @@ export default function QuickOrderPage() {
           <a
             href="data:text/csv;charset=utf-8,sku,quantity%0AHS7304,500%0AStainless Steel Sheet,200"
             download="buy_sell_quick_order_template.csv"
-            className="flex items-center gap-2 px-4 py-2.5 glass border border-borderline text-xs font-bold rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-card border border-border text-xs font-bold rounded-2xl hover:bg-muted transition-all"
           >
             <Download size={14} /> Download Sample CSV
           </a>
@@ -287,8 +287,8 @@ export default function QuickOrderPage() {
       </div>
 
       {/* ── Drag & Drop CSV Importer Section ── */}
-      <div className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-4">
-        <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+      <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-4">
+        <h2 className="text-sm font-black uppercase tracking-wider text-foreground flex items-center gap-2">
           <FileSpreadsheet size={18} className="text-primary" /> CSV / Excel Bulk Importer
         </h2>
 
@@ -297,7 +297,7 @@ export default function QuickOrderPage() {
           className="flex flex-col items-center justify-center w-full h-36 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-all group text-center p-4"
         >
           <Upload size={28} className="text-primary/50 group-hover:text-primary transition-colors mb-2" />
-          <p className="text-xs font-bold text-slate-900 dark:text-white">
+          <p className="text-xs font-bold text-foreground">
             {csvFile ? csvFile.name : "Drag & drop CSV order file here, or click to browse"}
           </p>
           <p className="text-[10px] text-muted-foreground mt-0.5">File format: SKU, Quantity (e.g. HS7304.11, 500)</p>
@@ -313,8 +313,8 @@ export default function QuickOrderPage() {
         </label>
 
         {csvResult && (
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-borderline text-xs">
-            <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted border border-border text-xs">
+            <span className="font-bold text-foreground flex items-center gap-1.5">
               <CheckCircle2 size={16} className="text-emerald-500" /> Processed {csvResult.validCount} valid line items
             </span>
             {csvResult.errorCount > 0 && (
@@ -327,9 +327,9 @@ export default function QuickOrderPage() {
       </div>
 
       {/* ── Interactive Multi-Row Quick Order Grid ── */}
-      <div className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6">
-        <div className="flex justify-between items-center border-b border-borderline pb-4">
-          <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+      <div className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6">
+        <div className="flex justify-between items-center border-b border-border pb-4">
+          <h2 className="text-base font-black text-foreground flex items-center gap-2">
             <Layers size={18} className="text-primary" /> Procurement Quick-Order Grid
           </h2>
 
@@ -345,7 +345,7 @@ export default function QuickOrderPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-borderline bg-slate-50/50 dark:bg-slate-900/50">
+              <tr className="border-b border-border bg-muted/30">
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground w-12">#</th>
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Product Title / SKU / HS Code</th>
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground w-36">Quantity</th>
@@ -354,9 +354,9 @@ export default function QuickOrderPage() {
                 <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground w-12"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-borderline">
+            <tbody className="divide-y divide-border">
               {rows.map((row, idx) => (
-                <tr key={row.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-900/40 transition-colors">
+                <tr key={row.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 text-xs font-bold text-muted-foreground">{idx + 1}</td>
 
                   {/* SKU / Title Autocomplete */}
@@ -374,7 +374,7 @@ export default function QuickOrderPage() {
                             ? "border-amber-500/40 bg-amber-500/5"
                             : row.status === "invalid_sku"
                             ? "border-red-500/40 bg-red-500/5"
-                            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                            : "bg-card border-border"
                         }`}
                       />
                       {row.matchedProduct && (
@@ -398,17 +398,17 @@ export default function QuickOrderPage() {
                       min={1}
                       value={row.quantity}
                       onChange={(e) => updateRow(row.id, row.skuSearch, Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full px-3 py-2.5 bg-card border border-border rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </td>
 
                   {/* Unit Price */}
-                  <td className="px-4 py-3 text-xs font-bold text-slate-900 dark:text-white">
+                  <td className="px-4 py-3 text-xs font-bold text-foreground">
                     {row.unitPrice > 0 ? `$${row.unitPrice.toLocaleString()}` : "—"}
                   </td>
 
                   {/* Line Total */}
-                  <td className="px-4 py-3 text-xs font-black text-right text-slate-900 dark:text-white">
+                  <td className="px-4 py-3 text-xs font-black text-right text-foreground">
                     {row.lineTotal > 0 ? `$${row.lineTotal.toLocaleString()}` : "—"}
                   </td>
 
@@ -416,7 +416,7 @@ export default function QuickOrderPage() {
                   <td className="px-4 py-3 text-right">
                     <button
                       onClick={() => removeRow(row.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-red-500 rounded-lg transition-colors"
                     >
                       <Trash2 size={15} />
                     </button>
@@ -442,7 +442,7 @@ export default function QuickOrderPage() {
         </div>
 
         {/* Total & Checkout Bar */}
-        <div className="p-6 rounded-3xl bg-slate-900 text-white border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="p-6 rounded-3xl bg-foreground text-background border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-primary">BULK ORDER ESTIMATE</p>
             <h3 className="text-3xl font-black mt-0.5">${grandTotal.toLocaleString()} USD</h3>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { 
@@ -27,7 +27,7 @@ const Steps = [
     icon: <Building2 size={32} className="text-secondary" />,
     title: "2. List or Discover",
     desc: "Manufacturers list products at bulk prices. Wholesalers discover verified sources and premium goods at best-in-market rates.",
-    color: "bg-secondary/10"
+    color: "bg-primary/5"
   },
   {
     icon: <ShoppingBag size={32} className="text-accent" />,
@@ -45,7 +45,7 @@ const Steps = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-slate-50 dark:bg-slate-950 overflow-hidden">
+    <div className="min-h-screen pt-24 pb-20 bg-background overflow-hidden">
       
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 mb-24 relative">
@@ -55,7 +55,7 @@ export default function HowItWorksPage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-full text-primary font-bold text-xs uppercase tracking-widest border border-primary/20 mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-card/50 backdrop-blur-md rounded-full text-primary font-bold text-xs uppercase tracking-widest border border-primary/20 mb-6"
           >
             <Zap size={16} /> Our Process Explained
           </motion.div>
@@ -88,7 +88,7 @@ export default function HowItWorksPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="glass p-8 rounded-[2.5rem] border border-borderline/50 hover:border-primary/50 transition-all hover:-translate-y-2 group relative"
+              className="bg-card p-8 rounded-[2.5rem] border border-border/50 hover:border-primary/50 transition-all hover:-translate-y-2 group relative"
             >
               <div className={`w-16 h-16 ${step.color} rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-6`}>
                  {step.icon}
@@ -110,8 +110,8 @@ export default function HowItWorksPage() {
 
       {/* Role Comparison */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 mb-32">
-        <div className="glass rounded-[3.5rem] p-8 md:p-16 border border-primary/10 overflow-hidden relative">
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-secondary/20 rounded-full blur-[100px] translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="bg-card rounded-[3.5rem] p-8 md:p-16 border border-primary/10 overflow-hidden relative">
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-muted/30 rounded-full blur-[100px] translate-y-1/2 translate-x-1/3 pointer-events-none" />
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -137,7 +137,7 @@ export default function HowItWorksPage() {
             </div>
 
             <div className="relative">
-               <div className="glass aspect-square rounded-[3rem] border border-borderline flex items-center justify-center p-12 overflow-hidden shadow-2xl relative">
+               <div className="bg-card aspect-square rounded-[3rem] border border-border flex items-center justify-center p-12 overflow-hidden shadow-2xl relative">
                   <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}
@@ -154,7 +154,7 @@ export default function HowItWorksPage() {
                <motion.div 
                  animate={{ y: [0, 20, 0] }}
                  transition={{ duration: 4, repeat: Infinity }}
-                 className="absolute -top-8 -right-8 glass p-6 rounded-2xl border border-primary/20 shadow-xl hidden sm:block"
+                 className="absolute -top-8 -right-8 bg-card p-6 rounded-2xl border border-primary/20 shadow-xl hidden sm:block"
                >
                   <TrendingUp className="text-emerald-500 mb-2" size={32} />
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Growth Analytics</p>
@@ -171,7 +171,7 @@ export default function HowItWorksPage() {
            <Link href="/register" className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/20">
              Start Today - Free
            </Link>
-           <Link href="/marketplace" className="w-full sm:w-auto px-10 py-5 glass border-borderline font-black text-lg hover:bg-muted transition-all">
+           <Link href="/marketplace" className="w-full sm:w-auto px-10 py-5 bg-card border-border font-black text-lg hover:bg-muted transition-all">
              Browse Catalog
            </Link>
         </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Globe, Languages, Loader2, RotateCcw } from "lucide-react";
@@ -69,8 +69,8 @@ export default function AITranslationButton({
   };
 
   return (
-    <div className="inline-flex items-center gap-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-      <div className="flex items-center gap-1.5 px-2 text-xs font-bold text-slate-500 dark:text-slate-400">
+    <div className="inline-flex items-center gap-2 p-1 rounded-2xl bg-muted/80 border border-border">
+      <div className="flex items-center gap-1.5 px-2 text-xs font-bold text-muted-foreground">
         <Globe size={14} className="text-primary" /> Translate:
       </div>
 
@@ -78,7 +78,7 @@ export default function AITranslationButton({
         value={targetLang}
         onChange={(e) => setTargetLang(e.target.value)}
         disabled={loading}
-        className="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 text-xs font-semibold border-none outline-none cursor-pointer"
+        className="px-2.5 py-1 rounded-xl bg-card text-xs font-semibold border-none outline-none cursor-pointer"
       >
         {SUPPORTED_LANGUAGES.map((lang) => (
           <option key={lang.code} value={lang.code}>
@@ -90,7 +90,7 @@ export default function AITranslationButton({
       {isTranslated ? (
         <button
           onClick={handleToggleReset}
-          className="px-3 py-1 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex items-center gap-1"
+          className="px-3 py-1 rounded-xl bg-muted text-xs font-bold text-foreground hover:bg-muted transition-all flex items-center gap-1"
         >
           <RotateCcw size={12} /> Show Original
         </button>

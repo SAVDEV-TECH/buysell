@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Ship, Plane, Calculator, Package, Info } from "lucide-react";
@@ -64,15 +64,15 @@ export function FreightCalculator({
   const grandTotal = subtotal + freightCost;
 
   return (
-    <div className="w-full glass rounded-3xl border border-borderline p-6 space-y-6">
+    <div className="w-full bg-card rounded-3xl border border-border p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-borderline pb-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 text-primary rounded-xl">
             <Calculator size={18} />
           </div>
           <div>
-            <h3 className="text-sm font-black text-slate-900 dark:text-white">
+            <h3 className="text-sm font-black text-foreground">
               Bulk Order &amp; Freight Cost Estimator
             </h3>
             <p className="text-[11px] text-muted-foreground font-medium">
@@ -88,7 +88,7 @@ export function FreightCalculator({
         <select
           value={productTypeId}
           onChange={(e) => setProductTypeId(e.target.value)}
-          className="w-full px-4 py-2.5 bg-background border border-borderline rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/50 outline-none"
+          className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/50 outline-none"
         >
           {PRODUCT_TYPES.map((pt) => (
             <option key={pt.id} value={pt.id}>
@@ -102,7 +102,7 @@ export function FreightCalculator({
       <div className="space-y-3">
         <div className="flex justify-between items-center text-xs">
           <span className="font-bold text-muted-foreground">Order Quantity:</span>
-          <span className="font-black text-slate-900 dark:text-white text-sm">
+          <span className="font-black text-foreground text-sm">
             {quantity.toLocaleString()} {unit}
           </span>
         </div>
@@ -114,10 +114,10 @@ export function FreightCalculator({
           step={50}
           value={quantity}
           onChange={(e) => setQuantity(Number(e.target.value))}
-          className="w-full accent-primary cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+          className="w-full accent-primary cursor-pointer h-2 bg-muted rounded-lg"
         />
 
-        <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+        <div className="flex justify-between text-[10px] text-muted-foreground font-bold">
           <span>MOQ: {moq}</span>
           <span>10,000</span>
           <span>50,000+ Container</span>
@@ -134,7 +134,7 @@ export function FreightCalculator({
             className={`p-3 rounded-2xl border text-left transition-all ${
               freightMode === "sea_lcl"
                 ? "bg-primary/10 border-primary text-primary font-black"
-                : "border-borderline hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold"
+                : "border-border hover:bg-muted/40 text-muted-foreground font-bold"
             }`}
           >
             <Ship size={16} className="mb-1" />
@@ -148,7 +148,7 @@ export function FreightCalculator({
             className={`p-3 rounded-2xl border text-left transition-all ${
               freightMode === "sea_fcl"
                 ? "bg-primary/10 border-primary text-primary font-black"
-                : "border-borderline hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold"
+                : "border-border hover:bg-muted/40 text-muted-foreground font-bold"
             }`}
           >
             <Package size={16} className="mb-1" />
@@ -162,7 +162,7 @@ export function FreightCalculator({
             className={`p-3 rounded-2xl border text-left transition-all ${
               freightMode === "air"
                 ? "bg-primary/10 border-primary text-primary font-black"
-                : "border-borderline hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold"
+                : "border-border hover:bg-muted/40 text-muted-foreground font-bold"
             }`}
           >
             <Plane size={16} className="mb-1" />
@@ -173,23 +173,23 @@ export function FreightCalculator({
       </div>
 
       {/* Summary Box */}
-      <div className="p-4 rounded-2xl bg-slate-900 dark:bg-slate-950 text-white space-y-2 text-xs">
+      <div className="p-4 rounded-2xl bg-card text-white space-y-2 text-xs">
         <div className="flex justify-between">
-          <span className="text-slate-400">Unit Price Tier:</span>
+          <span className="text-muted-foreground">Unit Price Tier:</span>
           <span className="font-bold">${unitPrice.toFixed(2)} USD</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-400">Est. Cargo Weight / Volume:</span>
+          <span className="text-muted-foreground">Est. Cargo Weight / Volume:</span>
           <span className="font-bold">
             {estimatedWeightKg.toLocaleString()} kg (~{estimatedCbm} CBM)
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-400">Est. Shipping ({estimatedDays}):</span>
+          <span className="text-muted-foreground">Est. Shipping ({estimatedDays}):</span>
           <span className="font-bold">${freightCost.toLocaleString()} USD</span>
         </div>
 
-        <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-sm font-black">
+        <div className="pt-2 border-t border-border flex justify-between items-center text-sm font-black">
           <span className="text-emerald-400">Est. Landed FOB/CIF Price:</span>
           <span className="text-emerald-400 text-base">${grandTotal.toLocaleString()} USD</span>
         </div>

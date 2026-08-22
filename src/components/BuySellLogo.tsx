@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 
@@ -92,8 +92,8 @@ export function BuySellLogo({
         {/* Text 'buysell' - Hidden on mobile if hideTextOnMobile is true */}
         <div className={`flex flex-col ${hideTextOnMobile ? "hidden sm:flex" : ""}`}>
           <span className={`font-black tracking-tight leading-none ${titleSizes[size]}`}>
-            <span className="text-slate-900 dark:text-white">buy</span>
-            <span className="text-slate-600 dark:text-slate-400 font-semibold">sell</span>
+            <span className="text-foreground">buy</span>
+            <span className="text-muted-foreground font-semibold">sell</span>
           </span>
         </div>
       </div>
@@ -101,7 +101,7 @@ export function BuySellLogo({
       {/* Tagline */}
       {showTagline && (
         <span
-          className={`font-extrabold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500 mt-1 ${taglineSizes[size]}`}
+          className={`font-extrabold uppercase tracking-[0.25em] text-muted-foreground dark:text-muted-foreground mt-1 ${taglineSizes[size]}`}
         >
           Trading | Marketplace | Exchange
         </span>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useNotifications, NotificationType, NotificationItem } from "@/context/NotificationContext";
@@ -140,7 +140,7 @@ export default function NotificationsPage() {
           <button
             onClick={handleSendTestNotification}
             disabled={isSendingDemo}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-xs font-bold hover:scale-105 transition-all shadow-md disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-foreground text-background text-xs font-bold hover:scale-105 transition-all shadow-md disabled:opacity-50"
           >
             {isSendingDemo ? (
               <Loader2 size={14} className="animate-spin" />
@@ -166,13 +166,13 @@ export default function NotificationsPage() {
         {/* Search & Bulk Action */}
         <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
           <div className="relative w-full sm:w-80">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search notifications..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm outline-none focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-card text-sm outline-none focus:ring-2 focus:ring-primary/40 transition-all placeholder:text-muted-foreground"
             />
           </div>
 
@@ -183,7 +183,7 @@ export default function NotificationsPage() {
                   clearAll();
                 }
               }}
-              className="text-xs font-semibold text-slate-500 hover:text-red-500 transition-colors flex items-center gap-1.5 self-end sm:self-center"
+              className="text-xs font-semibold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5 self-end sm:self-center"
             >
               <Trash2 size={14} /> Clear all notifications
             </button>
@@ -191,7 +191,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-border">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
                   isActive
                     ? "bg-primary text-white shadow-md shadow-primary/20"
-                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+                    : "bg-muted/80 text-muted-foreground hover:bg-muted"
                 }`}
               >
                 {tab.label}
@@ -209,7 +209,7 @@ export default function NotificationsPage() {
                   className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                      : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {tab.count}
@@ -221,7 +221,7 @@ export default function NotificationsPage() {
       </div>
 
       {/* Notifications List Container */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden min-h-[400px]">
+      <div className="bg-card rounded-3xl border border-border shadow-xl overflow-hidden min-h-[400px]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-28 text-center space-y-4">
             <Loader2 size={36} className="text-primary animate-spin" />
@@ -229,11 +229,11 @@ export default function NotificationsPage() {
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-28 text-center px-4 space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+            <div className="w-16 h-16 rounded-3xl bg-muted flex items-center justify-center text-muted-foreground">
               <Inbox size={32} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">No notifications found</h3>
+              <h3 className="text-lg font-bold text-foreground">No notifications found</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                 {searchQuery
                   ? `No results matching "${searchQuery}". Try searching with another keyword.`
@@ -242,7 +242,7 @@ export default function NotificationsPage() {
             </div>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
+          <div className="divide-y divide-border/60">
             <AnimatePresence mode="popLayout">
               {filteredNotifications.map((notif) => {
                 const badge = getTypeBadge(notif.type);
@@ -253,7 +253,7 @@ export default function NotificationsPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -50 }}
-                    className={`p-6 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative group ${
+                    className={`p-6 hover:bg-muted/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative group ${
                       !notif.read ? "bg-primary/[0.02] dark:bg-primary/[0.04]" : ""
                     }`}
                   >
@@ -275,7 +275,7 @@ export default function NotificationsPage() {
                           <h3
                             onClick={() => markAsRead(notif.id)}
                             className={`font-bold text-base cursor-pointer hover:text-primary transition-colors ${
-                              !notif.read ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"
+                              !notif.read ? "text-foreground" : "text-foreground"
                             }`}
                           >
                             {notif.title}
@@ -295,7 +295,7 @@ export default function NotificationsPage() {
                         </p>
 
                         <div className="flex items-center gap-4 pt-1">
-                          <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock size={12} /> {formatTimeAgo(notif.created_at)}
                           </span>
 
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
                         <button
                           onClick={() => markAsRead(notif.id)}
                           title="Mark as read"
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all"
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
                         >
                           Mark read
                         </button>
@@ -326,7 +326,7 @@ export default function NotificationsPage() {
                       <button
                         onClick={() => deleteNotification(notif.id)}
                         title="Delete notification"
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                        className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
                       >
                         <Trash2 size={16} />
                       </button>

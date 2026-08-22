@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNotifications, NotificationType, NotificationItem } from "@/context/NotificationContext";
@@ -139,7 +139,7 @@ function ToastCard({ notif, onDismiss, soundEnabled }: ToastCardProps) {
 
       <div className="p-4 flex items-start gap-3.5">
         {/* Icon bubble */}
-        <div className={`p-2.5 rounded-xl border ${config.border} bg-white/80 dark:bg-slate-900/80 flex-shrink-0`}>
+        <div className={`p-2.5 rounded-xl border ${config.border} bg-card/80 flex-shrink-0`}>
           {config.icon}
         </div>
 
@@ -149,12 +149,12 @@ function ToastCard({ notif, onDismiss, soundEnabled }: ToastCardProps) {
             <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full border ${config.border} opacity-80`}>
               {config.label}
             </span>
-            <Bell size={10} className="text-slate-400 animate-pulse" />
+            <Bell size={10} className="text-muted-foreground animate-pulse" />
           </div>
-          <h4 className="text-sm font-black text-slate-900 dark:text-white leading-tight line-clamp-1">
+          <h4 className="text-sm font-black text-foreground leading-tight line-clamp-1">
             {notif.title}
           </h4>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed line-clamp-2">
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">
             {notif.message}
           </p>
           {notif.link && (
@@ -170,7 +170,7 @@ function ToastCard({ notif, onDismiss, soundEnabled }: ToastCardProps) {
             e.stopPropagation();
             onDismiss(notif.id);
           }}
-          className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-slate-800/40 transition-all flex-shrink-0 -mt-0.5"
+          className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/40 hover:bg-muted/40 transition-all flex-shrink-0 -mt-0.5"
           aria-label="Dismiss notification"
         >
           <X size={14} />
@@ -178,7 +178,7 @@ function ToastCard({ notif, onDismiss, soundEnabled }: ToastCardProps) {
       </div>
 
       {/* Progress bar */}
-      <div className="h-1 bg-white/20 dark:bg-slate-800/40">
+      <div className="h-1 bg-white/20 bg-muted/40">
         <div
           className={`h-full ${config.accent} transition-none`}
           style={{ width: `${progress}%` }}
@@ -202,7 +202,7 @@ function SoundToggle({ enabled, onToggle }: SoundToggleProps) {
       animate={{ opacity: 1, scale: 1 }}
       onClick={onToggle}
       title={enabled ? "Mute notification sounds" : "Enable notification sounds"}
-      className="hidden md:flex fixed bottom-6 left-6 z-[9998] p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-all hover:scale-110 active:scale-95"
+      className="hidden md:flex fixed bottom-6 left-6 z-[9998] p-3 rounded-2xl bg-card border border-border shadow-xl text-muted-foreground hover:text-primary dark:hover:text-primary transition-all hover:scale-110 active:scale-95"
     >
       {enabled ? <Volume2 size={18} /> : <VolumeX size={18} className="opacity-50" />}
     </motion.button>
@@ -235,7 +235,7 @@ function PushPermissionBanner({ onDismiss }: { onDismiss: () => void }) {
           <Bell size={20} className="text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-black text-slate-900 dark:text-white">
+          <h4 className="text-sm font-black text-foreground">
             Enable Push Notifications
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
@@ -252,7 +252,7 @@ function PushPermissionBanner({ onDismiss }: { onDismiss: () => void }) {
           </button>
           <button
             onClick={onDismiss}
-            className="text-xs text-muted-foreground hover:text-slate-700 dark:hover:text-slate-300 text-center transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground dark:hover:text-slate-300 text-center transition-colors"
           >
             Not now
           </button>

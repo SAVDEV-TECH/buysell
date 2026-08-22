@@ -62,7 +62,7 @@ export default function LanguageSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={open}
         suppressHydrationWarning
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-700 shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200"
+        className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-card hover:bg-muted transition-colors text-sm font-semibold text-foreground shadow-sm"
         title="Change language"
       >
         <Globe size={15} className="text-primary shrink-0" />
@@ -77,7 +77,7 @@ export default function LanguageSwitcher() {
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute right-0 mt-2 w-44 bg-card border border-border rounded-xl shadow-xl z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
         >
           {LOCALES.map((loc) => (
             <button
@@ -88,7 +88,7 @@ export default function LanguageSwitcher() {
               className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold transition-colors text-left
                 ${locale === loc.code
                   ? "bg-primary/5 text-primary"
-                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  : "text-foreground hover:bg-muted"
                 }`}
             >
               <span className="text-xl leading-none">{loc.flag}</span>

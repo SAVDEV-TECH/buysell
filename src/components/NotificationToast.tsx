@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import { useNotifications } from "@/context/NotificationContext";
@@ -39,7 +39,7 @@ export default function NotificationToast() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.9 }}
         transition={{ type: "spring", stiffness: 350, damping: 25 }}
-        className="fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-4 flex items-start gap-3 backdrop-blur-xl cursor-pointer group"
+        className="fixed bottom-6 right-6 z-[100] max-w-sm w-full bg-card border border-border rounded-2xl shadow-2xl p-4 flex items-start gap-3 backdrop-blur-xl cursor-pointer group"
         onClick={handleClick}
       >
         {/* Accent bar */}
@@ -58,7 +58,7 @@ export default function NotificationToast() {
             </span>
             <span className="text-[10px] text-muted-foreground">Just now</span>
           </div>
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+          <h4 className="text-sm font-bold text-foreground truncate">
             {latestToast.title}
           </h4>
           <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
@@ -73,7 +73,7 @@ export default function NotificationToast() {
             dismissToast();
           }}
           aria-label="Close notification toast"
-          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
+          className="p-1 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-lg"
         >
           <X size={16} />
         </button>

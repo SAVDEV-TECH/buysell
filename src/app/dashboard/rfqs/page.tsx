@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -415,13 +415,13 @@ export default function RFQManagementPage() {
       </div>
 
       {/* ── Mode Switcher & Filter Strip ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass p-3 rounded-3xl border border-borderline">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card p-3 rounded-3xl border border-border">
         {/* Mode Tabs */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl w-full sm:w-auto">
+        <div className="flex items-center gap-1 bg-muted/80 p-1.5 rounded-2xl w-full sm:w-auto">
           <button
             onClick={() => { setActiveTab("marketplace"); setSelectedRFQ(null); }}
             className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-              activeTab === "marketplace" ? "bg-white dark:bg-slate-900 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+              activeTab === "marketplace" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Globe size={14} /> Open Marketplace RFQs
@@ -429,7 +429,7 @@ export default function RFQManagementPage() {
           <button
             onClick={() => { setActiveTab("my_rfqs"); setSelectedRFQ(null); }}
             className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-              activeTab === "my_rfqs" ? "bg-white dark:bg-slate-900 text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+              activeTab === "my_rfqs" ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <FileText size={14} /> My Posted RFQs
@@ -444,7 +444,7 @@ export default function RFQManagementPage() {
             placeholder="Search by title or country…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+            className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>
@@ -467,12 +467,12 @@ export default function RFQManagementPage() {
           </div>
 
           {loading ? (
-            <div className="glass rounded-3xl p-16 flex flex-col items-center justify-center border border-borderline">
+            <div className="bg-card rounded-3xl p-16 flex flex-col items-center justify-center border border-border">
               <Loader2 size={32} className="text-primary animate-spin mb-3" />
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Syncing RFQ stream…</p>
             </div>
           ) : filteredRFQs.length === 0 ? (
-            <div className="glass rounded-3xl p-12 text-center border border-dashed border-borderline space-y-4">
+            <div className="bg-card rounded-3xl p-12 text-center border border-dashed border-border space-y-4">
               <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto">
                 <FileText size={28} />
               </div>
@@ -504,7 +504,7 @@ export default function RFQManagementPage() {
                     className={`p-5 rounded-2xl border transition-all cursor-pointer relative group ${
                       isSelected
                         ? "bg-primary/5 border-primary shadow-lg shadow-primary/10"
-                        : "glass border-borderline hover:border-primary/30"
+                        : "bg-card border-border hover:border-primary/30"
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
@@ -512,13 +512,13 @@ export default function RFQManagementPage() {
                         RFQ-{rfq.id.slice(0, 6).toUpperCase()}
                       </span>
                       <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                        rfq.status === "published" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-slate-100 text-slate-500 dark:bg-slate-800"
+                        rfq.status === "published" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-muted text-muted-foreground"
                       }`}>
                         {rfq.status}
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-sm text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">
                       {rfq.title}
                     </h3>
 
@@ -532,7 +532,7 @@ export default function RFQManagementPage() {
                       )}
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-borderline/50 flex justify-between items-center text-[10px] text-slate-400">
+                    <div className="mt-3 pt-3 border-t border-border/50 flex justify-between items-center text-[10px] text-muted-foreground">
                       <span className="flex items-center gap-1 font-bold">
                         <Building2 size={11} /> {buyerOrg}
                       </span>
@@ -551,32 +551,32 @@ export default function RFQManagementPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="glass rounded-3xl border border-borderline p-6 md:p-8 space-y-6 sticky top-6"
+              className="bg-card rounded-3xl border border-border p-6 md:p-8 space-y-6 sticky top-6"
             >
               {/* Inspection Header */}
-              <div className="flex justify-between items-start border-b border-borderline pb-5">
+              <div className="flex justify-between items-start border-b border-border pb-5">
                 <div>
                   <span className="text-[10px] font-mono font-black text-primary uppercase tracking-widest">
                     RFQ DETAILS · #{selectedRFQ.id.slice(0, 8)}
                   </span>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white mt-1">{selectedRFQ.title}</h2>
+                  <h2 className="text-xl font-black text-foreground mt-1">{selectedRFQ.title}</h2>
                   <p className="text-xs text-muted-foreground font-medium mt-0.5">
                     Posted by {(selectedRFQ.buyer_organization as any)?.company_name || "Verified Buyer"} · Destination: <strong>{selectedRFQ.destination_country}</strong>
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedRFQ(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl"
+                  className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               {/* Specs Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-muted/40 border border-border">
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Quantity</p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white mt-0.5">
+                  <p className="text-sm font-black text-foreground mt-0.5">
                     {selectedRFQ.quantity.toLocaleString()} {selectedRFQ.unit_of_measure}
                   </p>
                 </div>
@@ -588,7 +588,7 @@ export default function RFQManagementPage() {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Incoterm</p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white mt-0.5">{selectedRFQ.incoterms || "FOB"}</p>
+                  <p className="text-sm font-black text-foreground mt-0.5">{selectedRFQ.incoterms || "FOB"}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</p>
@@ -600,16 +600,16 @@ export default function RFQManagementPage() {
               {selectedRFQ.requirements_spec?.specifications && (
                 <div className="space-y-1.5">
                   <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Technical Specifications</h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-950/40 p-4 rounded-2xl border border-borderline leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs text-foreground bg-muted/30 p-4 rounded-2xl border border-border leading-relaxed whitespace-pre-wrap">
                     {selectedRFQ.requirements_spec.specifications}
                   </p>
                 </div>
               )}
 
               {/* ── Quotation Proposals Section ── */}
-              <div className="space-y-4 pt-2 border-t border-borderline">
+              <div className="space-y-4 pt-2 border-t border-border">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <h3 className="text-sm font-black text-foreground flex items-center gap-2">
                     <DollarSign size={16} className="text-primary" /> Submitted Supplier Proposals ({quotes.length})
                   </h3>
 
@@ -629,7 +629,7 @@ export default function RFQManagementPage() {
                     <Loader2 size={16} className="animate-spin text-primary" /> Loading proposals…
                   </div>
                 ) : quotes.length === 0 ? (
-                  <div className="p-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-dashed border-borderline">
+                  <div className="p-8 text-center bg-muted/40/40 rounded-2xl border border-dashed border-border">
                     <p className="text-xs text-muted-foreground font-semibold">No quotations submitted for this RFQ yet.</p>
                   </div>
                 ) : (
@@ -645,12 +645,12 @@ export default function RFQManagementPage() {
                           className={`p-4 rounded-2xl border transition-all space-y-3 ${
                             quote.status === "accepted"
                               ? "bg-emerald-500/10 border-emerald-500/30"
-                              : "bg-white dark:bg-slate-900 border-borderline"
+                              : "bg-card border-border"
                           }`}
                         >
                           <div className="flex justify-between items-start">
                             <div>
-                              <p className="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+                              <p className="font-bold text-xs text-foreground flex items-center gap-1.5">
                                 {supplierName}
                                 {isSupplierVerified && <VerifiedBadge />}
                               </p>
@@ -660,7 +660,7 @@ export default function RFQManagementPage() {
                             </div>
 
                             <div className="text-right">
-                              <p className="text-sm font-black text-slate-900 dark:text-white">
+                              <p className="text-sm font-black text-foreground">
                                 ${quote.unit_price}/{selectedRFQ.unit_of_measure}
                               </p>
                               <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
@@ -670,12 +670,12 @@ export default function RFQManagementPage() {
                           </div>
 
                           {quote.notes && (
-                            <p className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl text-[11px]">
+                            <p className="text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-xl text-[11px]">
                               &ldquo;{quote.notes}&rdquo;
                             </p>
                           )}
 
-                          <div className="flex items-center justify-between pt-2 border-t border-borderline/40 text-[10px] text-muted-foreground flex-wrap gap-2">
+                          <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[10px] text-muted-foreground flex-wrap gap-2">
                             <span>⚡ Lead time: <strong>{quote.lead_time_days} days</strong></span>
 
                             <div className="flex items-center gap-2">
@@ -718,12 +718,12 @@ export default function RFQManagementPage() {
               </div>
             </motion.div>
           ) : (
-            <div className="glass rounded-3xl border border-borderline p-16 text-center space-y-4 flex flex-col items-center justify-center min-h-[400px]">
+            <div className="bg-card rounded-3xl border border-border p-16 text-center space-y-4 flex flex-col items-center justify-center min-h-[400px]">
               <div className="w-16 h-16 bg-primary/10 text-primary rounded-3xl flex items-center justify-center shadow-inner">
                 <FileText size={32} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">Select an RFQ to Inspect</h3>
+                <h3 className="text-lg font-black text-foreground">Select an RFQ to Inspect</h3>
                 <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                   Click on any RFQ card from the left panel to review full specifications and submit or compare supplier proposals.
                 </p>
@@ -746,7 +746,7 @@ export default function RFQManagementPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-6"
+              className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-6"
             >
               <div className="flex justify-between items-center">
                 <div>
@@ -755,49 +755,49 @@ export default function RFQManagementPage() {
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl"
+                  className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               {createError && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 text-red-600 rounded-xl text-xs font-bold">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 rounded-xl text-xs font-bold">
                   {createError}
                 </div>
               )}
 
               <form onSubmit={handleCreateRFQ} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Product Title *</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Product Title *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. 5,000 Pcs Industrial Stainless Steel Valves"
                     value={newRfq.title}
                     onChange={(e) => setNewRfq({ ...newRfq, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Quantity *</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Quantity *</label>
                     <input
                       type="number"
                       required
                       min={1}
                       value={newRfq.quantity}
                       onChange={(e) => setNewRfq({ ...newRfq, quantity: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Unit</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Unit</label>
                     <select
                       value={newRfq.unitOfMeasure}
                       onChange={(e) => setNewRfq({ ...newRfq, unitOfMeasure: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
                     >
                       {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                     </select>
@@ -806,22 +806,22 @@ export default function RFQManagementPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Price / Unit ($)</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Target Price / Unit ($)</label>
                     <input
                       type="number"
                       step="0.01"
                       placeholder="e.g. 12.50"
                       value={newRfq.targetPrice}
                       onChange={(e) => setNewRfq({ ...newRfq, targetPrice: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Destination Country</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Destination Country</label>
                     <select
                       value={newRfq.destinationCountry}
                       onChange={(e) => setNewRfq({ ...newRfq, destinationCountry: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
                     >
                       {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -829,13 +829,13 @@ export default function RFQManagementPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Technical Specifications & Notes</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Technical Specifications & Notes</label>
                   <textarea
                     rows={4}
                     placeholder="Specify dimensions, material grades, packaging requirements, certifications needed..."
                     value={newRfq.specifications}
                     onChange={(e) => setNewRfq({ ...newRfq, specifications: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
                   />
                 </div>
 
@@ -843,7 +843,7 @@ export default function RFQManagementPage() {
                   <button
                     type="button"
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-100 transition-all"
+                    className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-all"
                   >
                     Cancel
                   </button>
@@ -874,7 +874,7 @@ export default function RFQManagementPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
+              className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
                 <div>
@@ -883,7 +883,7 @@ export default function RFQManagementPage() {
                 </div>
                 <button
                   onClick={() => setShowQuoteModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl"
+                  className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl"
                 >
                   <X size={18} />
                 </button>
@@ -891,7 +891,7 @@ export default function RFQManagementPage() {
 
               <form onSubmit={handleSubmitQuote} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Unit Price ($ USD) *</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Unit Price ($ USD) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -899,7 +899,7 @@ export default function RFQManagementPage() {
                     placeholder="e.g. 10.50"
                     value={quoteForm.unitPrice}
                     onChange={(e) => setQuoteForm({ ...quoteForm, unitPrice: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                   />
                   {quoteForm.unitPrice && (
                     <p className="text-[10px] font-bold text-emerald-600 mt-1">
@@ -910,21 +910,21 @@ export default function RFQManagementPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Lead Time (days)</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Lead Time (days)</label>
                     <input
                       type="number"
                       required
                       value={quoteForm.leadTime}
                       onChange={(e) => setQuoteForm({ ...quoteForm, leadTime: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Incoterms</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Incoterms</label>
                     <select
                       value={quoteForm.incoterm}
                       onChange={(e) => setQuoteForm({ ...quoteForm, incoterm: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+                      className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
                     >
                       {INCOTERMS.map((i) => <option key={i} value={i}>{i}</option>)}
                     </select>
@@ -932,13 +932,13 @@ export default function RFQManagementPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Supplier Proposal Notes</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Supplier Proposal Notes</label>
                   <textarea
                     rows={3}
                     placeholder="Include warranty, sample availability, packing conditions..."
                     value={quoteForm.notes}
                     onChange={(e) => setQuoteForm({ ...quoteForm, notes: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40 resize-none"
                   />
                 </div>
 
@@ -946,7 +946,7 @@ export default function RFQManagementPage() {
                   <button
                     type="button"
                     onClick={() => setShowQuoteModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-100 transition-all"
+                    className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-all"
                   >
                     Cancel
                   </button>

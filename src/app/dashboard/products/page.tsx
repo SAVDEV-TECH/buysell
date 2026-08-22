@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -56,7 +56,7 @@ interface Product {
 // ─── Status Config ────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<ProductStatus, { label: string; color: string; bg: string; icon: any }> = {
   active:       { label: "Active",       color: "text-emerald-600", bg: "bg-emerald-500/10 border-emerald-200",  icon: CheckCircle2 },
-  inactive:     { label: "Inactive",     color: "text-slate-500",   bg: "bg-slate-100 border-slate-200 dark:bg-slate-800 dark:border-slate-700", icon: XCircle },
+  inactive:     { label: "Inactive",     color: "text-muted-foreground",   bg: "bg-muted border-border", icon: XCircle },
   draft:        { label: "Draft",        color: "text-amber-600",   bg: "bg-amber-500/10 border-amber-200",     icon: Clock },
   under_review: { label: "Under Review", color: "text-blue-600",    bg: "bg-blue-500/10 border-blue-200",       icon: Eye },
 };

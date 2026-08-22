@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -44,7 +44,7 @@ export default function CurrencySelector() {
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-sm font-semibold text-slate-700 shadow-sm"
+        className="flex items-center gap-1.5 h-9 px-3 rounded-lg border border-border bg-white hover:bg-muted/30 transition-colors text-sm font-semibold text-foreground shadow-sm"
         title="Change currency / country"
       >
         <span className="text-base leading-none" aria-hidden="true">{flag}</span>
@@ -55,7 +55,7 @@ export default function CurrencySelector() {
       {isOpen && (
         <div
           role="listbox"
-          className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-[200] overflow-hidden"
+          className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-2xl shadow-2xl z-[200] overflow-hidden"
         >
           <div className="max-h-80 overflow-y-auto">
             {/* Popular */}
@@ -83,7 +83,7 @@ export default function CurrencySelector() {
                         ? "bg-primary/10 text-primary"
                         : code !== "NG"
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        : "hover:bg-muted text-foreground"
                     }`}
                   >
                     <span className="text-xl leading-none w-7 text-center">{countryFlag(code)}</span>
@@ -91,7 +91,7 @@ export default function CurrencySelector() {
                       <div className="flex items-center gap-2">
                         <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
                         {!isActive && code !== "NG" && (
-                          <span className="text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md">
                             Coming Soon
                           </span>
                         )}
@@ -109,7 +109,7 @@ export default function CurrencySelector() {
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-slate-100 dark:bg-slate-800 mx-3 my-1" />
+            <div className="h-px bg-muted mx-3 my-1" />
 
             {/* Other countries */}
             <div className="px-3 pb-3 pt-1">
@@ -136,7 +136,7 @@ export default function CurrencySelector() {
                         ? "bg-primary/10 text-primary"
                         : code !== "NG"
                         ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        : "hover:bg-muted text-foreground"
                     }`}
                   >
                     <span className="text-xl leading-none w-7 text-center">{countryFlag(code)}</span>
@@ -144,7 +144,7 @@ export default function CurrencySelector() {
                       <div className="flex items-center gap-2">
                         <p className={`text-sm font-bold truncate ${isActive ? "text-primary" : ""}`}>{cfg.name}</p>
                         {!isActive && code !== "NG" && (
-                          <span className="text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded-md">
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md">
                             Coming Soon
                           </span>
                         )}

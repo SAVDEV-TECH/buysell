@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -253,7 +253,7 @@ export default function RegisterPage() {
       </motion.div>
 
       {/* ── Right: Form panel ─────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 bg-background overflow-y-auto">
         {/* Mobile logo */}
         <div className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
           <div

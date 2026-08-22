@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -90,7 +90,7 @@ const FAQ_CATEGORIES = [
     id: "sellers",
     label: "Sellers",
     icon: LifeBuoy,
-    color: "text-secondary bg-secondary/10",
+    color: "text-secondary bg-primary/5",
     items: [
       {
         q: "How do I list a new product?",
@@ -176,7 +176,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white dark:bg-slate-900 rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-borderline relative"
+        className="bg-card rounded-3xl p-8 w-full max-w-lg shadow-2xl border border-border relative"
       >
         <button onClick={onClose} className="absolute top-5 right-5 text-muted-foreground hover:text-foreground transition-colors">
           <X size={20} />
@@ -209,18 +209,18 @@ function ContactModal({ onClose }: { onClose: () => void }) {
                 <div>
                   <label className="text-xs font-semibold mb-1.5 block">Your Name</label>
                   <input required placeholder="John Doe" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm" />
+                    className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm" />
                 </div>
                 <div>
                   <label className="text-xs font-semibold mb-1.5 block">Email</label>
                   <input required type="email" placeholder="you@company.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm" />
+                    className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm" />
                 </div>
               </div>
               <div>
                 <label className="text-xs font-semibold mb-1.5 block">Subject</label>
                 <select required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm">
+                  className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm">
                   <option value="">Select a topic…</option>
                   <option value="order">Order Issue</option>
                   <option value="payment">Payment Problem</option>
@@ -233,7 +233,7 @@ function ContactModal({ onClose }: { onClose: () => void }) {
               <div>
                 <label className="text-xs font-semibold mb-1.5 block">Message</label>
                 <textarea required rows={4} placeholder="Describe your issue in detail…" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-borderline rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm resize-none" />
+                  className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/40 text-sm resize-none" />
               </div>
               <button type="submit" disabled={loading}
                 className="w-full py-3 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50">
@@ -255,7 +255,7 @@ function FaqItem({ q, a, index }: { q: string; a: string; index: number }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`rounded-2xl border transition-all duration-200 overflow-hidden ${open ? "border-primary/30 bg-primary/5 dark:bg-primary/10" : "border-borderline bg-slate-50 dark:bg-slate-950/50"}`}
+      className={`rounded-2xl border transition-all duration-200 overflow-hidden ${open ? "border-primary/30 bg-primary/5 dark:bg-primary/10" : "border-border bg-background/50"}`}
     >
       <button
         onClick={() => setOpen(!open)}
@@ -307,7 +307,7 @@ export default function HelpCenterPage() {
   const activeItems = FAQ_CATEGORIES.find((c) => c.id === activeCategory)?.items ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+    <div className="min-h-screen bg-background pb-24">
       {/* ── Hero ── */}
       <div className="bg-gradient-to-br from-primary via-primary/90 to-secondary pt-12 pb-28 px-4 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px]" />
@@ -323,9 +323,9 @@ export default function HelpCenterPage() {
 
           {/* Search bar */}
           <div className="relative max-w-2xl">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
             {search && (
-              <button onClick={() => setSearch("")} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setSearch("")} className="absolute right-5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                 <X size={18} />
               </button>
             )}
@@ -335,7 +335,7 @@ export default function HelpCenterPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search for help articles, e.g. 'payment', 'order', 'listing'…"
-              className="w-full pl-12 pr-12 py-4 bg-white rounded-2xl text-slate-800 focus:ring-4 focus:ring-white/30 outline-none text-sm sm:text-base shadow-2xl shadow-black/20"
+              className="w-full pl-12 pr-12 py-4 bg-white rounded-2xl text-foreground focus:ring-4 focus:ring-white/30 outline-none text-sm sm:text-base shadow-2xl shadow-black/20"
             />
           </div>
         </div>
@@ -347,11 +347,11 @@ export default function HelpCenterPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { icon: BookOpen, label: "Knowledge Base", desc: "Browse guides & docs", color: "text-primary bg-primary/10", action: () => setSearch("how") },
-            { icon: Users, label: "Community", desc: "Ask other traders", color: "text-secondary bg-secondary/10", action: () => {} },
+            { icon: Users, label: "Community", desc: "Ask other traders", color: "text-secondary bg-primary/5", action: () => {} },
             { icon: MessageCircle, label: "Contact Support", desc: "Open a support ticket", color: "text-orange-500 bg-orange-500/10", action: () => setShowContact(true) },
           ].map(({ icon: Icon, label, desc, color, action }) => (
             <button key={label} onClick={action}
-              className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-none border border-borderline hover:-translate-y-1 hover:shadow-xl transition-all text-left group w-full">
+              className="bg-card p-6 rounded-3xl shadow-lg  border border-border hover:-translate-y-1 hover:shadow-xl transition-all text-left group w-full">
               <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                 <Icon size={24} />
               </div>
@@ -366,7 +366,7 @@ export default function HelpCenterPage() {
 
         {/* ── Search results ── */}
         {searchResults !== null ? (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 border border-borderline">
+          <div className="bg-card rounded-3xl p-6 sm:p-10 border border-border">
             <h2 className="text-lg font-bold mb-5">
               {searchResults.length > 0
                 ? `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} for "${search}"`
@@ -394,14 +394,14 @@ export default function HelpCenterPage() {
           </div>
         ) : (
           /* ── FAQ by category ── */
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-borderline overflow-hidden">
+          <div className="bg-card rounded-3xl border border-border overflow-hidden">
             {/* Category tabs */}
-            <div className="flex overflow-x-auto gap-1 p-3 border-b border-borderline scrollbar-hide">
+            <div className="flex overflow-x-auto gap-1 p-3 border-b border-border scrollbar-hide">
               {FAQ_CATEGORIES.map((cat) => {
                 const Icon = cat.icon;
                 return (
                   <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all ${activeCategory === cat.id ? "bg-primary text-white shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all ${activeCategory === cat.id ? "bg-primary text-white shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted"}`}>
                     <Icon size={15} />
                     {cat.label}
                   </button>

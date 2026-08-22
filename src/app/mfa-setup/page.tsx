@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -93,10 +93,10 @@ export default function MfaSetupPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <motion.div
@@ -104,7 +104,7 @@ export default function MfaSetupPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md relative"
       >
-        <div className="glass rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-white/10">
+        <div className="bg-card rounded-3xl p-8 shadow-2xl border border-border/30">
           <AnimatePresence mode="wait">
             {step === "choose" && (
               <motion.div key="choose" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -129,7 +129,7 @@ export default function MfaSetupPage() {
                     id="setup-totp-btn"
                     onClick={startTotpSetup}
                     disabled={loading}
-                    className="w-full p-4 glass border-2 border-borderline rounded-2xl text-left hover:border-primary/50 hover:bg-primary/5 transition-all group disabled:opacity-50"
+                    className="w-full p-4 bg-card border-2 border-border rounded-2xl text-left hover:border-primary/50 hover:bg-primary/5 transition-all group disabled:opacity-50"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-all">
@@ -217,7 +217,7 @@ export default function MfaSetupPage() {
                     maxLength={6}
                     id="totp-code-input"
                     placeholder="000000"
-                    className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-center font-mono text-2xl tracking-widest"
+                    className="w-full px-4 py-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-center font-mono text-2xl tracking-widest"
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   />

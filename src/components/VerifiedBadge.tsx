@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { CheckCircle2, ShieldCheck, FileCheck, Building2, Award, X, Lock, Clock, AlertCircle } from "lucide-react";
@@ -88,7 +88,7 @@ export const VerifiedBadge = ({
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-borderline z-50 p-6 md:p-8"
+              className="bg-card w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-border z-50 p-6 md:p-8"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
@@ -99,23 +99,23 @@ export const VerifiedBadge = ({
                     <span className="text-[10px] font-mono font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">
                       BUYSELL TRUST CERTIFICATE
                     </span>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                    <h3 className="text-lg font-black text-foreground">
                       Verified Business Record
                     </h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition-colors"
+                  className="p-2 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-full transition-colors"
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-borderline">
+                <div className="p-4 bg-muted/40 rounded-2xl border border-border">
                   <p className="text-xs text-muted-foreground font-bold">Company Name</p>
-                  <p className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                  <p className="text-base font-black text-foreground mt-0.5">
                     {supplierName}
                   </p>
                   {kybData.registration_number && (
@@ -133,7 +133,7 @@ export const VerifiedBadge = ({
                     Audited Verification Checklist
                   </p>
 
-                  <div className="space-y-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <div className="space-y-2 text-xs font-bold text-foreground">
                     {checks.map((check) => {
                       const Icon = check.icon;
                       return (
@@ -142,15 +142,15 @@ export const VerifiedBadge = ({
                           className={`flex items-center gap-2.5 p-2.5 rounded-xl border ${
                             check.passed
                               ? "bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40"
-                              : "bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-700"
+                              : "bg-muted/30 border-border"
                           }`}
                         >
                           {check.passed ? (
                             <Icon size={16} className="text-blue-600 flex-shrink-0" />
                           ) : (
-                            <Clock size={16} className="text-slate-400 flex-shrink-0" />
+                            <Clock size={16} className="text-muted-foreground flex-shrink-0" />
                           )}
-                          <span className={check.passed ? "" : "text-slate-400"}>
+                          <span className={check.passed ? "" : "text-muted-foreground"}>
                             {check.label}
                           </span>
                           {!check.passed && (
@@ -170,7 +170,7 @@ export const VerifiedBadge = ({
 
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-full py-3.5 mt-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-xs hover:opacity-90 transition-all"
+                  className="w-full py-3.5 mt-4 bg-foreground text-background rounded-2xl font-black text-xs hover:opacity-90 transition-all"
                 >
                   Close Verification View
                 </button>

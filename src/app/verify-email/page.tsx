@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -54,13 +54,13 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="glass rounded-2xl border border-borderline p-8 text-center">
+        <div className="bg-card rounded-2xl border border-border p-8 text-center">
           {/* Header icon */}
           <div className="mb-8">
             {verified ? (
@@ -156,7 +156,7 @@ export default function VerifyEmailPage() {
             )}
           </div>
 
-          <div className="mt-6 pt-6 border-t border-borderline/30">
+          <div className="mt-6 pt-6 border-t border-border/30">
             <p className="text-xs text-muted-foreground">
               Need help?{" "}
               <Link href="/help" className="text-primary hover:underline">

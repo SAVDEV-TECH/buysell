@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -88,7 +88,7 @@ export default function VerificationPage() {
       </div>
 
       {verificationLevel === "verified" ? (
-        <div className="glass rounded-[2.5rem] border-2 border-emerald-500/20 bg-emerald-500/5 p-10 flex items-center gap-6">
+        <div className="bg-card rounded-[2.5rem] border-2 border-emerald-500/20 bg-emerald-500/5 p-10 flex items-center gap-6">
           <ShieldCheck size={44} className="text-emerald-500" />
           <div>
             <h2 className="text-2xl font-black">Company Verified</h2>
@@ -96,7 +96,7 @@ export default function VerificationPage() {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="glass rounded-[2.5rem] p-8 md:p-12 border border-borderline space-y-8">
+        <form onSubmit={handleSubmit} className="bg-card rounded-[2.5rem] p-8 md:p-12 border border-border space-y-8">
           <div>
             <h3 className="text-2xl font-black mb-2 font-mono">KYB Verification Protocol</h3>
             <p className="text-muted-foreground text-sm font-medium">Submit legal registration details for PostgreSQL verification.</p>
@@ -127,7 +127,7 @@ export default function VerificationPage() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. Acme Corp Ltd"
-                  className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-card/50 border border-border rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium"
                 />
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function VerificationPage() {
                   value={registrationNumber}
                   onChange={(e) => setRegistrationNumber(e.target.value)}
                   placeholder="e.g. RC-123456"
-                  className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium"
+                  className="w-full pl-12 pr-4 py-4 bg-card/50 border border-border rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium"
                 />
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function VerificationPage() {
                 onChange={(e) => setBusinessAddress(e.target.value)}
                 rows={3}
                 placeholder="Full address..."
-                className="w-full pl-12 pr-4 py-4 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium resize-none"
+                className="w-full pl-12 pr-4 py-4 bg-card/50 border border-border rounded-2xl focus:ring-4 focus:ring-primary/10 transition-all outline-none font-medium resize-none"
               />
             </div>
           </div>

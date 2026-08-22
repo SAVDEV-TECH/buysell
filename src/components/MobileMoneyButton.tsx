@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Smartphone, Loader2, CheckCircle, ShieldCheck, X } from "lucide-react";
@@ -194,7 +194,7 @@ function MobileMoneyModal({
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+        className="bg-card rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-500 p-5 text-white relative">
@@ -220,7 +220,7 @@ function MobileMoneyModal({
             <>
               {/* Provider grid */}
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 block">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
                   Select Provider
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -231,11 +231,11 @@ function MobileMoneyModal({
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all ${
                         provider.id === p.id
                           ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 shadow-md scale-105"
-                          : "border-slate-200 dark:border-slate-700 hover:border-emerald-300"
+                          : "border-border hover:border-emerald-300"
                       }`}
                     >
                       <ProviderLogo id={p.id} />
-                      <p className="text-[10px] font-black text-slate-700 dark:text-slate-200 leading-tight">
+                      <p className="text-[10px] font-black text-foreground leading-tight">
                         {p.name}
                       </p>
                     </button>
@@ -245,28 +245,28 @@ function MobileMoneyModal({
 
               {/* Phone input */}
               <div>
-                <label className="text-xs font-black uppercase tracking-widest text-slate-500 mb-2 block">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2 block">
                   Phone Number
                 </label>
                 <div className="relative">
                   <Smartphone
                     size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                   />
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +233 55 123 4567"
-                    className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold focus:outline-none focus:border-emerald-500 bg-transparent transition-all"
+                    className="w-full pl-10 pr-4 py-3 border-2 border-border rounded-2xl text-sm font-bold focus:outline-none focus:border-emerald-500 bg-transparent transition-all"
                   />
                 </div>
               </div>
 
               {/* Amount row */}
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 rounded-2xl px-4 py-3">
-                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Amount</span>
-                <span className="text-lg font-black text-slate-900 dark:text-white">
+              <div className="flex items-center justify-between bg-muted/60 rounded-2xl px-4 py-3">
+                <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Amount</span>
+                <span className="text-lg font-black text-foreground">
                   {currency} {amount.toLocaleString()}
                 </span>
               </div>
@@ -276,7 +276,7 @@ function MobileMoneyModal({
               {/* Escrow badge */}
               <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-2xl p-3">
                 <ShieldCheck size={16} className="text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold">
+                <p className="text-[11px] text-muted-foreground font-bold">
                   Funds are held in BuySell Escrow until delivery is confirmed by the buyer.
                 </p>
               </div>
@@ -301,19 +301,19 @@ function MobileMoneyModal({
                 <CheckCircle size={32} className="text-emerald-600" />
               </div>
               <div>
-                <h4 className="font-black text-lg text-slate-900 dark:text-white">Payment Initiated!</h4>
-                <p className="text-sm text-slate-500 mt-1">Complete the payment prompt on your phone</p>
+                <h4 className="font-black text-lg text-foreground">Payment Initiated!</h4>
+                <p className="text-sm text-muted-foreground mt-1">Complete the payment prompt on your phone</p>
               </div>
 
               {ussdCode && (
-                <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                <div className="bg-muted rounded-2xl p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
                     USSD Code
                   </p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white tracking-wider">
+                  <p className="text-2xl font-black text-foreground tracking-wider">
                     {ussdCode}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-2">
+                  <p className="text-[11px] text-muted-foreground mt-2">
                     Dial this on your {provider.name} line to complete
                   </p>
                 </div>
@@ -330,7 +330,7 @@ function MobileMoneyModal({
 
               <button
                 onClick={onClose}
-                className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl font-black text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                className="w-full py-3 bg-muted text-foreground rounded-2xl font-black text-sm hover:bg-muted transition-all"
               >
                 Done
               </button>

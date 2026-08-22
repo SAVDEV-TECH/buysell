@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -108,8 +108,8 @@ function OtpInput({
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={i === 0 ? handlePaste : undefined}
-          className={`w-11 h-14 sm:w-12 sm:h-14 text-center text-xl font-black rounded-xl border-2 bg-white/50 dark:bg-slate-900/50 outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
-            d ? "border-primary/60 text-foreground" : "border-borderline text-transparent"
+          className={`w-11 h-14 sm:w-12 sm:h-14 text-center text-xl font-black rounded-xl border-2 bg-card/50 outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/30 ${
+            d ? "border-primary/60 text-foreground" : "border-border text-transparent"
           }`}
         />
       ))}
@@ -266,13 +266,13 @@ export default function ForgotPasswordPage() {
   /* ── Success screen ────────────────────────────────────────────────────── */
   if (done) {
     return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-background">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          <div className="glass rounded-3xl p-10 shadow-2xl border border-white/20 dark:border-white/10 text-center">
+          <div className="bg-card rounded-3xl p-10 shadow-2xl border border-border/30 text-center">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -293,11 +293,11 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4 bg-background">
       {/* Background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <motion.div
@@ -305,7 +305,7 @@ export default function ForgotPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md relative"
       >
-        <div className="glass rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-white/10">
+        <div className="bg-card rounded-3xl p-8 shadow-2xl border border-border/30">
           <StepDots step={step} />
 
           <AnimatePresence mode="wait">
@@ -348,7 +348,7 @@ export default function ForgotPasswordPage() {
                         required
                         autoFocus
                         placeholder="name@company.com"
-                        className="w-full pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
@@ -464,7 +464,7 @@ export default function ForgotPasswordPage() {
                         type={showPassword ? "text" : "password"}
                         required
                         placeholder="Min. 12 characters"
-                        className="w-full pl-10 pr-12 py-3 bg-white/50 dark:bg-slate-900/50 border border-borderline rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm"
+                        className="w-full pl-10 pr-12 py-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
@@ -494,8 +494,8 @@ export default function ForgotPasswordPage() {
                         type={showConfirm ? "text" : "password"}
                         required
                         placeholder="Re-enter new password"
-                        className={`w-full pl-10 pr-12 py-3 bg-white/50 dark:bg-slate-900/50 border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm ${
-                          confirmPassword && confirmPassword !== password ? "border-destructive" : "border-borderline"
+                        className={`w-full pl-10 pr-12 py-3 bg-card/50 border rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm ${
+                          confirmPassword && confirmPassword !== password ? "border-destructive" : "border-border"
                         }`}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}

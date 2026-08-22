@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { 
@@ -27,8 +27,8 @@ const Sections = [
     icon: <Eye size={24} className="text-secondary" />,
     title: "2. How Information is Used",
     content: "The data we collect is strictly used to facilitate and secure your B2B transactions. Specifically, we use it to: (a) Verify the legitimacy of businesses joining the platform; (b) Process orders, payments, and freight logistics; (c) Enforce Role-Based Access Control (RBAC) across your organization's accounts; (d) Communicate critical updates, compliance notices, and order statuses; and (e) Improve our platform's user experience and algorithmic matching.",
-    color: "bg-secondary/10",
-    border: "border-secondary/20"
+    color: "bg-primary/5",
+    border: "border-primary/20"
   },
   {
     id: "sharing",
@@ -66,12 +66,12 @@ const Sections = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-slate-50 dark:bg-slate-950 overflow-hidden selection:bg-primary/30">
+    <div className="min-h-screen pt-24 pb-20 bg-background overflow-hidden selection:bg-primary/30">
       
       {/* Background Decor */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 relative">
@@ -122,7 +122,7 @@ export default function PrivacyPolicyPage() {
         {/* Content Sections */}
         <div className="space-y-8 relative">
           {/* Connecting Line */}
-          <div className="absolute left-8 top-8 bottom-8 w-px bg-gradient-to-b from-primary/20 via-borderline to-transparent hidden md:block" />
+          <div className="absolute left-8 top-8 bottom-8 w-px bg-gradient-to-b from-primary/20 via-border to-transparent hidden md:block" />
 
           {Sections.map((section, idx) => (
             <motion.div 
@@ -134,13 +134,13 @@ export default function PrivacyPolicyPage() {
               className="relative md:pl-20"
             >
               {/* Timeline dot */}
-              <div className={`hidden md:flex absolute left-0 top-6 w-16 h-16 -translate-x-1/2 bg-slate-50 dark:bg-slate-950 items-center justify-center`}>
+              <div className={`hidden md:flex absolute left-0 top-6 w-16 h-16 -translate-x-1/2 bg-background items-center justify-center`}>
                  <div className={`w-12 h-12 ${section.color} border ${section.border} rounded-2xl flex items-center justify-center shadow-lg shadow-black/5`}>
                    {section.icon}
                  </div>
               </div>
 
-              <div className="glass p-8 md:p-10 rounded-3xl border border-borderline/50 hover:border-primary/30 transition-colors group">
+              <div className="bg-card p-8 md:p-10 rounded-3xl border border-border/50 hover:border-primary/30 transition-colors group">
                 <div className="flex items-center gap-4 mb-6 md:hidden">
                   <div className={`w-12 h-12 ${section.color} border ${section.border} rounded-2xl flex items-center justify-center`}>
                     {section.icon}
@@ -165,7 +165,7 @@ export default function PrivacyPolicyPage() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-20 p-8 glass border border-primary/20 rounded-3xl text-center bg-primary/5"
+          className="mt-20 p-8 bg-card border border-primary/20 rounded-3xl text-center bg-primary/5"
         >
           <h3 className="text-xl font-bold mb-3">Questions about your privacy?</h3>
           <p className="text-muted-foreground mb-6">

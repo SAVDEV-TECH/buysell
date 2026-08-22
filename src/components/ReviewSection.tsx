@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -67,11 +67,11 @@ export default function ReviewSection({ productId }: { productId: string }) {
            <p className="text-muted-foreground font-medium uppercase tracking-widest text-[10px]">Verified Customer Reviews</p>
         </div>
         <div className="flex gap-2">
-           <div className="flex items-center gap-1.5 px-4 py-2 glass rounded-2xl border border-borderline">
+           <div className="flex items-center gap-1.5 px-4 py-2 bg-card rounded-2xl border border-border">
               <Star size={16} className="text-orange-500 fill-orange-500" />
               <span className="font-bold">{reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : "5.0"}</span>
            </div>
-           <div className="flex items-center gap-1.5 px-4 py-2 glass rounded-2xl border border-borderline">
+           <div className="flex items-center gap-1.5 px-4 py-2 bg-card rounded-2xl border border-border">
               <MessageSquare size={16} className="text-primary" />
               <span className="font-bold">{reviews.length}</span>
            </div>
@@ -80,7 +80,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
          <div className="lg:col-span-1">
-            <div className="glass p-8 rounded-[2.5rem] border border-borderline sticky top-24">
+            <div className="bg-card p-8 rounded-[2.5rem] border border-border sticky top-24">
                <h4 className="text-lg font-black mb-6">Write a Review</h4>
                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
@@ -106,7 +106,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                       rows={4}
-                      className="w-full px-6 py-4 glass rounded-2xl border border-borderline outline-none focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium resize-none"
+                      className="w-full px-6 py-4 bg-card rounded-2xl border border-border outline-none focus:ring-4 focus:ring-primary/10 transition-all text-sm font-medium resize-none"
                     />
                   </div>
 
@@ -141,7 +141,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
                 <p className="text-[10px] font-black tracking-widest uppercase italic">Loading reviews...</p>
               </div>
             ) : reviews.length === 0 ? (
-              <div className="py-20 text-center glass rounded-[3rem] border border-borderline border-dashed">
+              <div className="py-20 text-center bg-card rounded-[3rem] border border-border border-dashed">
                  <ShieldCheck size={48} className="mx-auto text-muted-foreground opacity-10 mb-4" />
                  <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground">No reviews for this product yet.</p>
               </div>
@@ -152,11 +152,11 @@ export default function ReviewSection({ productId }: { productId: string }) {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="glass p-8 rounded-[2.5rem] border border-borderline hover:border-primary/20 transition-all group"
+                  className="bg-card p-8 rounded-[2.5rem] border border-border hover:border-primary/20 transition-all group"
                 >
                    <div className="flex items-start justify-between mb-6">
                       <div className="flex items-center gap-4">
-                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary font-black text-lg">
+                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/10 flex items-center justify-center text-primary font-black text-lg">
                             {r.userName.charAt(0)}
                          </div>
                          <div>
@@ -178,7 +178,7 @@ export default function ReviewSection({ productId }: { productId: string }) {
                    
                    <p className="text-sm text-muted-foreground leading-relaxed font-medium">"{r.comment}"</p>
                    
-                   <div className="mt-8 flex items-center gap-6 pt-6 border-t border-borderline/50">
+                   <div className="mt-8 flex items-center gap-6 pt-6 border-t border-border/50">
                       <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-all">
                         <ThumbsUp size={14} /> Helpful Review
                       </button>

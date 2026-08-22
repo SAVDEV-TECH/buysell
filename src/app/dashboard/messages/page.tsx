@@ -528,13 +528,13 @@ export default function MessagesPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-[calc(100vh-130px)] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden">
+      <div className="flex h-[calc(100vh-130px)] bg-card rounded-3xl border border-border shadow-xl overflow-hidden">
 
         {/* ── Left Sidebar: Conversation List ──────────────────────────────── */}
-        <div className={`w-full md:w-80 lg:w-96 border-r border-slate-100 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-900 flex-shrink-0 ${activeConv ? "hidden md:flex" : "flex"}`}>
-          <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+        <div className={`w-full md:w-80 lg:w-96 border-r border-border flex flex-col bg-muted/30 flex-shrink-0 ${activeConv ? "hidden md:flex" : "flex"}`}>
+          <div className="p-5 border-b border-border flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-extrabold text-slate-900 dark:text-white">Trade Messages</h1>
+              <h1 className="text-xl font-extrabold text-foreground">Trade Messages</h1>
               <p className="text-xs text-muted-foreground">{conversations.length} active channels</p>
             </div>
             <button
@@ -546,27 +546,27 @@ export default function MessagesPage() {
             </button>
           </div>
 
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="px-4 py-3 border-b border-border">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by name or email…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
+                className="w-full pl-9 pr-4 py-2 bg-card border border-border rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
+          <div className="flex-1 overflow-y-auto divide-y divide-border/60">
             {loadingConvs ? (
               <div className="py-16 flex items-center justify-center">
                 <Loader2 size={24} className="text-primary animate-spin" />
               </div>
             ) : filteredConvs.length === 0 ? (
               <div className="py-16 text-center px-4 space-y-3">
-                <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-slate-400 mx-auto">
+                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center text-muted-foreground mx-auto">
                   <MessageSquare size={24} />
                 </div>
                 <p className="text-xs text-muted-foreground font-semibold">
@@ -585,14 +585,14 @@ export default function MessagesPage() {
                       setActiveConv(conv);
                       fetchMessages(conv.id);
                     }}
-                    className={`w-full text-left px-5 py-4 transition-all hover:bg-slate-100 dark:hover:bg-slate-800/60 ${isActive ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}`}
+                    className={`w-full text-left px-5 py-4 transition-all hover:bg-muted ${isActive ? "bg-primary/5 border-l-4 border-l-primary" : "border-l-4 border-l-transparent"}`}
                   >
                     <div className="flex items-start gap-3">
                       <Avatar name={partnerName} />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{partnerName}</h3>
-                          <span className="text-[10px] text-slate-400 whitespace-nowrap ml-2">
+                          <h3 className="font-bold text-sm text-foreground truncate">{partnerName}</h3>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
                             {formatTime(conv.last_message_at)}
                           </span>
                         </div>
@@ -618,22 +618,22 @@ export default function MessagesPage() {
           {activeConv ? (
             <>
               {/* Chat Header */}
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+              <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card">
                 <div className="flex items-center gap-3 min-w-0">
                   <button
                     onClick={() => setActiveConv(null)}
-                    className="md:hidden p-1 mr-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="md:hidden p-1 mr-1 text-muted-foreground hover:text-foreground"
                   >
                     ←
                   </button>
                   <Avatar name={getPartnerName(activeConv)} />
                   <div className="min-w-0">
-                    <h3 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+                    <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5 truncate">
                       {getPartnerName(activeConv)}
                       <VerifiedBadge showText />
                     </h3>
                     {getPartnerEmail(activeConv) && (
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-medium truncate flex items-center gap-1">
+                      <p className="text-[11px] text-muted-foreground font-mono font-medium truncate flex items-center gap-1">
                         <Mail size={11} className="text-primary" /> {getPartnerEmail(activeConv)}
                       </p>
                     )}
@@ -651,7 +651,7 @@ export default function MessagesPage() {
               </div>
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-slate-50/40 dark:bg-slate-950/30">
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-muted/30">
                 {loadingMsgs ? (
                   <div className="flex items-center justify-center py-16">
                     <Loader2 size={28} className="text-primary animate-spin" />
@@ -662,7 +662,7 @@ export default function MessagesPage() {
                       <MessageSquare size={32} className="text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">Secure B2B Trade Channel</h4>
+                      <h4 className="font-bold text-foreground">Secure B2B Trade Channel</h4>
                       <p className="text-xs text-muted-foreground mt-1 max-w-sm">
                         Discuss specs, share pro-forma invoices, or generate formal counter-offers directly in this thread.
                       </p>
@@ -683,7 +683,7 @@ export default function MessagesPage() {
                           
                           {/* Rich Quote Offer Card */}
                           {msg.quote_data && (
-                            <div className="p-4 bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-3xl border border-blue-500/30 shadow-xl space-y-3 w-72">
+                            <div className="p-4 bg-card text-white rounded-3xl border border-blue-500/30 shadow-xl space-y-3 w-72">
                               <div className="flex items-center justify-between border-b border-white/10 pb-2">
                                 <span className="text-[9px] font-mono font-black text-cyan-400 uppercase tracking-widest flex items-center gap-1">
                                   <Tag size={11} /> FORMAL B2B QUOTE OFFER
@@ -703,7 +703,7 @@ export default function MessagesPage() {
 
                               <Link
                                 href="/checkout"
-                                className="w-full py-2.5 bg-cyan-400 text-slate-950 rounded-xl font-black text-xs hover:bg-cyan-300 transition-all flex items-center justify-center gap-1 shadow-md"
+                                className="w-full py-2.5 bg-cyan-400 text-foreground rounded-xl font-black text-xs hover:bg-cyan-300 transition-all flex items-center justify-center gap-1 shadow-md"
                               >
                                 Accept & Pay Escrow <ExternalLink size={12} />
                               </Link>
@@ -712,9 +712,9 @@ export default function MessagesPage() {
 
                           {/* File Attachment Card */}
                           {msg.attachment_name && (
-                            <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center gap-3 text-xs">
+                            <div className="p-3 bg-muted rounded-2xl border border-border flex items-center gap-3 text-xs">
                               <FileText size={18} className="text-primary flex-shrink-0" />
-                              <span className="font-bold text-slate-900 dark:text-white truncate max-w-[160px]">
+                              <span className="font-bold text-foreground truncate max-w-[160px]">
                                 {msg.attachment_name}
                               </span>
                               {msg.attachment_url && (
@@ -735,14 +735,14 @@ export default function MessagesPage() {
                             <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                               isMe
                                 ? "bg-primary text-white rounded-br-none shadow-primary/20"
-                                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-none"
+                                : "bg-card border border-border text-foreground rounded-bl-none"
                             }`}>
                               {msg.text}
                             </div>
                           )}
 
                           {/* Timestamp & Read Status */}
-                          <div className={`flex items-center gap-1 text-[10px] text-slate-400 ${isMe ? "flex-row-reverse" : ""}`}>
+                          <div className={`flex items-center gap-1 text-[10px] text-muted-foreground ${isMe ? "flex-row-reverse" : ""}`}>
                             <Clock size={10} />
                             {formatTime(msg.created_at)}
                             {isMe && (
@@ -758,7 +758,7 @@ export default function MessagesPage() {
               </div>
 
               {/* Message Input */}
-              <div className="px-5 py-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              <div className="px-5 py-4 bg-card border-t border-border space-y-3">
                 <div className="flex items-end gap-3">
 
                   {/* Hidden File Input */}
@@ -775,12 +775,12 @@ export default function MessagesPage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingFile}
                     title="Attach File or Document"
-                    className="w-10 h-10 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/40 transition-all mb-1 flex-shrink-0"
+                    className="w-10 h-10 border border-border rounded-2xl flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-all mb-1 flex-shrink-0"
                   >
                     {uploadingFile ? <Loader2 size={16} className="animate-spin text-primary" /> : <Paperclip size={18} />}
                   </button>
 
-                  <div className="flex-1 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all overflow-hidden">
+                  <div className="flex-1 bg-muted/60 border border-border rounded-2xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all overflow-hidden">
                     <textarea
                       ref={textareaRef}
                       value={newMessage}
@@ -788,7 +788,7 @@ export default function MessagesPage() {
                       onKeyDown={handleKeyDown}
                       placeholder="Write a trade message… (Enter to send, Shift+Enter for new line)"
                       rows={2}
-                      className="w-full bg-transparent px-4 py-3 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 outline-none resize-none"
+                      className="w-full bg-transparent px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none"
                     />
                   </div>
 
@@ -808,7 +808,7 @@ export default function MessagesPage() {
                 <MessageSquare size={40} className="text-primary" />
               </div>
               <div>
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white">B2B Trade Messaging Hub</h3>
+                <h3 className="text-xl font-extrabold text-foreground">B2B Trade Messaging Hub</h3>
                 <p className="text-sm text-muted-foreground mt-1 max-w-xs">
                   Select a partner to negotiate pricing, share documents, or issue binding counter-offer quotes.
                 </p>
@@ -836,14 +836,14 @@ export default function MessagesPage() {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
+                className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
               >
                 <div className="flex justify-between items-center border-b pb-3">
                   <div>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Issue Counter-Offer Quote</h3>
+                    <h3 className="text-lg font-black text-foreground">Issue Counter-Offer Quote</h3>
                     <p className="text-xs text-muted-foreground">Send a binding quotation directly in the chat thread.</p>
                   </div>
-                  <button onClick={() => setShowQuoteModal(false)} className="p-1 text-slate-400">
+                  <button onClick={() => setShowQuoteModal(false)} className="p-1 text-muted-foreground">
                     <X size={18} />
                   </button>
                 </div>
@@ -890,7 +890,7 @@ export default function MessagesPage() {
                     <select
                       value={quoteIncoterms}
                       onChange={(e) => setQuoteIncoterms(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-primary/40 bg-white dark:bg-slate-950 font-bold"
+                      className="w-full px-4 py-3 rounded-xl border text-xs outline-none focus:ring-2 focus:ring-primary/40 bg-card font-bold"
                     >
                       <option value="FOB">FOB — Free On Board (Port Departure)</option>
                       <option value="CIF">CIF — Cost, Insurance & Freight</option>
@@ -934,7 +934,7 @@ export default function MessagesPage() {
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
+                className="bg-card border border-border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-5"
               >
                 <div className="flex justify-between items-center">
                   <div>
@@ -943,14 +943,14 @@ export default function MessagesPage() {
                   </div>
                   <button
                     onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvQuery(""); }}
-                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg"
+                    className="p-1 text-muted-foreground hover:text-foreground rounded-lg"
                   >
                     <X size={18} />
                   </button>
                 </div>
 
                 {createError && (
-                  <p className="text-xs font-semibold text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                  <p className="text-xs font-semibold text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
                     {createError}
                   </p>
                 )}
@@ -964,7 +964,7 @@ export default function MessagesPage() {
                       placeholder="e.g. ssamuel106@uniport.edu.ng or Samuel"
                       value={newConvQuery}
                       onChange={(e) => setNewConvQuery(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-card text-sm font-medium outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                     />
                   </div>
 
@@ -972,7 +972,7 @@ export default function MessagesPage() {
                     <button
                       type="button"
                       onClick={() => { setShowNewConv(false); setCreateError(""); setNewConvQuery(""); }}
-                      className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                      className="flex-1 py-3 rounded-xl border border-border text-sm font-bold hover:bg-muted transition-all"
                     >
                       Cancel
                     </button>

@@ -30,12 +30,12 @@ export default function AISourcingAssistant() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[450px] h-[650px] max-h-[80vh] bg-white dark:bg-slate-900 rounded-[18px] border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-24 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[450px] h-[650px] max-h-[80vh] bg-card rounded-[18px] border border-border shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Close Button overlay */}
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 bg-white/80 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all z-10 shadow-sm backdrop-blur-sm border border-slate-200 dark:border-slate-700"
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-muted-foreground hover:text-foreground bg-card/80 hover:bg-muted transition-all z-10 shadow-sm backdrop-blur-sm border border-border"
               title="Close Chat"
             >
               <X size={18} />

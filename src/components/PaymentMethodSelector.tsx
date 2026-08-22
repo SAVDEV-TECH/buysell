@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Zap, CreditCard, Smartphone, Globe, Landmark } from "lucide-react";
@@ -26,8 +26,8 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
   if (loading) {
     return (
       <div className="space-y-4 p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-2xl">
-        <div className="h-6 bg-slate-300 dark:bg-slate-700 rounded animate-pulse" />
-        <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+        <div className="h-6 bg-muted rounded animate-pulse" />
+        <div className="h-20 bg-muted rounded animate-pulse" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function PaymentMethodSelector({ onMethodChange, selectedMethod }
             className={`flex items-start gap-4 p-4 border-2 rounded-2xl cursor-pointer transition-all ${
               selectedMethod === method.id
                 ? "border-primary bg-primary/5 shadow-sm"
-                : "border-borderline hover:border-primary/50 bg-background opacity-80 hover:opacity-100"
+                : "border-border hover:border-primary/50 bg-background opacity-80 hover:opacity-100"
             }`}
           >
             <input

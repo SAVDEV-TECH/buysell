@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -26,7 +26,7 @@ function SuccessContent() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="max-w-xl w-full bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-slate-800 shadow-2xl p-8 md:p-12 text-center relative overflow-hidden"
+        className="max-w-xl w-full bg-card rounded-[3rem] border border-border shadow-2xl p-8 md:p-12 text-center relative overflow-hidden"
       >
         {/* Top Glow Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-green-500/10 blur-3xl rounded-full" />
@@ -50,15 +50,15 @@ function SuccessContent() {
         </p>
 
         {/* Order Details Card */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 text-left space-y-3 mb-8">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-3">
+        <div className="bg-muted/40 rounded-2xl p-5 border border-border text-left space-y-3 mb-8">
+          <div className="flex items-center justify-between border-b border-border/60 pb-3">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order ID</span>
             <span className="text-sm font-extrabold text-primary font-mono">{orderId}</span>
           </div>
 
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 pb-3">
+          <div className="flex items-center justify-between border-b border-border/60 pb-3">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Reference</span>
-            <span className="text-xs font-mono text-slate-600 dark:text-slate-300 truncate max-w-[200px]">{ref}</span>
+            <span className="text-xs font-mono text-muted-foreground truncate max-w-[200px]">{ref}</span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ function SuccessContent() {
           </Link>
           <Link
             href="/marketplace"
-            className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-base"
+            className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-border text-foreground font-semibold hover:bg-muted transition-all text-base"
           >
             <ShoppingBag size={18} /> Return to Marketplace
           </Link>

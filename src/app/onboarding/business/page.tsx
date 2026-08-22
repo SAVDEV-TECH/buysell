@@ -1,4 +1,4 @@
- "use client";
+﻿ "use client";
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -107,13 +107,13 @@ function validateCompanyName(name: string): string | undefined {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const inputBase =
-  "w-full px-4 py-3 rounded-xl border bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-slate-400";
+  "w-full px-4 py-3 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all placeholder:text-muted-foreground";
 
 function inputCls(error?: string) {
   return `${inputBase} ${
     error
       ? "border-red-300 dark:border-red-700 focus:ring-red-200 focus:border-red-400"
-      : "border-slate-200 dark:border-slate-700"
+      : "border-border"
   }`;
 }
 
@@ -129,7 +129,7 @@ function Field({ label, required, error, children, htmlFor }: {
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="text-sm font-semibold text-slate-700 dark:text-slate-200"
+        className="text-sm font-semibold text-foreground"
       >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
@@ -152,21 +152,21 @@ function StepRole({ orgType, setOrgType }: {
     {
       type: "buyer" as OrgType,
       icon: <ShoppingCart size={24} className="text-blue-600" />,
-      color: "bg-blue-100 dark:bg-blue-900/40",
+      color: "bg-blue-500/10",
       title: "Buyer / Wholesaler",
       description: "I want to source and purchase products in bulk from verified suppliers.",
     },
     {
       type: "supplier" as OrgType,
       icon: <Factory size={24} className="text-purple-600" />,
-      color: "bg-purple-100 dark:bg-purple-900/40",
+      color: "bg-purple-500/10",
       title: "Manufacturer / Supplier",
       description: "I want to list my products and sell to businesses around the world.",
     },
     {
       type: "both" as OrgType,
       icon: <Layers size={24} className="text-orange-600" />,
-      color: "bg-orange-100 dark:bg-orange-900/40",
+      color: "bg-orange-500/10",
       title: "Both — Buy & Sell",
       description: "My business both sources products from suppliers and sells our own goods.",
     },
@@ -186,7 +186,7 @@ function StepRole({ orgType, setOrgType }: {
             className={`w-full text-left p-6 rounded-2xl border-2 transition-all duration-200 ${
               selected
                 ? "border-primary bg-primary/5 shadow-lg shadow-primary/10 scale-[1.02]"
-                : "border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                : "border-border hover:border-primary/40 hover:bg-muted/50"
             }`}
           >
             <div className="flex items-start gap-4">
@@ -218,7 +218,7 @@ function StepCompany({ form, set, errors }: {
     <div className="space-y-5">
       <Field label="Company / Business Name" required error={errors.companyName} htmlFor="companyName">
         <div className="relative">
-          <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             id="companyName"
             className={inputCls(errors.companyName) + " pl-10"}
@@ -233,7 +233,7 @@ function StepCompany({ form, set, errors }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Phone Number" required error={errors.phone} htmlFor="phone">
           <div className="relative">
-            <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
               id="phone"
               className={inputCls(errors.phone) + " pl-10"}
@@ -247,7 +247,7 @@ function StepCompany({ form, set, errors }: {
         </Field>
         <Field label="Company Website" error={errors.website} htmlFor="website">
           <div className="relative">
-            <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <input
               id="website"
               className={inputCls(errors.website) + " pl-10"}
@@ -264,7 +264,7 @@ function StepCompany({ form, set, errors }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Country" required error={errors.country} htmlFor="country">
           <div className="relative">
-            <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
+            <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none z-10" />
             <select
               id="country"
               className={inputCls(errors.country) + " pl-10 appearance-none"}
@@ -290,7 +290,7 @@ function StepCompany({ form, set, errors }: {
 
       <Field label="Street Address" htmlFor="address">
         <div className="relative">
-          <Home size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Home size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             id="address"
             className={inputCls() + " pl-10"}
@@ -304,7 +304,7 @@ function StepCompany({ form, set, errors }: {
 
       <Field label="Business Registration Number" htmlFor="regNum">
         <div className="relative">
-          <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             id="regNum"
             className={inputCls() + " pl-10"}
@@ -330,7 +330,7 @@ function StepDetails({ form, set, submitError, errors }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <Field label="Number of Employees" required error={errors.employeeCount} htmlFor="employees">
           <div className="relative">
-            <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <select
               id="employees"
               className={inputCls(errors.employeeCount) + " pl-10 appearance-none"}
@@ -344,7 +344,7 @@ function StepDetails({ form, set, submitError, errors }: {
         </Field>
         <Field label="Annual Revenue Range" htmlFor="revenue">
           <div className="relative">
-            <Briefcase size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Briefcase size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <select
               id="revenue"
               className={inputCls() + " pl-10 appearance-none"}
@@ -360,7 +360,7 @@ function StepDetails({ form, set, submitError, errors }: {
 
       <Field label="Main Product / Service Categories" htmlFor="products">
         <div className="relative">
-          <Package size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Package size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             id="products"
             className={inputCls() + " pl-10"}
@@ -383,7 +383,7 @@ function StepDetails({ form, set, submitError, errors }: {
       </Field>
 
       {submitError && (
-        <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 flex items-start gap-2">
+        <div className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-start gap-2">
           <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
           <span>{submitError}</span>
         </div>
@@ -421,7 +421,7 @@ function StepDone({ companyName, onDashboard }: {
           { icon: "🔍", title: "Under Review",       desc: "Our admins are verifying your info" },
           { icon: "🚀", title: "Go Live",            desc: "Start listing products once verified" },
         ].map(({ icon, title, desc }) => (
-          <div key={title} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+          <div key={title} className="p-4 rounded-2xl bg-muted/40 border border-border">
             <div className="text-2xl mb-2">{icon}</div>
             <p className="font-bold text-sm">{title}</p>
             <p className="text-xs text-muted-foreground mt-1">{desc}</p>
@@ -438,7 +438,7 @@ function StepDone({ companyName, onDashboard }: {
         </button>
         <Link
           href="/dashboard/verification"
-          className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-slate-200 dark:border-slate-700 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+          className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-border font-semibold text-sm hover:bg-muted transition-all"
         >
           Check Verification Status
         </Link>
@@ -599,7 +599,7 @@ export default function OnboardingBusinessPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950/20 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-2xl">
 
         {/* Header */}
@@ -628,7 +628,7 @@ export default function OnboardingBusinessPage() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                         isDone   ? "bg-primary text-white" :
                         isActive ? "bg-primary text-white ring-4 ring-primary/20" :
-                                   "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                   "bg-muted text-muted-foreground"
                       }`}>
                         {isDone ? <CheckCircle2 size={16} /> : i + 1}
                       </div>
@@ -637,7 +637,7 @@ export default function OnboardingBusinessPage() {
                       </span>
                     </div>
                     {i < STEPS.filter((s) => s.id !== "done").length - 1 && (
-                      <div className={`h-0.5 flex-1 mx-2 rounded-full transition-all ${isDone ? "bg-primary" : "bg-slate-200 dark:bg-slate-700"}`} />
+                      <div className={`h-0.5 flex-1 mx-2 rounded-full transition-all ${isDone ? "bg-primary" : "bg-muted"}`} />
                     )}
                   </div>
                 );
@@ -647,11 +647,11 @@ export default function OnboardingBusinessPage() {
         )}
 
         {/* Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden">
+        <div className="bg-card rounded-3xl border border-border/80 shadow-xl  overflow-hidden">
 
           {/* Card header */}
           {currentStep !== "done" && (
-            <div className="px-8 pt-8 pb-6 border-b border-slate-100 dark:border-slate-800">
+            <div className="px-8 pt-8 pb-6 border-b border-border">
               <h2 className="text-xl font-extrabold">
                 {currentStep === "role"    && "What best describes your business?"}
                 {currentStep === "company" && "Tell us about your company"}
@@ -701,7 +701,7 @@ export default function OnboardingBusinessPage() {
                   setFieldErrors({});
                 }}
                 disabled={stepIndex === 0}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-semibold disabled:opacity-30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl border border-border text-sm font-semibold disabled:opacity-30 hover:bg-muted transition-all"
               >
                 <ChevronLeft size={16} /> Back
               </button>

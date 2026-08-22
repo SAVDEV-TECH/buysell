@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -338,7 +338,7 @@ export default function PayoutsPage() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative rounded-3xl p-8 md:p-10 overflow-hidden bg-slate-900 border border-slate-800 shadow-2xl text-white flex flex-col justify-between min-h-[320px]"
+            className="relative rounded-3xl p-8 md:p-10 overflow-hidden bg-card border border-border shadow-2xl text-white flex flex-col justify-between min-h-[320px]"
           >
             {/* Background Texture */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
@@ -518,7 +518,7 @@ export default function PayoutsPage() {
                       <td className="px-6 py-4 font-bold text-xs text-emerald-600 dark:text-emerald-400">
                         ${Number(payout.net_amount || payout.amount).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      <td className="px-6 py-4 text-xs font-semibold text-foreground">
                         {bankName} {acctNum ? `(•••• ${acctNum.slice(-4)})` : ""}
                       </td>
                       <td className="px-6 py-4">
@@ -546,20 +546,20 @@ export default function PayoutsPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
+              className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-black">Request Capital Withdrawal</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Transfer funds to your business bank account.</p>
                 </div>
-                <button onClick={() => setShowWithdrawModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl">
+                <button onClick={() => setShowWithdrawModal(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl">
                   <X size={18} />
                 </button>
               </div>
 
               {withdrawError && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 text-red-600 rounded-xl text-xs font-bold">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-600 rounded-xl text-xs font-bold">
                   {withdrawError}
                 </div>
               )}
@@ -567,7 +567,7 @@ export default function PayoutsPage() {
               <form onSubmit={handleRequestWithdrawal} className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Withdrawal Amount ($ USD) *</label>
+                    <label className="text-xs font-bold text-foreground">Withdrawal Amount ($ USD) *</label>
                     <button
                       type="button"
                       onClick={() => setWithdrawAmount(String(balance.available))}
@@ -583,12 +583,12 @@ export default function PayoutsPage() {
                     placeholder="0.00"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/40"
+                    className="w-full px-4 py-3 rounded-xl border border-border text-sm font-bold outline-none focus:ring-2 focus:ring-primary/40"
                   />
                 </div>
 
                 {withdrawAmount && Number(withdrawAmount) > 0 && (
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
+                  <div className="p-3 rounded-xl bg-muted/60 border border-border text-xs space-y-1.5">
                     <div className="flex justify-between text-muted-foreground">
                       <span>Requested Amount:</span>
                       <span>${Number(withdrawAmount).toLocaleString()}</span>
@@ -607,7 +607,7 @@ export default function PayoutsPage() {
                 {payoutSettings && (
                   <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 text-xs space-y-1">
                     <p className="font-bold text-primary">Destination Bank:</p>
-                    <p className="text-slate-700 dark:text-slate-300">
+                    <p className="text-foreground">
                       {payoutSettings.bank_name} · {payoutSettings.account_name} (•••• {payoutSettings.account_number.slice(-4)})
                     </p>
                   </div>
@@ -617,7 +617,7 @@ export default function PayoutsPage() {
                   <button
                     type="button"
                     onClick={() => setShowWithdrawModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-100 transition-all"
+                    className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-all"
                   >
                     Cancel
                   </button>
@@ -648,21 +648,21 @@ export default function PayoutsPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5"
+              className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-lg font-black">Configure Settlement Account</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Enter business bank details for payouts.</p>
                 </div>
-                <button onClick={() => setShowSettingsModal(false)} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl">
+                <button onClick={() => setShowSettingsModal(false)} className="p-1.5 text-muted-foreground hover:text-foreground rounded-xl">
                   <X size={18} />
                 </button>
               </div>
 
               <form onSubmit={handleSaveSettings} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Bank Name *</label>
+                  <label className="text-xs font-bold text-foreground block mb-1">Bank Name *</label>
                   <input
                     type="text"
                     required
@@ -675,7 +675,7 @@ export default function PayoutsPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Account Name *</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Account Name *</label>
                     <input
                       type="text"
                       required
@@ -686,7 +686,7 @@ export default function PayoutsPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Account Number / IBAN *</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Account Number / IBAN *</label>
                     <input
                       type="text"
                       required
@@ -700,7 +700,7 @@ export default function PayoutsPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">SWIFT / BIC Code</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">SWIFT / BIC Code</label>
                     <input
                       type="text"
                       placeholder="CHASUS33XXX"
@@ -710,7 +710,7 @@ export default function PayoutsPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Payout Currency</label>
+                    <label className="text-xs font-bold text-foreground block mb-1">Payout Currency</label>
                     <select
                       value={settingsForm.currency}
                       onChange={(e) => setSettingsForm({ ...settingsForm, currency: e.target.value })}
@@ -725,7 +725,7 @@ export default function PayoutsPage() {
                   <button
                     type="button"
                     onClick={() => setShowSettingsModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold hover:bg-slate-100 transition-all"
+                    className="flex-1 py-3 rounded-xl border border-border text-xs font-bold hover:bg-muted transition-all"
                   >
                     Cancel
                   </button>

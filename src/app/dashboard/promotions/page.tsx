@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { 
@@ -26,7 +26,7 @@ export default function PromotionsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
          <div className="lg:col-span-2 space-y-6">
-            <div className="glass p-10 rounded-[3.5rem] border border-borderline min-h-[500px] relative overflow-hidden">
+            <div className="bg-card p-10 rounded-[3.5rem] border border-border min-h-[500px] relative overflow-hidden">
                <div className="relative z-10">
                   <h3 className="text-xl font-bold mb-10 flex items-center gap-2">
                      <Zap size={20} className="text-primary fill-primary" /> Active Discount Matrix
@@ -37,7 +37,7 @@ export default function PromotionsPage() {
          </div>
 
          <div className="lg:col-span-1 space-y-6">
-            <div className="glass p-8 rounded-[3rem] border border-borderline h-full flex flex-col justify-between">
+            <div className="bg-card p-8 rounded-[3rem] border border-border h-full flex flex-col justify-between">
                <div>
                   <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
                      <MousePointer2 className="text-primary" size={20} /> Promo Intelligence

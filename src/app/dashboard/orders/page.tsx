@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, useMemo, useCallback } from "react";
@@ -147,7 +147,7 @@ function getPaymentStatusBadge(paymentStatus: string) {
     );
   }
   return (
-    <span className="text-slate-500 font-bold text-[10px]">
+    <span className="text-muted-foreground font-bold text-[10px]">
       ⏳ Payment Pending
     </span>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import ProductExplorer from "@/components/ProductExplorer";
 import { Package, ShieldCheck, Zap, Globe, ArrowRight } from "lucide-react";
@@ -70,7 +70,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="solid-card p-6 sm:p-8 hover:shadow-lg hover:border-primary/30 transition-all group">
+            <div key={index} className="bg-card rounded-2xl border border-border p-6 sm:p-8 hover:shadow-lg hover:border-primary/30 transition-all group">
               <div className="mb-6 p-4 bg-primary/10 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>

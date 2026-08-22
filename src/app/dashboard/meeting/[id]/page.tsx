@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useParams, useRouter } from "next/navigation";
@@ -26,8 +26,8 @@ export default function MeetingRoom() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] bg-slate-950 text-white rounded-[2rem] overflow-hidden relative shadow-2xl border border-borderline mt-6">
-      <div className="flex items-center justify-between p-4 bg-slate-900 border-b border-borderline/20 z-10">
+    <div className="flex flex-col h-[calc(100vh-80px)] bg-slate-950 text-white rounded-[2rem] overflow-hidden relative shadow-2xl border border-border mt-6">
+      <div className="flex items-center justify-between p-4 bg-card border-b border-border/20 z-10">
         <div className="flex items-center gap-4">
           <button 
             onClick={() => router.back()}

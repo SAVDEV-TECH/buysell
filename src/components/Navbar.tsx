@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Search, MessageSquare, Menu, X, LayoutDashboard, ShoppingBag, Settings, LogOut, ChevronDown, ShieldCheck } from "lucide-react";
@@ -184,7 +184,7 @@ const Navbar = () => {
                             setIsUserMenuOpen(false);
                             handleSignOut();
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-red-500 hover:bg-destructive/10 transition-colors"
                         >
                           <LogOut size={15} />
                           <span>Sign Out</span>

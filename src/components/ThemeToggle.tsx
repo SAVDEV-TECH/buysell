@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ export default function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+      <div className="w-8 h-8 rounded-lg bg-muted animate-pulse"></div>
     );
   }
 
@@ -24,7 +24,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none"
+      className="p-2 rounded-xl text-foreground hover:text-primary hover:bg-muted transition-colors focus:outline-none"
       aria-label="Toggle Dark Mode"
       title="Toggle Dark Mode"
     >

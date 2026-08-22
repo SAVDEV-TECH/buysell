@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect, useRef } from "react";
@@ -146,7 +146,7 @@ export default function DashboardOverview() {
               <p className="text-sm text-muted-foreground max-w-md">Our admins are currently reviewing your credentials. Once verified, you will have full access to platform features and payouts.</p>
             </div>
           </div>
-          <Link href="/help" className="px-6 py-3 bg-white dark:bg-slate-900 border border-orange-500/30 text-orange-600 dark:text-orange-400 rounded-xl font-bold text-sm whitespace-nowrap hover:bg-orange-50 transition-all">
+          <Link href="/help" className="px-6 py-3 bg-card border border-orange-500/30 text-orange-600 dark:text-orange-400 rounded-xl font-bold text-sm whitespace-nowrap hover:bg-orange-50 transition-all">
             Check Status Details
           </Link>
         </motion.div>
@@ -192,7 +192,7 @@ export default function DashboardOverview() {
           <div className="relative flex-shrink-0">
             <Link
               href="/onboarding/business"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold text-sm hover:bg-slate-50 hover:scale-105 transition-all shadow-xl shadow-black/20 whitespace-nowrap"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-primary font-bold text-sm hover:bg-muted/30 hover:scale-105 transition-all shadow-xl shadow-black/20 whitespace-nowrap"
             >
               Set Up Business Profile <ArrowRight size={18} />
             </Link>

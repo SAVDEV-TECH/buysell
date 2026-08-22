@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { HelpCircle, X, ShieldCheck, Ship, Truck, FileText } from "lucide-react";
@@ -68,11 +68,11 @@ export function IncotermsGuide() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl relative overflow-hidden border border-borderline z-50 p-6 md:p-8 max-h-[90vh] overflow-y-auto"
+              className="bg-card w-full max-w-2xl rounded-3xl shadow-2xl relative overflow-hidden border border-border z-50 p-6 md:p-8 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-black text-foreground">
                     International Trade Terms (Incoterms 2020)
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -81,7 +81,7 @@ export function IncotermsGuide() {
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition-colors"
+                  className="p-2 text-muted-foreground hover:text-foreground dark:hover:text-slate-200 rounded-full transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -93,12 +93,12 @@ export function IncotermsGuide() {
                   return (
                     <div
                       key={t.code}
-                      className="p-4 rounded-2xl border border-borderline bg-slate-50/50 dark:bg-slate-800/40 space-y-2"
+                      className="p-4 rounded-2xl border border-border bg-muted/30 bg-muted/40 space-y-2"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Icon size={18} className="text-primary" />
-                          <span className="font-black text-sm text-slate-900 dark:text-white">
+                          <span className="font-black text-sm text-foreground">
                             {t.code} — {t.name}
                           </span>
                         </div>
