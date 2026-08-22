@@ -1,7 +1,8 @@
  "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import BuySellLoader from "@/components/BuySellLoader";
 import {
   Package,
   ArrowRight,
@@ -403,7 +404,7 @@ function DesktopProductCard({
 // ─────────────────────────────────────────────────────────────
 // MAIN EXPLORER
 // ─────────────────────────────────────────────────────────────
-export default function ProductExplorer({ limit }: { limit?: number }) {
+function ProductExplorerInner({ limit }: { limit?: number }) {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { t } = useLanguage();
@@ -762,5 +763,19 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         />
       )}
     </div>
+  );
+}
+
+export default function ProductExplorer({ limit }: { limit?: number }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full py-12 flex justify-center items-center">
+          <BuySellLoader message="Loading products..." fullScreen={false} />
+        </div>
+      }
+    >
+      <ProductExplorerInner limit={limit} />
+    </Suspense>
   );
 }

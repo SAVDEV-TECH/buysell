@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -269,7 +269,7 @@ function ImageUploadPanel({
 }
 
 // ─── Main Form Page ───────────────────────────────────────────────────────────
-export default function NewProductPage() {
+function NewProductForm() {
   const { user, organizationId } = useAuth();
   const router = useRouter();
   const params = useSearchParams();
@@ -948,5 +948,19 @@ export default function NewProductPage() {
         }}
       />
     </div>
+  );
+}
+
+export default function NewProductPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center p-8">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <NewProductForm />
+    </Suspense>
   );
 }
