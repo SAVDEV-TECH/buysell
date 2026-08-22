@@ -69,26 +69,27 @@ const Navbar = () => {
         </span>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex h-16 items-center justify-between gap-2 sm:gap-4">
+          {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center">
               <BuySellLogo size="sm" showTagline={false} hideTextOnMobile={true} />
             </Link>
           </div>
 
-          {/* ── Permanent Global Search Bar (Desktop & Tablet) ── */}
-          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md lg:max-w-xl mx-2 lg:mx-6">
-            <div className="flex items-center w-full bg-muted/60 hover:bg-muted focus-within:bg-card focus-within:ring-2 focus-within:ring-primary/20 border border-border rounded-xl transition-all shadow-sm overflow-hidden h-10">
-              <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center">
-                <Search size={15} />
+          {/* ── Permanent Global Search Bar (Universal for all screens) ── */}
+          <form onSubmit={handleSearchSubmit} className="flex flex-1 min-w-0 max-w-2xl mx-1.5 sm:mx-3 md:mx-6">
+            <div className="flex items-center w-full bg-card hover:border-primary/60 focus-within:border-primary border-2 border-primary/30 rounded-xl transition-all shadow-sm overflow-hidden h-10">
+              <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center shrink-0">
+                <Search size={16} className="text-primary" />
               </div>
               <input
                 type="text"
-                placeholder="Search products, suppliers, raw materials, HS codes..."
+                placeholder="Search products, verified suppliers, HS codes..."
                 value={navSearch}
                 onChange={(e) => setNavSearch(e.target.value)}
-                className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-muted-foreground outline-none py-2 pr-2"
+                className="w-full bg-transparent text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none py-2 pr-2 min-w-0"
               />
               {navSearch && (
                 <button
@@ -97,22 +98,24 @@ const Navbar = () => {
                     setNavSearch("");
                     router.push("/marketplace");
                   }}
-                  className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
-                  title="Clear"
+                  className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors shrink-0"
+                  title="Clear search"
                 >
-                  <X size={13} />
+                  <X size={14} />
                 </button>
               )}
               <button
                 type="submit"
-                className="h-full px-4 bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors flex items-center gap-1 shrink-0"
+                aria-label="Search Marketplace"
+                className="h-full px-3 sm:px-4 bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors flex items-center gap-1.5 shrink-0"
               >
-                Search
+                <Search size={14} className="sm:hidden" />
+                <span className="hidden sm:inline">Search</span>
               </button>
             </div>
           </form>
           
-          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0" suppressHydrationWarning>
+          <nav className="hidden xl:flex items-center gap-4 shrink-0" suppressHydrationWarning>
             <Link href="/marketplace" className="text-xs font-semibold text-foreground/80 hover:text-primary transition-colors">
               Products
             </Link>
@@ -121,8 +124,8 @@ const Navbar = () => {
             </Link>
           </nav>
           
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden sm:flex items-center gap-2 lg:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div className="hidden sm:flex items-center gap-1.5 lg:gap-2">
               <ThemeToggle />
               <LanguageSwitcher />
               <CurrencySelector />
@@ -265,45 +268,8 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ── Permanent Global Search Bar (Mobile) ── */}
-      <div className="md:hidden px-3.5 pb-2.5 pt-0.5 border-t border-border/40 bg-background/95">
-        <form onSubmit={handleSearchSubmit} className="relative w-full">
-          <div className="flex items-center w-full bg-muted/60 focus-within:bg-card focus-within:ring-2 focus-within:ring-primary/20 border border-border rounded-xl transition-all shadow-sm overflow-hidden h-9">
-            <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center">
-              <Search size={14} />
-            </div>
-            <input
-              type="text"
-              placeholder="Search products, suppliers, HS codes..."
-              value={navSearch}
-              onChange={(e) => setNavSearch(e.target.value)}
-              className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-muted-foreground outline-none py-1.5 pr-2"
-            />
-            {navSearch && (
-              <button
-                type="button"
-                onClick={() => {
-                  setNavSearch("");
-                  router.push("/marketplace");
-                }}
-                className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
-                title="Clear"
-              >
-                <X size={13} />
-              </button>
-            )}
-            <button
-              type="submit"
-              className="h-full px-3.5 bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors shrink-0"
-            >
-              Search
-            </button>
-          </div>
-        </form>
-      </div>
-
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full border-t border-border bg-card px-4 pt-2 pb-4 space-y-1 shadow-lg z-40">
+        <div className="lg:hidden absolute top-full left-0 w-full border-t border-border bg-card px-4 pt-2 pb-4 space-y-1 shadow-lg z-40">
           <Link href="/marketplace" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:text-primary hover:bg-muted border-b border-border/50">
             Products
           </Link>

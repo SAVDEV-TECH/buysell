@@ -544,7 +544,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               placeholder={t("market_search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-10 py-3 bg-card rounded-2xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
+              className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-10 py-3 bg-card rounded-2xl border-2 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
             />
             {search && (
               <button
