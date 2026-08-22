@@ -20,13 +20,16 @@ const Navbar = () => {
   const searchParams = useSearchParams();
 
   const [navSearch, setNavSearch] = useState("");
+  const [searchScope, setSearchScope] = useState<"products" | "suppliers">("products");
+  const [isScopeMenuOpen, setIsScopeMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const scopeMenuRef = useRef<HTMLDivElement>(null);
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || "User";
 
-  // Sync navSearch with URL parameter when on marketplace
+  // Sync navSearch with URL parameter when on marketplace or manufacturers
   useEffect(() => {
     const q = searchParams.get("q");
     if (q !== null) {
@@ -36,18 +39,27 @@ const Navbar = () => {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (navSearch.trim()) {
-      router.push(`/marketplace?q=${encodeURIComponent(navSearch.trim())}`);
+    const query = navSearch.trim();
+    if (searchScope === "suppliers") {
+      router.push(query ? `/manufacturers?q=${encodeURIComponent(query)}` : `/manufacturers`);
     } else {
-      router.push(`/marketplace`);
+      router.push(query ? `/marketplace?q=${encodeURIComponent(query)}` : `/marketplace`);
     }
   };
 
-  // Close profile dropdown on outside click
+  const handleTrendingClick = (term: string) => {
+    setNavSearch(term);
+    router.push(`/marketplace?q=${encodeURIComponent(term)}`);
+  };
+
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setIsUserMenuOpen(false);
+      }
+      if (scopeMenuRef.current && !scopeMenuRef.current.contains(e.target as Node)) {
+        setIsScopeMenuOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -78,38 +90,73 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* ── Permanent Global Search Bar (Universal for all screens) ── */}
+          {/* ── Alibaba / Made-in-China Style B2B Global Search Bar ── */}
           <form onSubmit={handleSearchSubmit} className="flex flex-1 min-w-0 max-w-2xl mx-1.5 sm:mx-3 md:mx-6">
-            <div className="flex items-center w-full bg-card hover:border-primary/60 focus-within:border-primary border-2 border-primary/30 rounded-xl transition-all shadow-sm overflow-hidden h-10">
-              <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center shrink-0">
-                <Search size={16} className="text-primary" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search products, verified suppliers, HS codes..."
-                value={navSearch}
-                onChange={(e) => setNavSearch(e.target.value)}
-                className="w-full bg-transparent text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none py-2 pr-2 min-w-0"
-              />
-              {navSearch && (
+            <div className="flex items-center w-full bg-card hover:border-primary focus-within:border-primary border-2 border-primary rounded-xl transition-all shadow-sm overflow-hidden h-10 sm:h-11">
+              
+              {/* Type / Scope Dropdown Selector (Products / Suppliers) */}
+              <div className="relative shrink-0" ref={scopeMenuRef}>
                 <button
                   type="button"
-                  onClick={() => {
-                    setNavSearch("");
-                    router.push("/marketplace");
-                  }}
-                  className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors shrink-0"
-                  title="Clear search"
+                  onClick={() => setIsScopeMenuOpen((o) => !o)}
+                  className="h-full px-2.5 sm:px-3.5 text-xs font-bold text-foreground bg-muted/50 hover:bg-muted border-r border-border flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer select-none"
                 >
-                  <X size={14} />
+                  <span className="capitalize">{searchScope}</span>
+                  <ChevronDown size={13} className={`text-muted-foreground transition-transform duration-200 ${isScopeMenuOpen ? "rotate-180" : ""}`} />
                 </button>
-              )}
+                {isScopeMenuOpen && (
+                  <div className="absolute left-0 top-full mt-1.5 w-36 bg-card border border-border rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => { setSearchScope("products"); setIsScopeMenuOpen(false); }}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-bold transition-colors flex items-center justify-between ${searchScope === "products" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"}`}
+                    >
+                      <span>Products</span>
+                      {searchScope === "products" && <span className="text-[10px] font-black">✓</span>}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setSearchScope("suppliers"); setIsScopeMenuOpen(false); }}
+                      className={`w-full text-left px-3.5 py-2 text-xs font-bold transition-colors flex items-center justify-between ${searchScope === "suppliers" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"}`}
+                    >
+                      <span>Suppliers</span>
+                      {searchScope === "suppliers" && <span className="text-[10px] font-black">✓</span>}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Text Input */}
+              <div className="flex-1 flex items-center min-w-0 px-2 sm:px-3">
+                <input
+                  type="text"
+                  placeholder={searchScope === "products" ? "What are you looking for..." : "Search verified manufacturers & suppliers..."}
+                  value={navSearch}
+                  onChange={(e) => setNavSearch(e.target.value)}
+                  className="w-full bg-transparent text-xs sm:text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none py-1.5 min-w-0"
+                />
+                {navSearch && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNavSearch("");
+                      router.push(searchScope === "suppliers" ? "/manufacturers" : "/marketplace");
+                    }}
+                    className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors shrink-0"
+                    title="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              {/* Search Submit Button */}
               <button
                 type="submit"
-                aria-label="Search Marketplace"
-                className="h-full px-3 sm:px-4 bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-colors flex items-center gap-1.5 shrink-0"
+                aria-label="Search"
+                className="h-full px-3.5 sm:px-5 bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
               >
-                <Search size={14} className="sm:hidden" />
+                <Search size={15} />
                 <span className="hidden sm:inline">Search</span>
               </button>
             </div>
@@ -266,6 +313,21 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Alibaba / Made-in-China Style Popular B2B Keyword Strip ── */}
+      <div className="hidden md:flex items-center justify-center gap-2 py-1 px-4 text-xs bg-muted/40 border-t border-border/60 overflow-x-auto scrollbar-hide">
+        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Hot Searches:</span>
+        {["Industrial Machinery", "Solar Inverters", "Agro Processing", "Textiles & Fabrics", "Packaging Materials", "Generators", "Electrical Supplies"].map((term) => (
+          <button
+            key={term}
+            type="button"
+            onClick={() => handleTrendingClick(term)}
+            className="text-[11px] text-muted-foreground hover:text-primary font-semibold hover:underline transition-colors shrink-0 px-1.5 py-0.5 rounded cursor-pointer"
+          >
+            {term}
+          </button>
+        ))}
       </div>
 
       {isMobileMenuOpen && (
