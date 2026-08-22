@@ -24,6 +24,8 @@ import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import ProductSkeleton from "@/components/ProductSkeleton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { DualPriceTag } from "@/components/DualPriceTag";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 const PayWithPaystack = dynamic(() => import("@/components/PaystackButton"), {
@@ -219,9 +221,14 @@ function MobileProductCard({
           <MoqLeadTimeRows product={product} compact />
         </div>
 
-        <p className="mt-0.5 min-w-0 w-full max-w-full truncate text-[11px] font-black tracking-tight text-primary">
-          ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}
-        </p>
+        <div className="mt-0.5 min-w-0 w-full">
+          <DualPriceTag
+            minPriceUsd={pricing.minPrice}
+            maxPriceUsd={pricing.maxPrice}
+            size="xs"
+            layout="stacked"
+          />
+        </div>
 
         <div className="mt-1 grid min-w-0 w-full max-w-full grid-cols-[28px_minmax(0,1fr)] gap-1.5">
           <button
@@ -342,9 +349,9 @@ function DesktopProductCard({
           style={{ gridTemplateColumns: `repeat(${pricing.tiers.length}, minmax(0, 1fr))` }}
         >
           {pricing.tiers.map((t, idx) => (
-            <div key={idx} className="flex flex-col border-r last:border-r-0 border-border/40">
+            <div key={idx} className="flex flex-col border-r last:border-r-0 border-border/40 px-1">
               <span className="text-muted-foreground">{t.minQty}+ units</span>
-              <span className="font-bold text-primary">₦{t.price.toLocaleString()}</span>
+              <DualPriceTag amountInUsd={t.price} size="xs" layout="stacked" className="items-center" />
             </div>
           ))}
         </div>
@@ -356,10 +363,14 @@ function DesktopProductCard({
 
         {/* Price + actions */}
         <div className="mt-auto flex flex-col gap-2 pt-2 border-t border-border/50">
-          <p className="text-sm font-bold text-foreground tracking-tight truncate w-full">
-            ₦{pricing.minPrice.toLocaleString()} - ₦{pricing.maxPrice.toLocaleString()}{" "}
-            <span className="text-[10px] font-normal text-muted-foreground">/ piece</span>
-          </p>
+          <DualPriceTag
+            minPriceUsd={pricing.minPrice}
+            maxPriceUsd={pricing.maxPrice}
+            unit="piece"
+            size="sm"
+            layout="inline"
+            showTooltip
+          />
 
           <div className="flex items-center gap-1.5 w-full">
             <button

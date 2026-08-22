@@ -8,6 +8,7 @@ import React from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { DualPriceTag } from "@/components/DualPriceTag";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -87,7 +88,9 @@ export default function CartDrawer() {
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-bold line-clamp-1">{item.name}</h3>
-                          <p className="text-sm text-muted-foreground">₦{item.price.toLocaleString()}</p>
+                          <div className="mt-0.5">
+                            <DualPriceTag amountInUsd={item.price} size="xs" layout="stacked" />
+                          </div>
                           {item.moq && item.quantity < item.moq && (
                             <p className="text-[10px] text-red-500 font-bold mt-1 uppercase tracking-tighter animate-pulse">
                               Requires min. {item.moq} units
@@ -127,17 +130,17 @@ export default function CartDrawer() {
             {cartItems.length > 0 && (
               <div className="p-6 border-t border-border bg-muted/30">
                 <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-muted-foreground">
+                  <div className="flex justify-between text-muted-foreground items-baseline">
                     <span>Subtotal</span>
-                    <span>₦{cartTotal.toLocaleString()}</span>
+                    <DualPriceTag amountInUsd={cartTotal} size="xs" layout="inline" />
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Shipping</span>
                     <span>Calculated upon PO submission</span>
                   </div>
-                  <div className="flex justify-between font-black text-xl pt-4 border-t border-border/50">
-                    <span>Total</span>
-                    <span className="text-primary">₦{cartTotal.toLocaleString()}</span>
+                  <div className="flex justify-between items-baseline font-black text-lg pt-4 border-t border-border/50">
+                    <span>Estimated Total</span>
+                    <DualPriceTag amountInUsd={cartTotal} size="lg" layout="stacked" showTooltip />
                   </div>
                 </div>
 

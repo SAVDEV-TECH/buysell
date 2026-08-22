@@ -25,9 +25,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { useCurrency } from "@/context/CurrencyContext";
+import { SUPPORTED_CURRENCIES } from "@/lib/exchangeRates";
 
 export default function SettingsPage() {
   const { user, profile, role, organizationId, verificationLevel } = useAuth();
+  const { currency, setCurrency } = useCurrency();
   const supabaseRef = useRef(createClient());
   const supabase = supabaseRef.current;
 
@@ -311,6 +314,27 @@ export default function SettingsPage() {
                   className="w-full pl-11 pr-4 py-3 bg-muted/60 border border-border rounded-2xl text-xs font-bold text-primary capitalize cursor-not-allowed"
                 />
               </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-xs font-bold text-foreground block mb-1.5">Preferred Display Currency &amp; Localization</label>
+              <div className="relative">
+                <Globe size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-muted border border-border rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-primary/40 text-foreground"
+                >
+                  {Object.values(SUPPORTED_CURRENCIES).map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.flag} {c.code} ({c.symbol}) — {c.name} ({c.countryName})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Marketplace products will automatically display estimated price conversions in your preferred currency.
+              </p>
             </div>
           </div>
         </div>

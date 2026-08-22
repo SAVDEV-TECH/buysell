@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -23,8 +23,9 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { DualPriceTag } from "@/components/DualPriceTag";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: string;
@@ -404,12 +405,16 @@ export default function QuickOrderPage() {
 
                   {/* Unit Price */}
                   <td className="px-4 py-3 text-xs font-bold text-foreground">
-                    {row.unitPrice > 0 ? `$${row.unitPrice.toLocaleString()}` : "—"}
+                    {row.unitPrice > 0 ? (
+                      <DualPriceTag amountInUsd={row.unitPrice} size="xs" layout="stacked" />
+                    ) : "—"}
                   </td>
 
                   {/* Line Total */}
                   <td className="px-4 py-3 text-xs font-black text-right text-foreground">
-                    {row.lineTotal > 0 ? `$${row.lineTotal.toLocaleString()}` : "—"}
+                    {row.lineTotal > 0 ? (
+                      <DualPriceTag amountInUsd={row.lineTotal} size="xs" layout="stacked" className="items-end" />
+                    ) : "—"}
                   </td>
 
                   {/* Remove Row */}
@@ -442,17 +447,19 @@ export default function QuickOrderPage() {
         </div>
 
         {/* Total & Checkout Bar */}
-        <div className="p-6 rounded-3xl bg-foreground text-background border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="p-6 rounded-3xl bg-card border border-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-lg">
           <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-primary">BULK ORDER ESTIMATE</p>
-            <h3 className="text-3xl font-black mt-0.5">${grandTotal.toLocaleString()} USD</h3>
-            <p className="text-xs text-white/50">{validItemCount} valid items ready for bulk checkout</p>
+            <div className="mt-1">
+              <DualPriceTag amountInUsd={grandTotal} size="xl" layout="stacked" showTooltip />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">{validItemCount} valid items ready for bulk checkout</p>
           </div>
 
           <button
             onClick={handleAddAllToCart}
             disabled={validItemCount === 0}
-            className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-40"
+            className="flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-black text-sm shadow-xl shadow-primary/25 hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all disabled:opacity-40"
           >
             Proceed to Bulk Checkout <ArrowRight size={18} />
           </button>

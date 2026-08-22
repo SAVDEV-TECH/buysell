@@ -31,6 +31,7 @@ import { getAllProductImages } from "@/lib/productUtils";
 import BuySellLoader from "@/components/BuySellLoader";
 import AITranslationButton from "@/components/AITranslationButton";
 import FreightCalculator from "@/components/FreightCalculator";
+import { DualPriceTag } from "@/components/DualPriceTag";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 
@@ -287,7 +288,15 @@ export default function ProductDetailPage() {
             </div>
 
             <h1 className="text-2xl md:text-4xl font-bold tracking-tight mb-3 text-foreground">{product.name}</h1>
-            <p className="text-2xl font-bold text-primary mb-4">${product.price.toLocaleString()} USD <span className="text-xs font-medium text-muted-foreground">/ unit</span></p>
+            <div className="mb-4">
+              <DualPriceTag
+                amountInUsd={product.price}
+                unit="unit"
+                size="xl"
+                layout="stacked"
+                showTooltip
+              />
+            </div>
             
             {/* AI Translation Toolbar */}
             <div className="mb-3">

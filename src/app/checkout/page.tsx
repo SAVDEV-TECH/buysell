@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import PaymentMethodSelector from "@/components/PaymentMethodSelector";
+import { DualPriceTag } from "@/components/DualPriceTag";
 
 const PaystackButton = dynamic(() => import('@/components/PaystackButton'), { ssr: false });
 const FlutterwaveButton = dynamic(() => import('@/components/FlutterwaveButton'), { ssr: false });
@@ -569,9 +570,9 @@ export default function CheckoutPage() {
                   <span>Escrow Protection Fee</span>
                   <span className="text-emerald-500 font-bold">FREE</span>
                 </div>
-                <div className="flex justify-between text-sm font-bold text-foreground pt-2 border-t border-border">
-                  <span>Total</span>
-                  <span className="text-primary">${finalTotal.toLocaleString()} USD</span>
+                <div className="flex justify-between items-baseline text-sm font-bold text-foreground pt-3 border-t border-border">
+                  <span>Estimated Total</span>
+                  <DualPriceTag amountInUsd={finalTotal} size="md" layout="stacked" showTooltip />
                 </div>
               </div>
             </div>

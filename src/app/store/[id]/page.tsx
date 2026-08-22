@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,7 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import FreightCalculator from "@/components/FreightCalculator";
 import RFQModal from "@/components/RFQModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { DualPriceTag } from "@/components/DualPriceTag";
 
 /* ─── Country helpers ──────────────────────────────────────────────── */
 const COUNTRY_FLAGS: Record<string, string> = {
@@ -114,11 +115,14 @@ function ProductCard({
         </div>
 
         {/* Price */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-xl font-bold text-primary">
-            ${lowestPrice.toLocaleString()}
-          </span>
-          <span className="text-xs text-muted-foreground font-medium">/ unit</span>
+        <div className="py-1">
+          <DualPriceTag
+            amountInUsd={lowestPrice}
+            unit="unit"
+            size="md"
+            layout="stacked"
+            showTooltip
+          />
         </div>
 
         {/* Tiered pricing hint */}

@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { DualPriceTag } from "@/components/DualPriceTag";
 import { 
   Building2, 
   Search, 
@@ -142,9 +143,9 @@ export default function WholesaleDirectoryPage() {
                     </Link>
                     
                     <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
-                       <div>
-                         <p className="text-[9px] text-muted-foreground uppercase font-semibold">Bulk Price</p>
-                         <p className="font-bold text-base text-primary">${product.price}</p>
+                       <div className="flex-1 min-w-0 pr-2">
+                         <p className="text-[9px] text-muted-foreground uppercase font-semibold mb-0.5">Bulk Price</p>
+                         <DualPriceTag amountInUsd={product.price} size="sm" layout="stacked" showTooltip />
                        </div>
                        <button 
                          onClick={() => addToCart({

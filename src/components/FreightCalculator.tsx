@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { Ship, Plane, Calculator, Package, Info } from "lucide-react";
+import { DualPriceTag } from "@/components/DualPriceTag";
 
 interface FreightCalculatorProps {
   basePrice: number;
@@ -173,10 +174,10 @@ export function FreightCalculator({
       </div>
 
       {/* Summary Box */}
-      <div className="p-4 rounded-2xl bg-card text-white space-y-2 text-xs">
-        <div className="flex justify-between">
+      <div className="p-4 rounded-2xl bg-card border border-border text-foreground space-y-2 text-xs">
+        <div className="flex justify-between items-baseline">
           <span className="text-muted-foreground">Unit Price Tier:</span>
-          <span className="font-bold">${unitPrice.toFixed(2)} USD</span>
+          <DualPriceTag amountInUsd={unitPrice} size="xs" layout="inline" />
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Est. Cargo Weight / Volume:</span>
@@ -184,14 +185,14 @@ export function FreightCalculator({
             {estimatedWeightKg.toLocaleString()} kg (~{estimatedCbm} CBM)
           </span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between items-baseline">
           <span className="text-muted-foreground">Est. Shipping ({estimatedDays}):</span>
-          <span className="font-bold">${freightCost.toLocaleString()} USD</span>
+          <DualPriceTag amountInUsd={freightCost} size="xs" layout="inline" />
         </div>
 
-        <div className="pt-2 border-t border-border flex justify-between items-center text-sm font-black">
-          <span className="text-emerald-400">Est. Landed FOB/CIF Price:</span>
-          <span className="text-emerald-400 text-base">${grandTotal.toLocaleString()} USD</span>
+        <div className="pt-3 border-t border-border flex justify-between items-center text-sm font-black">
+          <span className="text-primary">Est. Landed Total:</span>
+          <DualPriceTag amountInUsd={grandTotal} size="lg" layout="stacked" showTooltip />
         </div>
       </div>
 
