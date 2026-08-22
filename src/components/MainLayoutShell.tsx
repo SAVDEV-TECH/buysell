@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
@@ -19,7 +20,9 @@ export default function MainLayoutShell({ children }: { children: React.ReactNod
 
   return (
     <>
-      <Navbar />
+      <Suspense fallback={<header className="sticky top-0 z-50 w-full h-16 bg-background/95 border-b border-border" />}>
+        <Navbar />
+      </Suspense>
       <CartDrawer />
       <main className="flex-1 pb-24 md:pb-0">{children}</main>
       <Footer />

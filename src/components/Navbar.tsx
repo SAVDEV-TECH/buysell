@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, MessageSquare, Menu, X, LayoutDashboard, ShoppingBag, Settings, LogOut, ChevronDown, ShieldCheck } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -15,11 +16,32 @@ import { BuySellLogo } from "@/components/BuySellLogo";
 const Navbar = () => {
   const { user, profile, role } = useAuth();
   const { unreadCount } = useNotifications();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [navSearch, setNavSearch] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || "User";
+
+  // Sync navSearch with URL parameter when on marketplace
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) {
+      setNavSearch(q);
+    }
+  }, [searchParams]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (navSearch.trim()) {
+      router.push(`/marketplace?q=${encodeURIComponent(navSearch.trim())}`);
+    } else {
+      router.push(`/marketplace`);
+    }
+  };
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -48,32 +70,59 @@ const Navbar = () => {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center">
+        <div className="flex h-16 items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center">
               <BuySellLogo size="sm" showTagline={false} hideTextOnMobile={true} />
             </Link>
           </div>
-          
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8" suppressHydrationWarning>
-            <Link href="/marketplace" className="flex items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary transition-colors">
-              <Search size={16} /> Products
-            </Link>
-            <Link href="/manufacturers" className="flex items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary transition-colors">
-              <Search size={16} /> Manufacturers
-            </Link>
-            <Link href="/dashboard/messages" className="flex items-center gap-2 text-sm font-semibold text-foreground/80 hover:text-primary transition-colors relative">
-              <MessageSquare size={16} /> Messages
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-2 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-pulse">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
+
+          {/* ── Permanent Global Search Bar (Desktop & Tablet) ── */}
+          <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-md lg:max-w-xl mx-2 lg:mx-6">
+            <div className="flex items-center w-full bg-muted/60 hover:bg-muted focus-within:bg-card focus-within:ring-2 focus-within:ring-primary/20 border border-border rounded-xl transition-all shadow-sm overflow-hidden h-10">
+              <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center">
+                <Search size={15} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search products, suppliers, raw materials, HS codes..."
+                value={navSearch}
+                onChange={(e) => setNavSearch(e.target.value)}
+                className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-muted-foreground outline-none py-2 pr-2"
+              />
+              {navSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNavSearch("");
+                    router.push("/marketplace");
+                  }}
+                  className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
+                  title="Clear"
+                >
+                  <X size={13} />
+                </button>
               )}
+              <button
+                type="submit"
+                className="h-full px-4 bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors flex items-center gap-1 shrink-0"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+          
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6 shrink-0" suppressHydrationWarning>
+            <Link href="/marketplace" className="text-xs font-semibold text-foreground/80 hover:text-primary transition-colors">
+              Products
+            </Link>
+            <Link href="/manufacturers" className="text-xs font-semibold text-foreground/80 hover:text-primary transition-colors">
+              Manufacturers
             </Link>
           </nav>
           
-          <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-            <div className="hidden md:flex items-center gap-3 lg:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="hidden sm:flex items-center gap-2 lg:gap-3">
               <ThemeToggle />
               <LanguageSwitcher />
               <CurrencySelector />
@@ -214,6 +263,43 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Permanent Global Search Bar (Mobile) ── */}
+      <div className="md:hidden px-3.5 pb-2.5 pt-0.5 border-t border-border/40 bg-background/95">
+        <form onSubmit={handleSearchSubmit} className="relative w-full">
+          <div className="flex items-center w-full bg-muted/60 focus-within:bg-card focus-within:ring-2 focus-within:ring-primary/20 border border-border rounded-xl transition-all shadow-sm overflow-hidden h-9">
+            <div className="pl-3 pr-2 text-muted-foreground flex items-center justify-center">
+              <Search size={14} />
+            </div>
+            <input
+              type="text"
+              placeholder="Search products, suppliers, HS codes..."
+              value={navSearch}
+              onChange={(e) => setNavSearch(e.target.value)}
+              className="w-full bg-transparent text-xs font-medium text-foreground placeholder:text-muted-foreground outline-none py-1.5 pr-2"
+            />
+            {navSearch && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNavSearch("");
+                  router.push("/marketplace");
+                }}
+                className="p-1 mr-1 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
+                title="Clear"
+              >
+                <X size={13} />
+              </button>
+            )}
+            <button
+              type="submit"
+              className="h-full px-3.5 bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors shrink-0"
+            >
+              Search
+            </button>
+          </div>
+        </form>
       </div>
 
       {isMobileMenuOpen && (

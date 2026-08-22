@@ -20,6 +20,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
@@ -406,6 +407,8 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -415,6 +418,14 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
   const [sortBy, setSortBy] = useState("Newest");
   const [showFilters, setShowFilters] = useState(false);
   const [activeChat, setActiveChat] = useState<{ id: string; name: string } | null>(null);
+
+  // Sync search state with URL query parameter (?q=...)
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) {
+      setSearch(q);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -519,10 +530,10 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-clip">
-      {/* ── Sticky Top Search & Filter Bar ── */}
-      <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-3 mb-6 -mx-4 px-4 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 border-b border-border shadow-sm transition-all">
+      {/* ── Marketplace Search, Sort & Category Controls (Stationary) ── */}
+      <div className="space-y-4 mb-8">
         {/* Search + Sort + Filter row */}
-        <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 lg:gap-4 w-full min-w-0 max-w-full">
+        <div className="flex flex-col lg:flex-row gap-3 w-full min-w-0 max-w-full">
           <div className="flex-1 relative group min-w-0 max-w-full">
             <Search
               size={18}
@@ -533,7 +544,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               placeholder={t("market_search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-10 py-2.5 sm:py-3 bg-card rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
+              className="w-full min-w-0 max-w-full placeholder:truncate pl-11 pr-10 py-3 bg-card rounded-2xl border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium text-sm text-foreground shadow-sm"
             />
             {search && (
               <button
@@ -550,7 +561,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           <div className="flex gap-2 sm:gap-3 w-full sm:w-auto shrink-0">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex-1 sm:flex-none h-10 sm:h-11 px-3 sm:px-4 rounded-xl border flex items-center justify-center gap-2 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-sm ${
+              className={`flex-1 sm:flex-none h-11 px-4 rounded-2xl border flex items-center justify-center gap-2 font-bold text-xs sm:text-sm transition-all whitespace-nowrap shadow-sm ${
                 showFilters
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card border-border hover:bg-muted text-foreground"
@@ -567,7 +578,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full h-10 sm:h-11 pl-3 sm:pl-4 pr-8 sm:pr-9 bg-card border border-border rounded-xl font-bold outline-none cursor-pointer hover:bg-muted transition-all text-xs sm:text-sm text-foreground appearance-none truncate shadow-sm"
+                className="w-full h-11 pl-4 pr-9 bg-card border border-border rounded-2xl font-bold outline-none cursor-pointer hover:bg-muted transition-all text-xs sm:text-sm text-foreground appearance-none truncate shadow-sm"
               >
                 <option value="Newest">{t("market_sort_newest")}</option>
                 <option value="Price: Low to High">{t("market_sort_low")}</option>
@@ -576,7 +587,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               </select>
               <ArrowUpRight
                 size={14}
-                className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 rotate-45 text-muted-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 rotate-45 text-muted-foreground"
               />
             </div>
           </div>
@@ -589,11 +600,11 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden mt-3"
+              className="overflow-hidden"
             >
-              <div className="bg-card p-3 sm:p-5 rounded-xl border border-border grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 items-end shadow-sm">
+              <div className="bg-card p-5 rounded-2xl border border-border grid grid-cols-1 md:grid-cols-2 gap-4 items-end shadow-sm">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 italic">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2 italic">
                     Price Range (USD $)
                   </p>
                   <div className="flex items-center gap-3">
@@ -602,7 +613,7 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                       placeholder="Min ($)"
                       value={minPrice || ""}
                       onChange={(e) => setMinPrice(Number(e.target.value))}
-                      className="w-full px-4 py-2 bg-background rounded-lg border border-border outline-none text-xs font-bold text-foreground"
+                      className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none text-xs font-bold text-foreground"
                     />
                     <span className="opacity-30 font-black">—</span>
                     <input
@@ -610,14 +621,14 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
                       placeholder="Max ($)"
                       value={maxPrice === 1000000 ? "" : maxPrice}
                       onChange={(e) => setMaxPrice(Number(e.target.value) || 1000000)}
-                      className="w-full px-4 py-2 bg-background rounded-lg border border-border outline-none text-xs font-bold text-foreground"
+                      className="w-full px-4 py-2.5 bg-muted border border-border rounded-xl outline-none text-xs font-bold text-foreground"
                     />
                   </div>
                 </div>
                 <div className="flex justify-end">
                   <button
                     onClick={resetFilters}
-                    className="w-full sm:w-auto px-6 py-2 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                    className="w-full sm:w-auto px-6 py-2.5 bg-red-500/10 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all"
                   >
                     Reset Filters
                   </button>
@@ -628,12 +639,12 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
         </AnimatePresence>
 
         {/* Categories Pills */}
-        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pt-2.5 pb-0.5 scrollbar-hide snap-x w-full items-center">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide snap-x w-full items-center">
           {["All Products", "Electronics", "Furniture", "Fashion", "Groceries", "Industrial"].map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 sm:px-3.5 py-1 sm:py-1.5 rounded-lg font-bold text-[10px] sm:text-xs whitespace-nowrap border transition-all snap-start flex-shrink-0 ${
+              className={`px-4 py-2 rounded-xl font-bold text-xs whitespace-nowrap border transition-all snap-start flex-shrink-0 ${
                 activeCategory === cat
                   ? "bg-primary text-primary-foreground border-primary shadow-sm"
                   : "bg-card border-border hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -647,9 +658,9 @@ export default function ProductExplorer({ limit }: { limit?: number }) {
           {(search || activeCategory !== "All Products" || minPrice > 0 || maxPrice < 1000000) && (
             <button
               onClick={resetFilters}
-              className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-red-600 px-2 py-1 rounded-md hover:bg-red-500/10 transition-colors shrink-0 ml-auto flex items-center gap-1"
+              className="text-[11px] font-black uppercase tracking-wider text-red-500 hover:text-red-600 px-3 py-1.5 rounded-xl hover:bg-red-500/10 transition-colors shrink-0 ml-auto flex items-center gap-1.5 border border-red-500/20"
             >
-              <X size={11} /> Reset All
+              <X size={13} /> Reset Filters
             </button>
           )}
         </div>

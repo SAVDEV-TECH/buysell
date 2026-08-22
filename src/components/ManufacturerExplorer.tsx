@@ -87,8 +87,8 @@ export default function ManufacturerExplorer() {
           </p>
         </div>
 
-        {/* ── Sticky Top Search & Filter Bar ── */}
-        <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-4 mb-8 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-border shadow-sm transition-all">
+        {/* ── Manufacturer Search & Filter Bar (Stationary) ── */}
+        <div className="space-y-4 mb-8">
           <div className="flex flex-col lg:flex-row gap-3">
             <div className="relative flex-1 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={18} />

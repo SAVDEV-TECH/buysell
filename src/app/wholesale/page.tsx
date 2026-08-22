@@ -100,8 +100,8 @@ export default function WholesaleDirectoryPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-20">
-        {/* ── Sticky Top Search Bar ── */}
-        <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur-md pt-2 pb-3 mb-6 border-b border-border shadow-sm -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        {/* ── Wholesale Search Bar (Stationary) ── */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <h2 className="text-xl sm:text-2xl font-black text-foreground">Wholesale Directory</h2>
           
           <div className="w-full sm:w-80 relative">
