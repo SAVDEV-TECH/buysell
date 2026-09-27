@@ -5,16 +5,14 @@ const config: CapacitorConfig = {
   appName: "BuySell",
   webDir: "out",
 
-  // When running "npx cap run android/ios" during development, forward
-  // requests to the local Next.js dev server so hot-reload works.
+  // The native WebView loads the live Vercel deployment directly.
+  // This means all API routes, SSR, and auth work exactly as on web —
+  // no static export required. Change the url if you get a custom domain.
   server: {
-    // Remove this block (or comment it out) for production builds.
-    // Uncomment to live-reload against your local dev server:
-    // url: "http://192.168.x.x:3000",
-    // cleartext: true,
+    url: "https://buysell-savdev-techs-projects.vercel.app",
+    cleartext: false,
     androidScheme: "https",
     iosScheme: "https",
-    hostname: "buysell.app",
     allowNavigation: [
       "*.supabase.co",
       "*.vercel.app",
