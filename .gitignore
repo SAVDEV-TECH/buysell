@@ -49,3 +49,8 @@ android/app/google-services.json
 ios/App/Pods/
 ios/App/App.xcworkspace/xcuserdata/
 ios/App/GoogleService-Info.plist
+
+# IDE and APK artifacts
+.idea/
+android/.idea/
+*.apk
