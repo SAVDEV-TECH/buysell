@@ -47,6 +47,7 @@ export const viewport = {
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import FloatingFeedbackModal from "@/components/FloatingFeedbackModal";
 import UserGuidedTourTooltip from "@/components/UserGuidedTourTooltip";
+import NativeAppManager from "@/components/NativeAppManager";
 import MicrosoftClarity from "@/components/MicrosoftClarity";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -64,6 +65,7 @@ export default function RootLayout({
               <AuthProvider>
                 <NotificationProvider>
                   <CartProvider>
+                    <NativeAppManager />
                     <MainLayoutShell>{children}</MainLayoutShell>
                     <MobileBottomNav />
                     <PwaRegister />

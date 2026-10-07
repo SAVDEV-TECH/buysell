@@ -204,3 +204,64 @@ export async function onAppResume(callback: () => void) {
     console.error("[BuySell] App lifecycle error:", err);
   }
 }
+
+// ─── Splash Screen ────────────────────────────────────────────────────────────
+
+/**
+ * Hides the native splash screen smoothly.
+ * Call this once the web app has completed mounting and rendering.
+ */
+export async function hideSplashScreen() {
+  if (!isNative()) return;
+  try {
+    const { SplashScreen } = await import("@capacitor/splash-screen");
+    await SplashScreen.hide({ fadeOutDuration: 400 });
+  } catch (err) {
+    console.error("[BuySell] SplashScreen hide error:", err);
+  }
+}
+
+// ─── Android Hardware Back Button ─────────────────────────────────────────────
+
+/**
+ * Handles the Android physical/hardware back button.
+ * - If on an inner route, navigates back in history.
+ * - If at root `/`, triggers onExitPrompt (or double-tap exit).
+ */
+export async function setupBackButtonListener(onExitPrompt?: () => void): Promise<() => void> {
+  if (!isNative()) return () => {};
+
+  try {
+    const { App } = await import("@capacitor/app");
+    let lastBackPress = 0;
+
+    const listener = await App.addListener("backButton", ({ canGoBack }) => {
+      const path = window.location.pathname;
+      const isRoot = path === "/" || path === "";
+
+      if (!isRoot && canGoBack) {
+        window.history.back();
+        return;
+      }
+
+      // At root / homepage
+      const now = Date.now();
+      if (now - lastBackPress < 2000) {
+        App.exitApp();
+      } else {
+        lastBackPress = now;
+        if (onExitPrompt) {
+          onExitPrompt();
+        }
+      }
+    });
+
+    return () => {
+      listener.remove();
+    };
+  } catch (err) {
+    console.error("[BuySell] BackButton listener error:", err);
+    return () => {};
+  }
+}
+
