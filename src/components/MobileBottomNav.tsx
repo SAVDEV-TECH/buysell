@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Search, MessageSquare, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
+import { haptic } from "@/lib/capacitor";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -59,6 +60,7 @@ export default function MobileBottomNav() {
           <Link
             key={item.label}
             href={item.href}
+            onClick={() => haptic("light")}
             className={`relative flex flex-col items-center justify-center w-full h-full space-y-1 ${
               isActive
                 ? "text-primary"

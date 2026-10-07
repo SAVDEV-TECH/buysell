@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { haptic } from "@/lib/capacitor";
 
 export interface Product {
   id: string; 
@@ -82,6 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [cartItems]);
 
   const addToCart = (product: Product, qty = 1) => {
+    haptic("medium");
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
       if (existingItem) {
@@ -95,10 +97,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = (productId: string) => {
+    haptic("warning");
     setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
+    haptic("light");
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -111,6 +115,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const clearCart = () => {
+    haptic("warning");
     setCartItems([]);
   };
 

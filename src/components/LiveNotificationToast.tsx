@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNotifications, NotificationType, NotificationItem } from "@/context/NotificationContext";
@@ -22,6 +22,7 @@ import {
   SoundType,
 } from "@/lib/notificationSounds";
 import { useRouter } from "next/navigation";
+import { haptic } from "@/lib/capacitor";
 
 // ─── Type Helpers ──────────────────────────────────────────────────────────────
 
@@ -91,6 +92,9 @@ function ToastCard({ notif, onDismiss, soundEnabled }: ToastCardProps) {
   const DURATION = 6000; // 6 seconds
 
   useEffect(() => {
+    // Pulse haptic vibration on native mobile devices
+    haptic("medium");
+
     // Play sound on mount
     if (soundEnabled) {
       playNotificationSound(config.sound);

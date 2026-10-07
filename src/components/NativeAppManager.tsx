@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import {
   hideSplashScreen,
   setupBackButtonListener,
   configureBrandStatusBar,
+  registerPushNotifications,
   haptic,
 } from "@/lib/capacitor";
 import { WifiOff, RotateCcw } from "lucide-react";
@@ -17,8 +19,20 @@ import { WifiOff, RotateCcw } from "lucide-react";
  * - Detects network offline states and shows a quick recovery banner
  */
 export default function NativeAppManager() {
+  const { user } = useAuth();
   const [showExitToast, setShowExitToast] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+
+  // 1. Request and register push notifications when user logs in
+  useEffect(() => {
+    if (user) {
+      registerPushNotifications().then((token) => {
+        if (token) {
+          console.log("[BuySell] Native push registered:", token);
+        }
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     // 1. Configure status bar style

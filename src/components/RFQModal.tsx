@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { X, Send, Loader2, CheckCircle2, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { haptic } from "@/lib/capacitor";
 
 const INCOTERMS = [
   {
@@ -108,6 +109,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
 
       if (error) throw error;
 
+      haptic("success");
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -116,6 +118,7 @@ export default function RFQModal({ isOpen, onClose, product, manufacturer }: RFQ
         setTargetPrice("");
       }, 2000);
     } catch (error) {
+      haptic("error");
       console.error("Error submitting RFQ:", error);
       alert("Failed to submit request. Please try again.");
     } finally {

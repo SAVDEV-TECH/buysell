@@ -13,6 +13,7 @@ import {
 } from "@/lib/exchangeRates";
 import { COUNTRY_CONFIG, CountryData } from "@/lib/geolocation";
 import { useAuth } from "./AuthContext";
+import { haptic } from "@/lib/capacitor";
 
 interface CurrencyContextType {
   /** Active country data */
@@ -130,6 +131,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 
   // Set currency directly and sync matching country
   const handleSetCurrency = useCallback((currencyCode: string) => {
+    haptic("light");
     const code = currencyCode.toUpperCase();
     if (SUPPORTED_CURRENCIES[code]) {
       setSelectedCurrency(code);
