@@ -9,7 +9,7 @@ const config: CapacitorConfig = {
   // This means all API routes, SSR, and auth work exactly as on web —
   // no static export required. Change the url if you get a custom domain.
   server: {
-    url: "https://buysell-savdev-techs-projects.vercel.app",
+    url: "https://buysell-ebon.vercel.app",
     cleartext: false,
     androidScheme: "https",
     iosScheme: "https",
